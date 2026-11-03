@@ -1,8 +1,12 @@
 # ADR 0006: Deep learning vs LightGBM on the same tabular signal (comparison protocol, pre-registered)
 
-- Status: **Proposed** (draft, 2026-11-02). Becomes Accepted only after the human answers the decisions of
-  section 12 that are marked "before training" and the smoke pilot (section 9.4) has been reported.
-- Date: 2026-11-02; revised 2026-11-03 (owner decisions of 2026-11-02/03: metric, gain rule, seeds, compute)
+- Status: **Proposed** (draft, 2026-11-02). Becomes Accepted only after the remaining open gate H-D2
+  (section 12) is answered, P-local and P-gpu (section 9.4) are reported, the tests of section 15 pass, the
+  `researcher` check T3 is done and the reviewer verdict has no BLOCKER/MAJOR (section 16). The constants
+  of H-D8 are frozen from 2026-11-03; any change needs a new ADR or a dated amendment decided before any DL
+  result exists.
+- Date: 2026-11-02; revised 2026-11-03 (owner decisions of 2026-11-02/03: metric, gain rule, seeds, compute;
+  H-D4, H-D7 and H-D8 answered by the owner on 2026-11-03)
 - Task: T-DL-01; revision T-DL-02
 - Related: ADR 0001 (Parquet, single writer, temp+rename), ADR 0002 (labels, cut (c) "same information"),
   ADR 0003 (pixel split, BALANCED/REALISTIC regimes, paired pixel bootstrap, reporting floor, ECE),
@@ -504,17 +508,18 @@ measured" on Windows. For LightGBM: training wall time per seed is measured by `
   quota first, run P-gpu, decide A/B/C from its projection.
 - H-D3. Tuning budget: **decided by the owner (2026-11-03): B0**, zero search, val only for early stopping
   and temperature; limitation recorded; B1 is the reversal option (T8).
-- H-D4. Seeds: 5 for LightGBM and for each DL system (confirmed by the owner). Open: **confirm that the
-  earlier "4 of 5 seeds" rule is replaced by the delta/CI rule of section 4.4**. **Before training.**
-  Recommendation: confirm.
+- H-D4. Seeds: 5 for LightGBM and for each DL system (confirmed by the owner). **Confirmed by the owner
+  (2026-11-03)**: the earlier "4 of 5 seeds" rule is replaced by the delta/CI rule of section 4.4.
+  **Before training.** Recommendation: confirm.
 - H-D5. Retrain LightGBM with the same 5 seeds: now **mandatory** (section 3.8), because `delta` needs its
   seed SD; new files only, never overwriting `lgbm_*`. Recommendation: run after H-D6 is measured.
 - H-D6. Measure LightGBM training wall time (first on `lgbm_full_s0`) before the other nine seed fits.
   Open, not measured. Recommendation: measure one fit, then approve the rest.
 - H-D7. Pin `torch` in a separate `requirements-dl.txt` (proposed, R11) instead of `requirements.txt`.
-  Open. Version to pin: the one preinstalled in the Kaggle GPU image, **not verified**; local CPU wheel for
-  CPython 3.12 win_amd64 of that version: **not verified** (researcher handoff). Recommendation: separate
-  file, version read from the Kaggle image by `researcher`; under plan B/C record the version used.
+  **Decided by the owner (2026-11-03).** Version to pin: the one preinstalled in the Kaggle GPU image, **not
+  verified**; local CPU wheel for CPython 3.12 win_amd64 of that version: **not verified** (researcher
+  handoff). Recommendation: separate file, version read from the Kaggle image by `researcher`; under plan
+  B/C record the version used.
 - H-D8. Re-approve the **new** pre-registered constants before any test number exists: `C*` 0.80 / 0.90,
   P2 primary (P1, P3 sensitivity), F1-F5 (thresholds on val, seed means, `delta` = 2 x SD with ddof = 1),
   the **SD fold** (proposal: val), the **block bootstrap** (level-3 parents within bands, B = 1000,
@@ -529,8 +534,9 @@ measured" on Windows. For LightGBM: training wall time per seed is measured by `
   SD(D_c)` (~1.58 x a nominal 2-SD margin); `delta` rests on 4 degrees of freedom (relative SE of the SD
   ~35 %); type-I error very low, power reduced (a true gain near `2 s` wins at most about half the time;
   this counts only the seed term `P(D_c > delta_hat)`; the block-bootstrap CI condition (about 34 blocks,
-  possibly wide) and the noise of `delta_hat` lower or shift it; power was not computed). Open.
-  Recommendation: approve as written; the documented alternative is QSO-only when GALAXY is `n/a`.
+  possibly wide) and the noise of `delta_hat` lower or shift it; power was not computed).
+  **Approved as written by the owner (2026-11-03).** Recommendation: approve as written; the documented
+  alternative is QSO-only when GALAXY is `n/a`.
 - H-D9. ADR 0001 G < 20 anomaly: **closed 2026-11-03** (documentation error, no rebuild; ADR 0001 and
   schema amended). Recommendation: none.
 
@@ -784,8 +790,9 @@ BP/RP XP: no files (H-D1, out of scope).
 
 ## 16. Acceptance criteria (to leave Proposed)
 
-1. H-D2, H-D4, H-D7, H-D8 answered (H-D3 answered: B0); FT-Transformer defaults confirmed by
-   `researcher` (T3).
+1. H-D2 answered (the remaining open gate; H-D3, H-D4, H-D7 and H-D8 answered by the owner, 2026-11-03);
+   FT-Transformer defaults confirmed by `researcher` (T3). The constants of H-D8 are frozen from
+   2026-11-03; any change needs a new ADR or a dated amendment decided before any DL result exists.
 2. All tests of section 15 pass locally with torch installed (none skipped); `ruff` clean.
 3. P-local done; P-gpu done and its measured sec/epoch, peak GPU memory and projection delivered to the
    human; no number in that report is estimated without saying so.
