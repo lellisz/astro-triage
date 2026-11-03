@@ -1,0 +1,52 @@
+# Environment
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+.env
+.env.*
+
+# Data and run artifacts (only scripts, queries and manifests are versioned)
+data/
+logs/
+reports/figures/
+*.parquet
+*.duckdb
+*.fits
+*.fits.*
+*.ecsv
+*.vot
+*.csv
+!manifests/*.csv
+*.tmp
+*.log
+
+# Credentials (never versioned)
+.aws/
+credentials*
+*.pem
+*.key
+kaggle.json
+
+# Models and artefacts (anchored: src/astro_triage/models/ stays versioned)
+*.pkl
+*.joblib
+/models/
+/artifacts/
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Tooling
+graphify-out/
+.claude/settings.local.json
+
+
+
+# Archives and stray Windows device-name file
+*.zip
+NUL

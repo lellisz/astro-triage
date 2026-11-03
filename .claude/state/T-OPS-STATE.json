@@ -1,0 +1,19 @@
+{
+  "task_id": "T-OPS-STATE",
+  "title": "Owner decisions 2026-11-02/03 (short form)",
+  "updated_utc": "2026-11-03",
+  "owner_decisions": {
+    "population": "no G cut (null-G rows stay, nullable); docs to be corrected to match (H-D9 = documentation error, no rebuild)",
+    "commit": "authorised after the security check (pre-commit audit CLEAR_TO_COMMIT, 106 files); conventional commits; no co-author trailer",
+    "parallelism": "blocker fixes and the commit may proceed in parallel",
+    "compute_plan": ["Kaggle GPU", "Colab free", "CPU subsample with checkpoints"],
+    "layer2": "closed as negative on val pilot, branch A (T-L2-03 DONE)",
+    "adr_0006_section_4": "see backlog.md 'ADR 0006' section for the metric/gain/delta/seed decisions"
+  },
+  "hard_constraints": [
+    "no NVIDIA API call",
+    "no Kaggle write without explicit owner yes",
+    "never read or print .env",
+    "docs/adr/** written only by architect"
+  ]
+}

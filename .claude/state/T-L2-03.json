@@ -1,0 +1,376 @@
+{
+  "task_id": "T-L2-03",
+  "title": "Close Layer 2 (ADR 0005) as a negative result",
+  "updated_utc": "2026-11-03",
+  "status": "DONE",
+  "human_decisions_2026_11_02": [
+    "close Layer 2 as negative per ADR 0005 D7.8 / 17.1",
+    "no extra bake-off, no prompt v2, no lightning run",
+    "VLM follow-up does not start",
+    "no IC deadline",
+    "DL compute later on Kaggle GPU = ADR 0006, separate task, not started here"
+  ],
+  "hard_constraints": [
+    "no NVIDIA API call; scripts/layer2_run.py is not run by any task until the human approves caps (branch B only)",
+    "no git commit",
+    "no Kaggle write",
+    "never read or print .env / NVIDIA_API_KEY",
+    "docs/adr/** written only by architect"
+  ],
+  "open_question": {
+    "id": "H-L2-03",
+    "text": "Can the negative result be declared from the 100-object val pilot alone (documented decision that skips the test-fold evaluation), or must D7.8 be executed on the test fold (layer2_evaluate.py) with an H7 pixel subset and approved caps?",
+    "why_only_human": "D7.8 and 17.1.2 are defined on a test-fold evaluation (paired pixel-bootstrap CI, floor). The pilot is descriptive (floor not reachable) and 17.1.2 (tau2 infeasible) was never evaluated: it needs >= 100 OK val answers; pilot OK counts were ultra blind 10, bolt blind 50. So the pilot alone does not trigger D7.8 or 17.1.2 literally; closing on it is a deviation the human must own.",
+    "branch_A": {
+      "label": "close on val pilot, test fold untouched",
+      "api_calls": 0,
+      "api_hours": 0,
+      "agent_cycles": "architect amendment + reviewer||security + orchestrator backlog",
+      "consequence": "ADR must say 'closed on descriptive val evidence; the pre-registered D7.8 test was not executed'. Cannot be called a D7.8 pre-registered negative. Test fold stays unexposed (ADR 0005 section 15 irreversibility avoided)."
+    },
+    "branch_B": {
+      "label": "execute D7.8 on a test pixel subset",
+      "prereq_implementation": "17.9.2-3 pixel subset not implemented (file plan deferred to H7): architect plan + coder + tester + reviewer||security, 0 API calls",
+      "sub_decisions_needed": [
+        "H2 model (ultra vs bolt; with_l1 paired diff 0.008 [-0.034, 0.047])",
+        "H3 thinking-on arm (assumed not run)",
+        "H5 with_l1 on test (doubles calls)",
+        "H6 memorization probe (50 val calls) run or skip",
+        "H7 q_test, q_val, max_calls, max_tokens_total"
+      ],
+      "cost_from_pilot_report_projection_base_54773_routed": {
+        "q_0.05_bolt_blind": "2,779 calls, ~1.30M tokens, 1.5 h",
+        "q_0.05_ultra_blind": "2,779..5,518 calls, ~1.32-1.33M tokens, 1.5..5.0 h",
+        "q_0.10_bolt_blind": "5,517 calls, ~2.60M tokens, 3.0 h",
+        "q_0.10_ultra_blind": "5,517..10,994 calls, ~2.65-2.67M tokens, 3.0..10.0 h",
+        "plus_H5_with_l1_q_0.05": "+2,779 calls, 1.5..5.6 h",
+        "plus_H6_probe": "+50 calls",
+        "full_routed_reference": "54,813..109,586 calls, 30.4..100-111.5 h"
+      },
+      "caveats": [
+        "projection rows are over all 54,773 routed full_v0 objects; the test/val split of that count is not measured",
+        "evaluator refuses unless every routed object in the val subset AND test subset has a terminal record (17.1.5)",
+        "calibration needs >= 100 OK val answers: ~1,000 val calls for ultra blind (10% OK), ~200 for bolt blind (50% OK); otherwise 'not_applied' branch 17.1.3",
+        "floor reachability (>= 100 objects in >= 20 pixels per cell) at a given q is not computed; B1 must check it before caps are set",
+        "test-fold exposure is irreversible for prompt v1 / tau 0.86 (ADR 0005 section 15)"
+      ]
+    },
+    "answer": {
+      "branch": "A",
+      "by": "owner",
+      "date": "2026-11-02"
+    }
+  },
+  "tasks_branch_A": [
+    {
+      "id": "T-L2-03-A1",
+      "agent": "architect",
+      "goal": "Write ADR 0005 Amendment 2 (section 18) closing Layer 2 on the val pilot without test-fold evaluation, and set the status line.",
+      "files": [
+        "docs/adr/0005-layer2-nemotron-nvidia-api.md"
+      ],
+      "constraints": [
+        "edit only section 18 (new) and the Status lines 3-5",
+        "no change to sections 1-17 normative text",
+        "English",
+        "no number not present in data/interim/full_v0/layer2/pilot_report.md or routing_v1.json"
+      ],
+      "acceptance": [
+        "section 18 exists and lists the 2026-11-02 human decisions verbatim (no bake-off, no prompt v2, no lightning, no VLM, no IC deadline, DL -> ADR 0006)",
+        "section 18 states that the D7.8 test-fold rule was NOT executed and 17.1.2 was NOT triggered, with the OK counts 10 (ultra blind) and 50 (bolt blind) vs the 100 minimum",
+        "section 18 reproduces the 4 pilot rows (status counts, forced acc + CI, macro-F1 forced vs L1 0.721, L2 = L1 argmax) labelled descriptive",
+        "section 18 states the test fold of full_v0 was never called and remains unexposed for Layer 2",
+        "H2, H3, H5, H6, H7 each marked closed as moot with date 2026-11-02",
+        "section 18 states the reopen path: new ADR, new prompt version evaluated on val first (D7.8)",
+        "Status line no longer reads 'Proposed' alone and names Amendment 2"
+      ],
+      "context": "Human decided 2026-11-02 to close Layer 2 as negative (branch A of H-L2-03: no test evaluation). Status wording (e.g. 'Closed - negative on val, not evaluated on test') is the architect's choice but must not claim the D7.8 verdict.",
+      "depends_on": [
+        "H-L2-03=A"
+      ]
+    },
+    {
+      "id": "T-L2-03-A2",
+      "agent": "reviewer",
+      "goal": "Check the Amendment 2 diff for consistency with ADR 0003, 0004, 0006 and ADR 0005 sections 1-17.",
+      "files": [
+        "docs/adr/0005-layer2-nemotron-nvidia-api.md",
+        "docs/adr/0003-split-and-priors.md",
+        "docs/adr/0004-no-login-data-path.md",
+        "docs/adr/0006-deep-learning-tabular-comparison.md",
+        "data/interim/full_v0/layer2/pilot_report.md"
+      ],
+      "constraints": [
+        "read only",
+        "parallel with T-L2-03-A3"
+      ],
+      "acceptance": [
+        "every number in section 18 matches pilot_report.md or routing_v1.json",
+        "no claim of a test-fold metric, CI on test, or D7.8 verdict",
+        "ADR 0006 line 10 reference to the 0005 negative-result rule still accurate or flagged",
+        "no change to ADR 0003 split/floor/metrics implied",
+        "verdict with findings per CONTRACT §3"
+      ],
+      "context": "ADR-only diff; no code.",
+      "depends_on": [
+        "T-L2-03-A1"
+      ]
+    },
+    {
+      "id": "T-L2-03-A3",
+      "agent": "security",
+      "goal": "Check the Amendment 2 diff for leaked secrets, personal paths or raw ledger/server text.",
+      "files": [
+        "docs/adr/0005-layer2-nemotron-nvidia-api.md"
+      ],
+      "constraints": [
+        "read only",
+        "do not open .env or ledgers' raw HTTP bodies",
+        "parallel with T-L2-03-A2"
+      ],
+      "acceptance": [
+        "no key-like string, Bearer token, absolute user path or e-mail in section 18",
+        "verdict with findings per CONTRACT §3"
+      ],
+      "context": "ADR-only diff.",
+      "depends_on": [
+        "T-L2-03-A1"
+      ]
+    },
+    {
+      "id": "T-L2-03-A4",
+      "agent": "orchestrator",
+      "goal": "Update .claude/state/backlog.md: Layer 2 closed; SEC-B1..B4 frozen (no further calls); dashboard Layer 2 page behaviour without eval_l2.json listed as open check.",
+      "files": [
+        ".claude/state/backlog.md",
+        ".claude/state/T-L2-03.json"
+      ],
+      "constraints": [
+        "no BLOCKER/MAJOR open from A2/A3"
+      ],
+      "acceptance": [
+        "backlog has a 'Layer 2 closed 2026-11-02' section",
+        "T-L2-03.json status DONE"
+      ],
+      "context": "Closing bookkeeping.",
+      "depends_on": [
+        "T-L2-03-A2",
+        "T-L2-03-A3"
+      ]
+    }
+  ],
+  "tasks_branch_B": [
+    {
+      "id": "T-L2-03-B0",
+      "agent": "human",
+      "goal": "Answer H2, H3, H5, H6 and H7 (q_test, q_val, max_calls, max_tokens_total) in writing with date.",
+      "files": [],
+      "constraints": [
+        "caps sized from pilot_report.md projection"
+      ],
+      "acceptance": [
+        "each of H2, H3, H5, H6, H7 has a written answer and date"
+      ],
+      "context": "Without these no run is allowed (CONTRACT §8, ADR 0005 17.9.5).",
+      "depends_on": [
+        "H-L2-03=B"
+      ]
+    },
+    {
+      "id": "T-L2-03-B1",
+      "agent": "architect",
+      "goal": "Write ADR 0005 Amendment 2 part 1: record B0 decisions and the 17.9.2-3 file plan for pixel_subset_v1.json, including a floor-reachability check for the chosen q.",
+      "files": [
+        "docs/adr/0005-layer2-nemotron-nvidia-api.md"
+      ],
+      "constraints": [
+        "no test-fold number used",
+        "pixel draw default_rng(20261025) over sorted test pixels, label-blind",
+        "file plan in the section-16 format"
+      ],
+      "acceptance": [
+        "file plan lists every file to create/modify with INTENT and ACCEPTANCE",
+        "states expected number of test pixels and whether >= 20 pixels with >= 100 objects per headline cell is reachable",
+        "H2/H3/H5/H6/H7 recorded with date"
+      ],
+      "context": "17.9 deferred the file plan to H7.",
+      "depends_on": [
+        "T-L2-03-B0"
+      ]
+    },
+    {
+      "id": "T-L2-03-B2",
+      "agent": "coder",
+      "goal": "Implement the pixel subset (17.9.2-3) exactly per the B1 file plan.",
+      "files": [
+        "defined by T-L2-03-B1 file plan; orchestrator runs graphify query before dispatch"
+      ],
+      "constraints": [
+        "no network",
+        "no new dependency",
+        "does not run layer2_run.py"
+      ],
+      "acceptance": [
+        "B1 file-plan ACCEPTANCE items implemented",
+        "runner, consolidator and evaluator refuse a pixel_subset sha mismatch"
+      ],
+      "context": "Spec comes from B1.",
+      "depends_on": [
+        "T-L2-03-B1"
+      ]
+    },
+    {
+      "id": "T-L2-03-B3",
+      "agent": "tester",
+      "goal": "Prove 17.9 acceptance without network.",
+      "files": [
+        "tests/**"
+      ],
+      "constraints": [
+        "no network",
+        "fake key only"
+      ],
+      "acceptance": [
+        "same seed -> same pixel list",
+        "shuffling labels leaves the list unchanged",
+        "evaluator n_test equals object count of chosen pixels (synthetic)",
+        "sha mismatch -> exit 1 'layer2 evaluation refused'",
+        "full suite green"
+      ],
+      "context": "",
+      "depends_on": [
+        "T-L2-03-B2"
+      ]
+    },
+    {
+      "id": "T-L2-03-B4",
+      "agent": "reviewer + security (parallel)",
+      "goal": "Review the B2/B3 diff.",
+      "files": [
+        "B2 diff"
+      ],
+      "constraints": [
+        "read only"
+      ],
+      "acceptance": [
+        "no BLOCKER/MAJOR open (fixer loop max 3 per CONTRACT §5)"
+      ],
+      "context": "",
+      "depends_on": [
+        "T-L2-03-B3"
+      ]
+    },
+    {
+      "id": "T-L2-03-B5",
+      "agent": "human",
+      "goal": "Approve and launch layer2_run.py on the val subset then the test subset with the B0 caps; approval text and date go into the run manifest.",
+      "files": [
+        "data/interim/full_v0/layer2/**"
+      ],
+      "constraints": [
+        "max_calls and max_tokens_total explicit",
+        "quota guard before each call",
+        "exit 3/4 -> rerun resumes from cache"
+      ],
+      "acceptance": [
+        "every routed object in both subsets has a terminal record",
+        "ledger calls <= max_calls"
+      ],
+      "context": "Only step that calls the NVIDIA API.",
+      "depends_on": [
+        "T-L2-03-B4"
+      ]
+    },
+    {
+      "id": "T-L2-03-B6",
+      "agent": "tester",
+      "goal": "Run scripts/layer2_evaluate.py on full_v0 (no network) and report eval_l2.json/md.",
+      "files": [
+        "data/interim/full_v0/layer2/eval_l2.json",
+        "data/interim/full_v0/layer2/eval_l2.md"
+      ],
+      "constraints": [
+        "no prompt/threshold change after seeing test (D7.8)"
+      ],
+      "acceptance": [
+        "exit 0",
+        "verdict.outcome and fit.tau2_status reported verbatim",
+        "both headline pairs with floor status and paired CI reported"
+      ],
+      "context": "",
+      "depends_on": [
+        "T-L2-03-B5"
+      ]
+    },
+    {
+      "id": "T-L2-03-B7",
+      "agent": "architect",
+      "goal": "Write ADR 0005 Amendment 2 part 2: record the D7.8 verdict verbatim, close status, VLM not started.",
+      "files": [
+        "docs/adr/0005-layer2-nemotron-nvidia-api.md"
+      ],
+      "constraints": [
+        "numbers only from eval_l2.json"
+      ],
+      "acceptance": [
+        "D7.8 sentence quoted with CIs",
+        "tau2_status quoted",
+        "status line updated",
+        "if outcome != no_gain, stop and escalate to human instead of closing"
+      ],
+      "context": "",
+      "depends_on": [
+        "T-L2-03-B6"
+      ]
+    },
+    {
+      "id": "T-L2-03-B8",
+      "agent": "reviewer + security (parallel)",
+      "goal": "Consistency check of part 2 with eval_l2.json and ADR 0003/0004/0006.",
+      "files": [
+        "docs/adr/0005-layer2-nemotron-nvidia-api.md",
+        "data/interim/full_v0/layer2/eval_l2.json"
+      ],
+      "constraints": [
+        "read only"
+      ],
+      "acceptance": [
+        "every number matches eval_l2.json",
+        "no BLOCKER/MAJOR"
+      ],
+      "context": "",
+      "depends_on": [
+        "T-L2-03-B7"
+      ]
+    },
+    {
+      "id": "T-L2-03-B9",
+      "agent": "orchestrator",
+      "goal": "Backlog and state closure as A4.",
+      "files": [
+        ".claude/state/backlog.md",
+        ".claude/state/T-L2-03.json"
+      ],
+      "constraints": [],
+      "acceptance": [
+        "T-L2-03.json status DONE"
+      ],
+      "context": "",
+      "depends_on": [
+        "T-L2-03-B8"
+      ]
+    }
+  ],
+  "deferred": [
+    "dashboard (src/astro_triage/dashboard/*) behaviour when eval_l2.json is absent: not checked",
+    "graphify not queried: no coder spec is dispatchable yet; B2 files[] must come from graphify after B1"
+  ],
+  "closure": {
+    "branch_chosen": "A (close on val pilot, test fold untouched), owner, 2026-11-02",
+    "A1": "DONE - architect wrote ADR 0005 Amendment 2 (section 18)",
+    "A2": "reviewer found 2 MAJOR -> fixed by fixer (T-L2-03-FIX1) -> reviewer re-check APPROVE_WITH_COMMENTS; MINORs R-A2-003/004/005 and ledger-name citation in backlog",
+    "A3": "security CLEAR",
+    "A4": "DONE - orchestrator state + backlog update, 2026-11-03",
+    "tasks_branch_B": "not executed (moot, branch A chosen)"
+  }
+}
