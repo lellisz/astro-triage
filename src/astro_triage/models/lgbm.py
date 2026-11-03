@@ -192,7 +192,10 @@ def load_folds(outdir: Path) -> dict[str, Fold]:
 
 
 def fit_booster(
-    train: Fold, val: Fold, features: tuple[str, ...]
+    train: Fold,
+    val: Fold,
+    features: tuple[str, ...],
+    params: dict[str, object] | None = None,
 ) -> tuple[lgb.Booster, int]:
     """Fit on train; early stopping on val logloss. Takes no test rows."""
     dtrain = lgb.Dataset(
@@ -209,7 +212,7 @@ def fit_booster(
         free_raw_data=False,
     )
     booster = lgb.train(
-        PARAMS,
+        PARAMS if params is None else params,
         dtrain,
         num_boost_round=MAX_TREES,
         valid_sets=[dval],
@@ -427,10 +430,17 @@ def _json_default(value: object) -> object:
 
 
 def run_model(
-    spec: ModelSpec, folds: dict[str, Fold], outdir: Path
+    spec: ModelSpec,
+    folds: dict[str, Fold],
+    outdir: Path,
+    *,
+    seed: int = SEED,
+    model_id: str | None = None,
 ) -> dict[str, object]:
+    model_id = spec.model_id if model_id is None else model_id
+    fit_params = {**PARAMS, "seed": seed}
     train, val, test = folds["train"], folds["val"], folds["test"]
-    booster, best_iter = fit_booster(train, val, spec.features)
+    booster, best_iter = fit_booster(train, val, spec.features, fit_params)
     z_val = logits(booster, val, spec.features)
     temperature = fit_temperature(z_val, val.labels)
     counts = np.bincount(train.labels, minlength=len(CLASSES)).astype(np.float64)
@@ -451,7 +461,7 @@ def run_model(
         "created_utc": datetime.now(UTC).isoformat(timespec="seconds"),
         "git_sha": _git_sha(),
         "inputs": json.dumps(inputs),
-        "model_id": spec.model_id,
+        "model_id": model_id,
         "model_version": MODEL_VERSION,
         "features_file": "features.parquet",
         "labels_file": "labels.parquet",
@@ -460,8 +470,8 @@ def run_model(
         "calibration": CALIBRATION_NAME,
         "calibration_fit_fold": "val",
     }
-    pred_path = outdir / f"predictions_{spec.model_id}_{MODEL_VERSION}.parquet"
-    model_path = outdir / "models" / f"{spec.model_id}.txt"
+    pred_path = outdir / f"predictions_{model_id}_{MODEL_VERSION}.parquet"
+    model_path = outdir / "models" / f"{model_id}.txt"
     model_path.parent.mkdir(parents=True, exist_ok=True)
     out_table = table.sort_by("source_id").replace_schema_metadata(meta)
     _atomic(pred_path, lambda tmp: pq.write_table(out_table, tmp, compression="zstd"))
@@ -470,17 +480,17 @@ def run_model(
         lambda tmp: booster.save_model(tmp, num_iteration=best_iter),
     )
     params = (
-        f"lightgbm {lgb.__version__}; params={json.dumps(PARAMS, sort_keys=True)}; "
+        f"lightgbm {lgb.__version__}; params={json.dumps(fit_params, sort_keys=True)}; "
         f"max_trees={MAX_TREES}; patience={PATIENCE}; best_iteration={best_iter}; "
-        f"seed={SEED}; calibration={CALIBRATION_NAME} fit on val"
+        f"seed={seed}; calibration={CALIBRATION_NAME} fit on val"
     )
     _manifest(pred_path, pred_path.stem, len(out_table), params, inputs)
-    _manifest(model_path, f"model_{spec.model_id}", 1, params, inputs)
+    _manifest(model_path, f"model_{model_id}", 1, params, inputs)
 
     gain = gain_importance(booster)
     t_lo, t_hi = TEMPERATURE_BOUNDS
     return {
-        "model_id": spec.model_id,
+        "model_id": model_id,
         "n_features": len(spec.features),
         "features": list(spec.features),
         "best_iteration": best_iter,
