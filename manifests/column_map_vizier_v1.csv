@@ -1,0 +1,42 @@
+canonical_name,source_table,vizier_column,status,derivation,note
+source_id,raw,Source,mapped,,pass=gaiadr3; int64; also the join key to paramp
+ra,raw,RAdeg,mapped,,pass=gaiadr3; XMatch output has RAdeg not RA_ICRS; epoch 2016.0 equivalence checked in G-B
+dec,raw,DEdeg,mapped,,pass=gaiadr3; XMatch output has DEdeg not DE_ICRS; epoch 2016.0 equivalence checked in G-B
+l,raw,,derived,astropy ICRS to Galactic from ra/dec,no GLON in the XMatch output; never NULL
+b,raw,,derived,astropy ICRS to Galactic from ra/dec,no GLAT in the XMatch output; never NULL
+ra_error,raw,e_RAdeg,mapped,,pass=gaiadr3; unit (mas) checked in G-B
+dec_error,raw,e_DEdeg,mapped,,pass=gaiadr3; unit (mas) checked in G-B
+parallax,raw,Plx,mapped,,pass=gaiadr3; NULL when Solved=3
+parallax_error,raw,e_Plx,mapped,,pass=gaiadr3; NULL when Solved=3
+parallax_over_error,raw,,derived,float32(parallax / parallax_error); NULL if either is NULL or parallax_error is 0,XMatch output has RPlx but equivalence is not verified; schema 9.2 row 10 says derived
+pm,raw,,derived,sqrt(pmra^2 + pmdec^2); NULL if either is NULL,XMatch output has a PM column but schema 9.2 row 11 says derived; equivalence not verified
+pmra,raw,pmRA,mapped,,pass=gaiadr3; NULL when Solved=3
+pmra_error,raw,e_pmRA,mapped,,pass=gaiadr3; NULL when Solved=3
+pmdec,raw,pmDE,mapped,,pass=gaiadr3; NULL when Solved=3
+pmdec_error,raw,e_pmDE,mapped,,pass=gaiadr3; NULL when Solved=3
+ruwe,raw,RUWE,mapped,,pass=gaiadr3; NULL on some rows
+astrometric_excess_noise,raw,epsi,mapped,,pass=gaiadr3
+astrometric_excess_noise_sig,raw,sepsi,mapped,,pass=gaiadr3; semantics checked in G-B
+astrometric_params_solved,raw,Solved,mapped,,pass=gaiadr3; encoding 3/31/95 checked in G-B and schema R2
+ipd_gof_harmonic_amplitude,raw,IPDgofha,mapped,,pass=gaiadr3
+ipd_frac_multi_peak,raw,IPDfmp,mapped,,pass=gaiadr3
+ipd_frac_odd_win,raw,IPDfow,mapped,,pass=gaiadr3
+phot_g_mean_mag,raw,Gmag,mapped,,pass=gaiadr3
+phot_g_mean_flux_over_error,raw,RFG,mapped,,pass=gaiadr3
+phot_bp_mean_mag,raw,BPmag,mapped,,pass=gaiadr3
+phot_rp_mean_mag,raw,RPmag,mapped,,pass=gaiadr3
+bp_rp,raw,BP-RP,mapped,,pass=gaiadr3; name needs quoting in ADQL
+phot_bp_rp_excess_factor,raw,E(BP/RP),mapped,,pass=gaiadr3; semantics checked in G-B
+in_qso_candidates,raw,QSO,absent_null,,absent from the XMatch output (TAP table only); NULL on every XMatch-path row; excluded from features (ADR 0004 D7.3)
+in_galaxy_candidates,raw,Gal,absent_null,,absent from the XMatch output (TAP table only); NULL on every XMatch-path row; excluded from features (ADR 0004 D7.3)
+classprob_dsc_combmod_quasar,raw,PQSO,mapped,,pass=gaiadr3; equivalence to gaia_source combmod is inference only until G-B; paramp also has PQSO (5-class combmod) so alias by table
+classprob_dsc_combmod_galaxy,raw,PGal,mapped,,pass=gaiadr3; equivalence to gaia_source combmod is inference only until G-B; paramp also has PGal (5-class combmod) so alias by table
+classprob_dsc_combmod_star,raw,PSS,mapped,,pass=gaiadr3; equivalence to gaia_source combmod is inference only until G-B
+classprob_dsc_allosmod_quasar,raw,PQSO-A,mapped,,pass=paramp; LEFT JOIN on Source; -A = allosmod is convention only until G-B; NULL common
+classprob_dsc_allosmod_galaxy,raw,PGal-A,mapped,,pass=paramp; LEFT JOIN on Source; -A = allosmod is convention only until G-B; NULL common
+classprob_dsc_allosmod_star,raw,Pstar-A,mapped,,pass=paramp; LEFT JOIN on Source; -A = allosmod is convention only until G-B; NULL common
+dr13_objid,raw,,absent_null,,no VizieR source identified; NULL on every row (ADR 0004 D1); E2 deferred
+dr13_angular_distance_arcsec,raw,,absent_null,,no VizieR source identified; NULL on every row (ADR 0004 D1); E2 deferred
+dr13_number_of_neighbours,raw,,absent_null,,no VizieR source identified; NULL on every row (ADR 0004 D1); E2 deferred
+dr13_number_of_mates,raw,,absent_null,,no VizieR source identified; NULL on every row (ADR 0004 D1); E2 deferred
+ap_row_present,raw,,derived,true if the paramp pass has a row with this Source,local LEFT JOIN flag (schema 9.2 row 41); false for 674 of 52518 sources in the 100k batch

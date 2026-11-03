@@ -1,0 +1,1 @@
+SELECT COUNT(*) AS n FROM gaiadr3.gaia_source WHERE phot_g_mean_mag < 20
