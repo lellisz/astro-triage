@@ -10,6 +10,7 @@ from __future__ import annotations
 
 import argparse
 import hashlib
+import json
 import re
 import sys
 import zipfile
@@ -30,6 +31,8 @@ SKIP_DIRS: Final[frozenset[str]] = frozenset(
 )
 SKIP_SUFFIXES: Final[frozenset[str]] = frozenset({".pyc", ".pyo", ".tmp", ".log"})
 FORBIDDEN_SUFFIXES: Final[frozenset[str]] = frozenset({".parquet", ".fits", ".duckdb"})
+MODE_FILE: Final = "kaggle/kaggle_mode.json"
+REFERENCE_FILE: Final = "kaggle/full_v0_reference.json"
 MAX_ZIP_BYTES: Final = 5 * 1024 * 1024
 ZIP_NAME: Final = "astro_triage_pkg.zip"
 _FIXED_TIME: Final = (1980, 1, 1, 0, 0, 0)
@@ -72,8 +75,17 @@ def check_content(rel: Path, data: bytes, markers: list[bytes]) -> None:
             raise PackageError(f"home directory path in {rel.as_posix()}")
 
 
-def build(root: Path, outdir: Path) -> tuple[Path, str, list[tuple[str, int]]]:
+def build(
+    root: Path, outdir: Path, mode: dict[str, str] | None = None
+) -> tuple[Path, str, list[tuple[str, int]]]:
     files = collect(root)
+    extra: dict[str, bytes] = {}
+    if (root / MODE_FILE).exists() or Path(MODE_FILE) in files:
+        raise PackageError(f"{MODE_FILE} must not exist in the repo")
+    if mode is not None:
+        if not (root / REFERENCE_FILE).is_file():
+            raise PackageError(f"seeds mode requires {REFERENCE_FILE}")
+        extra[MODE_FILE] = json.dumps(mode, indent=2).encode("utf-8") + b"\n"
     home = str(Path.home()).encode()
     markers = [home, home.replace(b"\\", b"/")]
     outdir.mkdir(parents=True, exist_ok=True)
@@ -82,8 +94,10 @@ def build(root: Path, outdir: Path) -> tuple[Path, str, list[tuple[str, int]]]:
     listing: list[tuple[str, int]] = []
     try:
         with zipfile.ZipFile(tmp, "w", compression=zipfile.ZIP_DEFLATED) as archive:
-            for rel in files:
-                data = (root / rel).read_bytes()
+            entries = [(rel, (root / rel).read_bytes()) for rel in files]
+            entries += [(Path(name), data) for name, data in extra.items()]
+            entries.sort(key=lambda item: item[0].as_posix())
+            for rel, data in entries:
                 check_content(rel, data, markers)
                 info = zipfile.ZipInfo(rel.as_posix(), date_time=_FIXED_TIME)
                 info.compress_type = zipfile.ZIP_DEFLATED
@@ -103,9 +117,18 @@ def build(root: Path, outdir: Path) -> tuple[Path, str, list[tuple[str, int]]]:
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--outdir", type=Path, required=True)
+    parser.add_argument("--mode", choices=("phase1", "seeds"), default="phase1")
+    parser.add_argument("--after-measure-one", choices=("stop", "continue"))
     args = parser.parse_args(argv)
+    if (args.mode == "seeds") != (args.after_measure_one is not None):
+        parser.error("--after-measure-one is required with --mode seeds and only then")
+    mode = (
+        {"mode": "seeds", "after_measure_one": args.after_measure_one}
+        if args.mode == "seeds"
+        else None
+    )
     try:
-        target, digest, listing = build(REPO_ROOT, args.outdir)
+        target, digest, listing = build(REPO_ROOT, args.outdir, mode)
     except (PackageError, OSError) as exc:
         print(f"package failed: {exc}", file=sys.stderr)
         return 1
