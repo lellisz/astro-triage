@@ -2,7 +2,8 @@
 
 - Status: **Proposed** (draft, 2026-11-02). Becomes Accepted only after the remaining open gate H-D2
   (section 12) is answered, P-local and P-gpu (section 9.4) are reported, the tests of section 15 pass, the
-  `researcher` check T3 is done and the reviewer verdict has no BLOCKER/MAJOR (section 16). The constants
+  `researcher` check T3 is done (done 2026-11-03, amendment A) and the reviewer verdict has no
+  BLOCKER/MAJOR (section 16). The constants
   of H-D8 are frozen from 2026-11-03; any change needs a new ADR or a dated amendment decided before any DL
   result exists.
 - Date: 2026-11-02; revised 2026-11-03 (owner decisions of 2026-11-02/03: metric, gain rule, seeds, compute;
@@ -154,6 +155,13 @@
    - continuous features: `sklearn.preprocessing.QuantileTransformer(output_distribution="normal",
      n_quantiles=1000, subsample=1_000_000, random_state=20261025)`; chosen as in Gorishniy et al. (2021),
      not tuned. StandardScaler is **not** an arm (one preprocessing, no search);
+     (Amended 2026-11-03, T-DL-02 amendment A, trigger T3) the quantile transform is consistent with the
+     paper's DL default (Sec. 4.3 / App. B.2). As in the paper, Gaussian noise N(0, 1e-3) is added to the
+     **train** numerical values only while fitting the quantiles; the original (noise-free) values of every
+     fold are then transformed. Implementation detail for the coder: noise drawn from
+     `default_rng(20261025)`, SD 1e-3, non-null cells only (whether the paper's 1e-3 is an SD or a variance
+     is not verified). `output_distribution="normal"` and `n_quantiles=1000` are **not verified** against
+     the paper;
    - `astrometric_params_solved` (M-full only): categorical {3, 31, 95}, one-hot for the MLP, one
      categorical token for the FT-Transformer; unseen code -> `TrainError`;
    - missing values: for every feature of the set with >= 1 NULL/NaN **in train**, a binary indicator
@@ -162,7 +170,8 @@
      the network reads the indicator, so both see exactly the NULL cells of `features.parquet`; a NULL in
      val or test in a feature that has no indicator -> `TrainError` (the masks would differ; covariates
      only, no label read). In M-noind the nine astrometric columns are absent, so no astrometric
-     missingness indicator exists there (ADR 0004 D7.4 ablation preserved);
+     missingness indicator exists there (ADR 0004 D7.4 ablation preserved). (Amendment A) The indicator
+     masks are this project's own design: neither supported nor contradicted by the paper excerpts read;
    - the preprocessor stores the train-fitted state and its sha256; the predictions parquet records it.
 4. **Loss and labels**: unweighted cross-entropy over `CLASSES` order (`STAR, GALAXY, QSO`); no class
    weights, no resampling, so `pi_src` = train class fractions, identical to LightGBM's (asserted).
@@ -173,17 +182,32 @@
    0.0..1.0 step 0.1 minimizing **val** logloss, ties to the larger `w` (prefer the existing model); then
    one temperature fitted on val on `log p`; stored with `p_raw_*` = the mixture before T. No stacking
    model, no other weights.
-7. Architectures (fixed, B0):
-   - FT-Transformer: the default configuration of Gorishniy et al. (2021) (paper "default" FT-Transformer:
-     3 blocks, d_token 192, 8 heads, FFN hidden factor 4/3 with ReGLU, attention dropout 0.2, FFN dropout
-     0.1, residual dropout 0.0, AdamW lr 1e-4, weight decay 1e-5). **These values are from the architect's
-     memory and must be confirmed by `researcher` against the paper/reference code before the pilot**; if
-     they differ, the paper wins and this list is amended before any training.
-   - MLP: 3 hidden layers x 512, ReLU, dropout 0.1, AdamW lr 1e-3, weight decay 1e-5. Chosen by the
-     architect, not tuned, stated as such.
-   - Both: batch 1024, `max_epochs` 100, early stopping on val logloss with patience 10 epochs, best-epoch
-     weights restored, no LR schedule. `max_epochs` may be **lowered for all systems at once** by the human
-     after the pilot (cost only, decided before any val result of the batch is seen).
+7. Architectures (fixed, B0). (Amended 2026-11-03, T-DL-02 amendment A, trigger T3: checked by
+   `researcher` T-RES-DL against Gorishniy et al. 2021, arXiv:2106.11959,
+   https://arxiv.org/html/2106.11959; the paper wins where it differs.)
+   - FT-Transformer: the paper "default" FT-Transformer (Table 12), **confirmed**: 3 blocks, d_token 192,
+     8 heads, FFN hidden factor 4/3 with ReGLU, attention dropout 0.2, FFN dropout 0.1, residual dropout
+     0.0, AdamW lr 1e-4, weight decay 1e-5. Added from the paper: weight decay **0.0** for the Feature
+     Tokenizer, LayerNorm and bias parameters (Table 12 note; the paper's rule is adopted; the package
+     README's `make_parameter_groups()` does not name the parameters it protects, so it is not relied on);
+     the learned [CLS] token embedding also goes in the weight-decay 0.0 group, with the Feature Tokenizer
+     (**project choice**: not settled by the paper text; reference code (rtdl) not consulted);
+     **PreNorm** variant (Sec. 3.3) **with the first normalisation of the first Transformer block removed**
+     (Sec. 3.3: "In the PreNorm setting, we also found it to be necessary to remove the first normalization
+     from the first Transformer layer to achieve good performance."); **Kaiming** initialisation
+     (Table 12). Not verified in the excerpts read: the tokenizer detail "one token per numeric feature
+     plus one categorical token for `astrometric_params_solved`" (kept as this ADR's design).
+   - MLP: 3 hidden layers x 512, ReLU, dropout 0.1, AdamW lr 1e-3, weight decay 1e-5. The paper gives no
+     MLP default, only a tuning space (Table 15: layers 1-8 / 1-16, size 1-512 / 1-1024, dropout
+     {0, U[0, 0.5]}, lr LogUniform[1e-5, 1e-2], weight decay {0, LogUniform[1e-6, 1e-3]}); these values are
+     **project choices inside the paper's ranges**, not tuned.
+   - Both: batch 1024 (**project choice**: the paper uses 256 / 512 / 1024 by dataset, Table 7; 1024 matches
+     its large-dataset group), `max_epochs` 100 (this ADR's own cost bound; no 100-epoch cap found in the
+     excerpts read, not verified), early stopping on val logloss with patience **16** epochs (the paper's
+     value for all algorithms, Sec. 4.3; supersedes the earlier 10), best-epoch weights restored, no LR
+     schedule (the **paper's setting**: "We do not apply learning rate schedules"). `max_epochs` may
+     be **lowered for all systems at once** by the human after the pilot (cost only, decided before any val
+     result of the batch is seen).
 8. **LightGBM seeds (mandatory, replaces the optional H-D5)**: `lgbm_full_s<k>` and `lgbm_noind_s<k>`,
    k = 0..4, are fitted on CPU with `PARAMS`, `MAX_TREES`, `PATIENCE` and calibration unchanged, only
    `seed` = 20261025 + k. Files go to `data/interim/<release>/lgbm_seeds/` and never overwrite the
@@ -282,7 +306,7 @@ Only H1 and H2 (pure MLP, pure FT-Transformer versus LightGBM) can produce a ver
 ### 4.4 Criterion of gain (decision rule, fixed now; code constants in section 15)
 
 This rule **replaces** the earlier draft's macro-F1 rule "CI lower bound > 0 in >= 4 of 5 seeds" (owner,
-2026-11-02/03; H-D4 asks the owner to confirm the replacement).
+2026-11-02/03; the replacement was confirmed by the owner on 2026-11-03, H-D4).
 
 Block bootstrap (headline CI; design choice proposed by the architect, flagged for the owner, H-D8):
 - block id of a test object: `block_i = pixel5_i // 16` (= `pixel5_i >> 4`), the level-3 nested parent of
@@ -423,9 +447,18 @@ measured" on Windows. For LightGBM: training wall time per seed is measured by `
    (`lgbm_seeds_sub<N>/`, same row draw, `dl_data.subsample_index`) so the comparison stays equal; val and
    test stay complete; every result is labelled "train subsample N". N is decided by the owner after the
    P-local timing. Checkpoint and deterministic resume (item 3) apply to A, B and C.
+   (Amended 2026-11-03, T-DL-02 amendment A) **GPU session check**: every Kaggle or Colab GPU session
+   prints `torch.__version__`, `torch.version.cuda` and the GPU name **before any training**, and aborts
+   with a clear message if the GPU is a P100 (sm_60) or the torch build does not list the device's
+   architecture (`torch.cuda.get_arch_list()`); the three values are recorded in `environment.json` and
+   in the run report. The pin is read from the **first** GPU session of the platform in use (Kaggle or
+   Colab) and recorded per platform in `environment.json`; within a platform, a later session whose torch
+   differs from that platform's recorded pin stops before training; there is no cross-platform assert
+   (Kaggle and Colab runs are separate and labelled). `requirements-dl.txt` carries the pin read from the
+   first session, not guessed (H-D7).
 1. Private kernel(s) named `astro-triage-dl-*`, accelerator GPU (type: not verified), internet on only for
    pip of the package (torch is **not** pip-installed: the preinstalled version is recorded and asserted
-   against `requirements-dl.txt`).
+   against the Kaggle pin recorded under item 0).
 2. Inputs: (a) the private package dataset built by `scripts/make_kaggle_package.py` (it already ships all of
    `src/`, `scripts/`, `kaggle/`); (b) the Phase 1 kernel output (`astro_triage_outputs.zip` with
    `full_v0/labels.parquet`, `features.parquet`, `predictions_lgbm_*_v0.parquet`, `train_report.json`) if
@@ -441,7 +474,8 @@ measured" on Windows. For LightGBM: training wall time per seed is measured by `
 5. The bootstrap evaluation (B = 1000) runs **off the GPU**: locally (CPU, `scripts/evaluate_dl.py`) or in
    a separate CPU kernel.
 6. Limits: weekly GPU hours and maximum session length are **not verified**; the plan does not depend on a
-   number until the human reads them in the interface.
+   number until the human reads them in the interface. (Amendment A) Official numbers were not found;
+   third parties report ~30 h/week and 12 h per session (low confidence); the owner's real quota is unknown.
 7. Rules: only resources named `astro-triage-*`, all private; uploads contain code only; never touch other
    datasets of the account. **Every write to Kaggle (dataset/kernel create or version) and every output
    download requires the human's explicit "yes".**
@@ -452,7 +486,8 @@ measured" on Windows. For LightGBM: training wall time per seed is measured by `
   1 epoch; correctness only (shapes, files, schema, resume after a kill); timings here are not used.
 - P-gpu (Kaggle, after the human's "yes"; or Colab under plan B): `ftt_full_s0`, `mlp_full_s0`,
   `ftt_noind_s0`, `mlp_noind_s0`, **1 epoch on the full train fold**, then val prediction. Measures
-  sec/epoch, peak GPU memory and inference time. Its val numbers are not reported as results.
+  sec/epoch, peak GPU memory and inference time. Its val numbers are not reported as results. It starts
+  with the GPU session check of section 9, item 0, and its printed torch version fixes the H-D7 pin.
 - Projection to the human: `sec/epoch x max_epochs x 5 seeds x 4 systems` as an **upper bound** (early
   stopping makes it lower), next to the GPU quota the human reads. Nothing measured is invented; anything
   not measured is printed as "not measured".
@@ -465,14 +500,14 @@ measured" on Windows. For LightGBM: training wall time per seed is measured by `
 |---|---|---|
 | R1 | GPU quota/time insufficient for 20 runs (not measured, not verified) | Pilot projection; priority order; plan B/C (section 9, item 0); seeds may be cut by the human before any DL run, then both families use the same N >= 3 and F3/F5 use that N (ddof = 1) |
 | R2 | Unequal effort masked as model effect (defaults vs hand-set LightGBM) | B0 for both (owner, H-D3); stated as limitation; B1 via T8 |
-| R3 | FT-Transformer defaults misremembered | `researcher` verifies before the pilot (handoff) |
+| R3 | FT-Transformer defaults misremembered | Checked 2026-11-03 by `researcher` T-RES-DL (amendment A, section 3.7); residual: the tokenizer detail and `output_distribution` / `n_quantiles` are not verified and are labelled so |
 | R4 | Missingness indicators let the network read the class through the astrometric NULL pattern | Same information as LightGBM M-full (it sees `astrometric_params_solved` and the same NULL cells, section 3.3); front (2) with `noind` measures it |
 | R5 | QuantileTransformer fit on 1.4M rows: memory/time on Kaggle (not measured) | `subsample=1_000_000`; measured in P-local and P-gpu |
 | R6 | GPU non-determinism -> seed runs not reproducible bit-for-bit | Recorded; claims rest on 5 seeds, not on one run |
 | R7 | Test seen before all seeds finish, then a "fix" | `val_freeze.json` gate; evaluator refuses without it |
 | R8 | Retired 2026-11-03 (BP/RP extra removed, H-D1) | none |
 | R9 | Phase 1 Kaggle output no longer available as input | Confirm in the interface; human decides the supply path |
-| R10 | `torch` version on Kaggle differs from the local pin | Runner records and asserts it; mismatch stops the run before training |
+| R10 | `torch` version on Kaggle differs from the local pin | The pin is read from the first GPU session of the platform in use and recorded per platform in `environment.json`; within a platform, a later session whose torch differs from that platform's recorded pin stops before training; no cross-platform assert (Kaggle and Colab runs are separate and labelled) (section 9, item 0). (Amendment A, not verified) Kaggle GPU image torch is reported as 2.10.0+cu128 only by a community comment dated 2026-06-14 on github.com/Kaggle/docker-python issue 1546 (confidence low-medium; no image tag/date found); Colab free runtime torch: not found; newest cp312 win_amd64 CPU wheel seen on download.pytorch.org: 2.9.1+cpu (a 2.10.0 entry not established) |
 | R11 | Pinning `torch` in `requirements.txt` makes the Phase 1 CPU runner pip-install torch | Pin in `requirements-dl.txt` instead (H-D7) |
 | R12 | Closed 2026-11-03: the ADR 0001 G < 20 text was a documentation error (H-D9) | none |
 | R13 | ADR 0002 section 2 redshift rule not applied (GCUT-RC3); some labels may be inconsistent with their redshift | Documented limitation (section 1); the protocol applies to full_v0 as built; T7 |
@@ -480,6 +515,7 @@ measured" on Windows. For LightGBM: training wall time per seed is measured by `
 | R15 | `delta` from 5 values is itself noisy (4 degrees of freedom, relative SE ~35 %); val SD may differ from test SD | Factor 2 (~3.2 SD of `D_c`, section 4.2); `v_k` printed; SD fold flagged (H-D8); T5 |
 | R16 | GALAXY purity under P2 not reportable -> a DL win impossible by construction | Conditional on the low-count reading; resolved by the owner's total reading (2026-11-03): published `lgbm_full` prior_matched argmax cells show 12 STAR + 159 QSO contaminants at completeness ~0.68 and 141 + 730 at ~0.99 (results.md:298, 260; not threshold-based), so the cell at `C* = 0.80` is likely reportable; QSO-only decision kept as reversal option (section 4.5) |
 | R17 | Val-threshold sampling variance is not in the CI; a system whose threshold lands at lower test completeness gets higher test purity | Stated as limitation (section 4.2); realised test completeness printed next to `D_c`; no tolerance gating |
+| R18 | (Amendment A) Current torch builds reported failing on the Kaggle P100 (sm_60) while the T4 (sm_75) works (same docker-python issue 1546; not verified) | GPU session check aborts on a P100 or a build without the device's architecture (section 9, item 0) |
 
 ## 11. Reversal triggers
 
@@ -487,7 +523,8 @@ measured" on Windows. For LightGBM: training wall time per seed is measured by `
   drop FT-Transformer to `noind`-free headline only, or drop the GPU and run MLP on CPU (human decides).
 - T2. On val (before test), a network fails to beat the trivial `pi_src` logloss after `max_epochs` ->
   implementation bug suspected; stop, fix, rerun; no test evaluation of that system.
-- T3. Researcher shows FT-Transformer defaults differ from section 3.7 -> amend before training.
+- T3. Researcher shows FT-Transformer defaults differ from section 3.7 -> amend before training. Fired
+  2026-11-03 (T-RES-DL); amendment A applied to sections 3.3 and 3.7 before any training.
 - T4. Retired 2026-11-03 (XP out of scope, H-D1).
 - T5. `delta.json` (before any DL run) shows `delta_full,c(P2, 0.80) = 0` for a class (identical purity on
   the five LightGBM seeds) or a non-finite `delta` for QSO -> stop; the human re-approves the rule (H-D8)
@@ -505,12 +542,14 @@ measured" on Windows. For LightGBM: training wall time per seed is measured by `
   reopen only through a new ADR (new signal).
 - H-D2. Compute: confirm the Kaggle accelerator, weekly quota and session length read in the interface;
   approve P-gpu; else plan B or C (section 9, item 0). Open. **Before P-gpu.** Recommendation: read the
-  quota first, run P-gpu, decide A/B/C from its projection.
+  quota first, run P-gpu, decide A/B/C from its projection. (Amendment A) Official Kaggle numbers were
+  not found; third-party figures (~30 h/week, 12 h per session) are low confidence; the owner's real quota
+  is unknown.
 - H-D3. Tuning budget: **decided by the owner (2026-11-03): B0**, zero search, val only for early stopping
   and temperature; limitation recorded; B1 is the reversal option (T8).
 - H-D4. Seeds: 5 for LightGBM and for each DL system (confirmed by the owner). **Confirmed by the owner
   (2026-11-03)**: the earlier "4 of 5 seeds" rule is replaced by the delta/CI rule of section 4.4.
-  **Before training.** Recommendation: confirm.
+  **Before training.** Recommendation: none (decided).
 - H-D5. Retrain LightGBM with the same 5 seeds: now **mandatory** (section 3.8), because `delta` needs its
   seed SD; new files only, never overwriting `lgbm_*`. Recommendation: run after H-D6 is measured.
 - H-D6. Measure LightGBM training wall time (first on `lgbm_full_s0`) before the other nine seed fits.
@@ -518,8 +557,12 @@ measured" on Windows. For LightGBM: training wall time per seed is measured by `
 - H-D7. Pin `torch` in a separate `requirements-dl.txt` (proposed, R11) instead of `requirements.txt`.
   **Decided by the owner (2026-11-03).** Version to pin: the one preinstalled in the Kaggle GPU image, **not
   verified**; local CPU wheel for CPython 3.12 win_amd64 of that version: **not verified** (researcher
-  handoff). Recommendation: separate file, version read from the Kaggle image by `researcher`; under plan
-  B/C record the version used.
+  handoff). Recommendation: separate file; the pin is read from the first GPU session of the platform in
+  use and recorded per platform; within a platform a later mismatch stops before training; no
+  cross-platform assert (plan C on CPU: the version is recorded only). (Amendment A, not verified)
+  Reported only by a community comment (2026-06-14, Kaggle/docker-python issue 1546): Kaggle GPU torch
+  2.10.0+cu128; newest cp312 win_amd64 CPU wheel seen: 2.9.1+cpu; Colab: not found. The pin is the
+  version printed by the first GPU session of the platform in use (section 9, item 0).
 - H-D8. Re-approve the **new** pre-registered constants before any test number exists: `C*` 0.80 / 0.90,
   P2 primary (P1, P3 sensitivity), F1-F5 (thresholds on val, seed means, `delta` = 2 x SD with ddof = 1),
   the **SD fold** (proposal: val), the **block bootstrap** (level-3 parents within bands, B = 1000,
@@ -535,8 +578,8 @@ measured" on Windows. For LightGBM: training wall time per seed is measured by `
   ~35 %); type-I error very low, power reduced (a true gain near `2 s` wins at most about half the time;
   this counts only the seed term `P(D_c > delta_hat)`; the block-bootstrap CI condition (about 34 blocks,
   possibly wide) and the noise of `delta_hat` lower or shift it; power was not computed).
-  **Approved as written by the owner (2026-11-03).** Recommendation: approve as written; the documented
-  alternative is QSO-only when GALAXY is `n/a`.
+  **Approved as written by the owner (2026-11-03).** Recommendation: none (decided); the documented
+  alternative remains QSO-only when GALAXY is `n/a`.
 - H-D9. ADR 0001 G < 20 anomaly: **closed 2026-11-03** (documentation error, no rebuild; ADR 0001 and
   schema amended). Recommendation: none.
 
@@ -637,26 +680,34 @@ DEPENDS: numpy, pandas, sklearn.preprocessing.QuantileTransformer, pickle, hashl
   astro_triage.models.lgbm (TrainError, INDICATOR_COLUMN) (closed list)
 INVARIANTS: fit sees train rows only; indicators decided from train NULLs only; transform never refits;
   a NULL in a feature without indicator -> TrainError; unseen solved code -> TrainError; output finite;
-  columns read by name; no torch import
+  columns read by name; no torch import; (amendment A) quantile-fit noise N(0, 1e-3) on train non-null
+  cells only, from default_rng(20261025), never applied in transform
 ACCEPTANCE: fit on train, transform(val) twice -> identical arrays; a NaN only present in val in a feature
   without indicator -> TrainError; noind set yields no solved categories and no astrometric indicator; sha
-  stable across save/load; subsample_index deterministic and within range
+  stable across save/load; subsample_index deterministic and within range; (amendment A) two fits on the
+  same train give the same state sha (deterministic noise) and transform(train) is not the noisy input
 RISK: QuantileTransformer on 1.4M x 21 memory; constant columns (quantile edge collapse)
 ```
 
 ```
-FILE: src/astro_triage/models/dl_nets.py                    [create, target <= 160 lines]
+FILE: src/astro_triage/models/dl_nets.py                    [create, target <= 180 lines]
 INTENT: MLP and FT-Transformer modules returning logits in CLASSES order
 EXPORTS:
   MLP_CONFIG: Final[dict[str, object]]; FTT_CONFIG: Final[dict[str, object]]   # section 3.7
   class MLP(torch.nn.Module): def __init__(self, n_cont: int, n_cat: int, config: Mapping[str, object]); forward(x_cont, x_cat) -> Tensor
-  class FTTransformer(torch.nn.Module): same signature
+  class FTTransformer(torch.nn.Module): same signature   # PreNorm, no attention-input norm in block 0, Kaiming init (amendment A)
   def build_model(arch: Literal["mlp", "ftt"], n_cont: int, n_cat: int) -> torch.nn.Module
+  def parameter_groups(model: torch.nn.Module, weight_decay: float) -> list[dict[str, object]]
+      # amendment A: weight_decay 0.0 for Feature Tokenizer, [CLS] token embedding (project choice: not
+      # settled by the paper text; reference code (rtdl) not consulted), LayerNorm and bias parameters (FTT)
 DEPENDS: torch, typing, collections.abc (closed list)
 INVARIANTS: output shape (batch, 3); no softmax inside; configs are the only hyperparameters
 ACCEPTANCE: forward on random (8, n) input -> (8, 3) finite for both archs, with and without categories;
-  parameter count logged
-RISK: FTT defaults misremembered (R3); ReGLU dimension arithmetic
+  parameter count logged; for FTT every tokenizer, [CLS] embedding, LayerNorm and bias parameter is in a
+  group with weight_decay 0.0 (the [CLS] embedding asserted explicitly) and every other parameter in the
+  group with 1e-5, each parameter exactly once; FTT block 0 has NO normalisation on its attention input
+  while blocks 1.. have one
+RISK: ReGLU dimension arithmetic; parameter groups mis-assigned (tokenizer / [CLS] / LayerNorm / bias)
 ```
 
 ```
@@ -673,7 +724,8 @@ DEPENDS: torch, numpy, pandas, pyarrow, pyarrow.parquet, json, time, os, resourc
   predictions_table, MODEL_FULL, MODEL_NOIND, TrainError, _atomic, _manifest, _git_sha) (closed list)
 INVARIANTS: test rows used only after weights and T are frozen, for the predictions table; returned dict
   holds val metrics and costs only; unweighted CE; seeds per section 7; resume from last.pt reproduces the
-  epoch counter and patience; refuses a checkpoint with another config/preprocessor sha
+  epoch counter and patience; refuses a checkpoint with another config/preprocessor sha; optimizer built
+  from dl_nets.parameter_groups (amendment A)
 ACCEPTANCE: 300-row synthetic release, 2 epochs CPU: parquet schema equals predictions_table schema;
   p_cal rows sum to 1; kill after epoch 1 + resume == uninterrupted run (CPU, bit-identical); report has
   no key containing "test"
@@ -695,18 +747,21 @@ RISK: log of zero probability (clip at 1e-12 before log)
 ```
 
 ```
-FILE: scripts/train_dl.py                                   [create, target <= 110 lines]
+FILE: scripts/train_dl.py                                   [create, target <= 130 lines]
 INTENT: CLI: --outdir --arch {mlp,ftt} --features {full,noind} --seeds 0-4 --max-epochs --patience
-  --device --ckpt-dir --train-subset (pilot) --plan-c-subsample N --ensemble (build ens_* from finished
-  nets and lgbm_full_s<k>) --freeze (write val_freeze.json via dl_compare.build_freeze, requires
-  --approval-text)
+  (default 16) --device --ckpt-dir --train-subset (pilot) --plan-c-subsample N --ensemble (build ens_*
+  from finished nets and lgbm_full_s<k>) --freeze (write val_freeze.json via dl_compare.build_freeze,
+  requires --approval-text)
 DEPENDS: argparse, json, sys, pathlib, astro_triage.models.{dl_train,ensemble,dl_data},
   astro_triage.evaluation.dl_compare (build_freeze)
 INVARIANTS: --train-subset runs write under dl/pilot/ and never into dl/; --plan-c-subsample writes under
   dl_sub<N>/ only; --freeze refuses an existing freeze, a missing planned model or a missing delta.json;
-  exit 1 on TrainError
+  exit 1 on TrainError; (amendment A) with --device cuda it prints torch.__version__, torch.version.cuda
+  and the GPU name before any training, records them in environment.json and the report, and exits 1 with
+  a clear message on a P100 (sm_60) or when torch.cuda.get_arch_list() lacks the device's architecture
 ACCEPTANCE: pilot run leaves dl/ without predictions_*; freeze lists one sha per planned model (DL and
-  LightGBM seeds), the delta.json sha and every threshold
+  LightGBM seeds), the delta.json sha and every threshold; the GPU check, with a faked device name
+  "Tesla P100-PCIE-16GB" and capability (6, 0), exits 1 before any training step
 RISK: CLI drift from the Kaggle runner (runner calls this script, no duplicate logic)
 ```
 
@@ -768,14 +823,16 @@ INTENT: GPU runner: package, pip (requirements.txt minus PIP_SKIP, never torch),
   one zip
 DEPENDS: stdlib only (as run_kaggle.py)
 INVARIANTS: never runs evaluate_dl (bootstrap off GPU); never uploads; skips finished model ids; refuses
-  if Phase 1 labels/features/predictions are not found
+  if Phase 1 labels/features/predictions are not found; (amendment A) the GPU session check of section 9,
+  item 0 runs (through scripts/train_dl.py) before any training
 ACCEPTANCE: dry-run mode on a fake /kaggle tree (tmp dir) lists the plan and exits 0 without training
 RISK: Kaggle paths of a notebook-output input (to be confirmed in the interface)
 ```
 
 ```
 FILE: requirements-dl.txt                                   [create, 2 lines]
-INTENT: -r requirements.txt + torch==<version preinstalled on the Kaggle GPU image; not verified>
+INTENT: -r requirements.txt + torch==<version printed by the first Kaggle/Colab GPU session (section 9,
+  item 0); not guessed, not verified yet>
 ```
 
 ```
@@ -791,8 +848,9 @@ BP/RP XP: no files (H-D1, out of scope).
 ## 16. Acceptance criteria (to leave Proposed)
 
 1. H-D2 answered (the remaining open gate; H-D3, H-D4, H-D7 and H-D8 answered by the owner, 2026-11-03);
-   FT-Transformer defaults confirmed by `researcher` (T3). The constants of H-D8 are frozen from
-   2026-11-03; any change needs a new ADR or a dated amendment decided before any DL result exists.
+   FT-Transformer defaults checked by `researcher` (T3; done 2026-11-03, amendment A). The constants of
+   H-D8 are frozen from 2026-11-03; any change needs a new ADR or a dated amendment decided before any DL
+   result exists.
 2. All tests of section 15 pass locally with torch installed (none skipped); `ruff` clean.
 3. P-local done; P-gpu done and its measured sec/epoch, peak GPU memory and projection delivered to the
    human; no number in that report is estimated without saying so.
