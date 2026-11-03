@@ -2,14 +2,46 @@
   "task_id": "T-OPS-STATE",
   "title": "Owner decisions 2026-11-02/03 (short form)",
   "updated_utc": "2026-11-03",
+  "last_update_task": "T-OPS-STATE2",
   "owner_decisions": {
-    "population": "no G cut (null-G rows stay, nullable); docs to be corrected to match (H-D9 = documentation error, no rebuild)",
+    "population": "no G cut, docs fixed (null-G rows stay, nullable; H-D9 = documentation error, no rebuild; T-DOC-GCUT, T-DOC-GCUT-FIX1, re-check APPROVE_WITH_COMMENTS)",
     "commit": "authorised after the security check (pre-commit audit CLEAR_TO_COMMIT, 106 files); conventional commits; no co-author trailer",
     "parallelism": "blocker fixes and the commit may proceed in parallel",
     "compute_plan": ["Kaggle GPU", "Colab free", "CPU subsample with checkpoints"],
     "layer2": "closed as negative on val pilot, branch A (T-L2-03 DONE)",
-    "adr_0006_section_4": "see backlog.md 'ADR 0006' section for the metric/gain/delta/seed decisions"
+    "adr_0006_section_4": "see backlog.md 'ADR 0006' section for the metric/gain/delta/seed decisions",
+    "z_consistency_rule_E3": "owner decided 2026-11-03 (GCUT-RC3): keep full_v0 as built (rule not implemented); limitation + trigger T7 in ADR 0006",
+    "H-D3": "B0 (decided 2026-11-03)",
+    "low_count_rule": "total reading, as implemented in metrics.py (decided 2026-11-03)",
+    "ensemble_pairs": "descriptive only (decided 2026-11-03)",
+    "population_g_cut": "none (confirmed 2026-11-03)"
   },
+  "done_2026_11_03": [
+    "H-D9 / G<20 blocker resolved by documentation fix",
+    "GCUT-R1 fixed",
+    "first commit: 10 conventional commits b51ec00..00ae63e, no co-author trailer",
+    "README.md and CLAUDE.md updated",
+    "GCUT-RC5 CLAUDE.md status part: coder updated README/CLAUDE.md, reviewer approved",
+    "F2 results.md/results.json stale '100k sample' text fixed (T-FIX-RESULTS-TEXT, coder; numbers untouched; backups *.bak-20261103; reviewer re-check pending)",
+    "graphify graph rebuilt: 1964 nodes, 4673 edges, 73 communities, 0 dangling edges (old 522-dangling-edges item resolved)"
+  ],
+  "commits": {
+    "range": "b51ec00..00ae63e",
+    "count": 10,
+    "head": "00ae63e"
+  },
+  "open_reviews": [
+    "reviewer re-check of ADR 0006 iteration 2 (incl. T-DL-02-REVIEW M3, M4, M5 applied in iteration 2), in progress",
+    "reviewer re-check of T-FIX-RESULTS-TEXT (results.md/results.json), not started"
+  ],
+  "next_steps": [
+    "1. reviewer re-check of ADR 0006 iteration 2 (in progress)",
+    "2. second commit grouping: README.md, CLAUDE.md, docs/adr/0001, docs/adr/0006, docs/specs/schema.md, .claude/state (owner must see the list first; no Co-Authored-By trailer)",
+    "3. owner answers H-D4 (confirm 5 seeds and that delta/CI replaces 4-of-5), H-D7 (separate requirements-dl.txt), H-D8 (re-approve new constants: SD fold = val, level-3 block bootstrap, MIN_BLOCKS 20, n/a cell = tie, seed-mean reading of 'pointwise difference'), also H-D2 and H-D6",
+    "4. measure LightGBM training time, then retrain with 5 seeds on CPU (new files)",
+    "5. DL code with architect/coder/tester/reviewer/security; local CPU pilot first, then Kaggle/Colab only with the owner's explicit yes",
+    "6. dashboard recruiter overview with 'provisional' seal; restart Streamlit bound to localhost"
+  ],
   "hard_constraints": [
     "no NVIDIA API call",
     "no Kaggle write without explicit owner yes",

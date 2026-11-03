@@ -1,7 +1,22 @@
 # Backlog (MINOR findings and deferred items)
 
-Updated 2026-10-25 by the orchestrator. Items here never trigger a fixer cycle (CONTRACT §3).
+Updated 2026-10-25 by the orchestrator; last update 2026-11-03 (T-OPS-STATE2). Items here never trigger a fixer cycle (CONTRACT §3).
 "Before T15" means: fix before the first real download, because it affects a long, flaky run.
+
+## DONE 2026-11-03
+- H-D9 / G<20 blocker: RESOLVED as a documentation error, no rebuild (T-DOC-GCUT, T-DOC-GCUT-FIX1, reviewer re-check
+  T-DOC-GCUT-RECHECK APPROVE_WITH_COMMENTS). Population = no G cut; null-G rows stay (nullable).
+- GCUT-R1: fixed (T-DOC-GCUT-FIX1).
+- First commit: 10 conventional commits b51ec00..00ae63e, no co-author trailer; pre-commit security CLEAR_TO_COMMIT (106 files).
+- README.md and CLAUDE.md updated (provisional-results warning).
+- GCUT-RC5 (CLAUDE.md "Status" part): DONE. The coder updated README/CLAUDE.md; reviewer approved. The ADR-text part of RC5
+  is handled in the ADR 0006 iteration 2 rewrite / ADR 0004 annotation (see the GCUT section below).
+- F2 (stale "100k sample" text of `data/interim/full_v0/eval/results.md` and `results.json`): DONE (T-FIX-RESULTS-TEXT, coder).
+  Header, Limitations and line 1653 corrected; line 20 / json line 37 relabelled as measured on the 100k pilot batch; numbers
+  untouched; backups `results.md.bak-20261103` and `results.json.bak-20261103` exist. Reviewer has NOT yet re-checked it.
+  Remaining MINORs are listed under "Evaluation runner / dataset docs" below.
+- Graphify graph rebuilt 2026-11-03: 1964 nodes, 4673 edges, 73 communities, 0 dangling edges. The old 522-dangling-edges item
+  is RESOLVED.
 
 ## RESOLVED 2026-10-25 (H1 + T13c, verified: 129 passed, ruff clean, 0 xfail)
 TAP-1, TAP-2, TAP-3, RV01-3 (code), RV01-5(a)(b), `_sanitize` widened (Bearer with space, quoted keys,
@@ -66,18 +81,19 @@ The reviewer rebuilt the split from ADR 0003 rule 2 independently and it matches
 - Schema 5.1/5.2 asks for `data/splits/split_map_l5_v1.parquet` with metadata keys; only the CSV exists.
 
 ## Schema (`docs/specs/schema.md`) open questions still open
-- OQ1 raw population (whole G<20 sky = 1,060,470,828 sources vs SDSS footprint vs SpecObj candidates).
+- OQ1 raw population: G<20 part RESOLVED 2026-11-03 (no G cut; documentation error, no rebuild). Remaining wording gaps
+  are GCUT-RC2/RC3 below.
 - OQ6 drop-reason precedence; OQ7 SpecObj/DR14Q column names and types; OQ8 TBV Gaia columns;
-  OQ9 5-class combmod; OQ10 `r_match` (E1), `z_star_max`/`z_qso_min` (E3), DR15 galaxy rule (E4).
+  OQ9 5-class combmod; OQ10 `r_match` (E1), `z_star_max`/`z_qso_min` (E3, see GCUT-RC3), DR15 galaxy rule (E4).
 - `labels_v1` cannot be built until E1, E3, E4 run.
 
 ## Dataset builder (T20 / T20b, 2026-10-26), open items
 - `n_specobj_candidates` is counted before the multi-Gaia drop; ADR 0002 section 3 does not say whether SDSS objects
   dropped earlier should still count. Decide and assert in a test.
-- Schema section 4 says `phot_g_mean_mag` and `phot_g_mean_flux_over_error` are non-null, but 25 of 52,524 pairs have NULL
-  (the XMatch path has no G < 20 selection). Builder marks them nullable; the schema (OQ8) needs a decision: G < 20 cut or nullable.
+- RESOLVED 2026-11-03 (owner: no G cut, nullable; documentation error, no rebuild): schema section 4 non-null G vs NULL-G pairs.
+  The stale build.py comment is tracked as GCUT-RC4 below.
 - `labels.parquet` lacks `label_status`, `in_dr14q`, `galaxy_public_by_dr15`, `in_cut_b`, `pm_propagated`; DR14Q/DR15 cut (b),
-  epoch propagation (ADR 0004 D3) and the z-consistency filter (E3) are not implemented yet.
+  epoch propagation (ADR 0004 D3) and the z-consistency filter (E3, GCUT-RC3) are not implemented yet.
 - Folds go through `split.assign_folds`, which rebuilds the pixel map per call (already in the Split section); the test
   proves it matches the committed CSV.
 - 100k sample: 0 test pixels reach 100 objects (max 34, median 11): the ADR 0003 reporting floor is only reachable with the
@@ -150,11 +166,13 @@ The reviewer rebuilt the split from ADR 0003 rule 2 independently and it matches
 
 ## Evaluation runner / dataset docs, from reviewer T-BLK-01 (2026-11-03)
 - F3 `evaluation/runner.py:46,87,1267` hardcodes `r_match` 0.75 and the 100k match rates. Read `r_match_arcsec` from the
-  labels parquet metadata instead.
+  labels parquet metadata instead. Also: `runner.make_header` would regenerate the shorter (pre-fix) header text on the next
+  evaluate run; when fixing F3, add the "protocol not frozen" wording to the generated header if desired.
 - F4 `src/astro_triage/dataset/build.py:1,69,104-105`: comments and the default name still describe the 100k batch. The
-  "25 pairs without G" figure is not general (full_v0 has 617 null-G rows).
-- F2 regenerate the text of `data/interim/full_v0/eval/results.md` and `results.json`: "100k sample" is stale text from an
-  older runner; the numbers are full_v0's; no bootstrap rerun needed. Status: owner approved the fix, not done yet.
+  "25 pairs without G" figure is not general (full_v0 has 617 null-G rows). Same fix as GCUT-RC4 below (one coder task).
+- F2 results.md/results.json text: DONE 2026-11-03 (T-FIX-RESULTS-TEXT; see DONE section). Reviewer re-check pending.
+  Remaining MINOR from that task: `results.md` line ~1650 ("match rate STAR 91% vs GALAXY 31%") should be labelled as measured
+  on the 100k pilot batch.
 
 ## Pre-commit security audit (2026-11-03): CLEAR_TO_COMMIT, 106 files
 - SEC-PC-01 the 3 `docs/*.docx` carry the owner's first name, course and institution in the text and in `docProps/core.xml`.
@@ -168,16 +186,40 @@ The reviewer rebuilt the split from ADR 0003 rule 2 independently and it matches
 - Re-measure the exact share of G<17.65 per class on full_v0. Reviewer quantiles agree with ADR 0006's 34.3% / 0.1% / 0.9%,
   but the exact share was not recomputed.
 
-## ADR 0006 (deep-learning tabular comparison): section 4 rewrite pending (architect)
+## ADR 0006 (deep-learning tabular comparison): section 4 rewrite (architect), iteration 2 under reviewer re-check
 - Owner decisions 2026-11-02/03 to write into section 4:
   - Metric: purity of QSO and GALAXY at fixed completeness 0.80 (primary) and 0.90 (secondary), thresholds chosen on val only.
   - Prior P2 primary; P1 and P3 as sensitivity.
   - Gain = pointwise difference > delta AND 95% pixel-block bootstrap CI > 0, in both classes.
   - delta = 2 x SD of LightGBM across 5 seeds (by formula). Tie keeps LightGBM.
   - 5 seeds; same features, split, tuning budget and calibration; missing-value masks on both sides; DSC as context only.
-- H-D9 closed: documentation error, no rebuild; T6 does not fire.
+- Owner decisions 2026-11-03 (added):
+  - Redshift rule (GCUT-RC3): keep full_v0 as built; record as a limitation plus trigger T7 in ADR 0006.
+  - H-D3 = B0 (decided).
+  - Low-count rule = total reading (as implemented in metrics.py).
+  - Ensemble pairs: descriptive only.
+  - Population: no G cut.
+- H-D9: resolved: documentation error, no rebuild, 2026-11-03. T6 does not fire.
 - Remove the unconfirmed claim "XP focused on red sources" (line ~49).
-- Still open: H-D3; H-D4 (confirm 5 seeds and that the 4-of-5 rule is replaced); H-D7; H-D8 (re-approve the new constants);
-  H-D6; H-D1; H-D2.
-- Architect must also define: (i) the fold on which the delta SD is measured (proposal: val); (ii) what an n/a or low-count
-  galaxy-purity cell means (proposal: counts as a tie).
+- Still open (owner): H-D4 (confirm 5 seeds and that delta/CI replaces the 4-of-5 rule); H-D7 (separate requirements-dl.txt);
+  H-D8 (re-approve the new constants: SD fold = val, level-3 block bootstrap, MIN_BLOCKS 20, n/a cell = tie, seed-mean reading
+  of "pointwise difference"); H-D2; H-D6; H-D1.
+- Reviewer T-DL-02-REVIEW findings M3, M4, M5: applied in iteration 2, pending re-check.
+
+## Population docs re-check (T-DOC-GCUT-RECHECK, 2026-11-03): APPROVE_WITH_COMMENTS, MINOR only
+- GCUT-RC1 `docs/adr/0001-storage.md:21-23`, `docs/specs/schema.md:123-125`: 17,611 is a count of PAIRS. Also state the
+  SpecObj-row count: 8,779 SpecObj rows (STAR 5,494, GALAXY 3,157, QSO 128) dropped by the ADR 0002 section 3 ambiguity rule.
+  Architect owns the ADR edit.
+- GCUT-RC2 same places + schema OQ1 (~line 483): the population definition omits the second ADR 0002 section 3 rule (one Gaia
+  source with several SpecObj: keep the nearest if classes agree, drop if they conflict). In full_v0
+  source_class_conflict = 0 and same_class_duplicates_collapsed = 0, which is why 2,061,857 - 17,611 = 2,044,246 holds.
+- GCUT-RC3 (more relevant) `docs/specs/schema.md:239` vs 119-127: the ADR 0002 section 2 redshift-consistency rule
+  (`z_star_max` / `z_qso_min`) is NOT implemented anywhere in `src/` (E3/OQ10 open), yet schema.md:239 lists it as part of the
+  label set; full_v0 labels did not pass that cut. Needs an explicit statement in the population text.
+  OWNER DECIDED 2026-11-03: keep full_v0 as built (rule not implemented); limitation + trigger T7 in ADR 0006.
+- GCUT-RC4 `src/astro_triage/dataset/build.py:104-105`: stale comment "25 pairs have no G photometry" (full_v0 has 617 null-G
+  rows) and it cites schema section 4 non-null G. Coder task, code outside docs; merge with F4 above.
+- GCUT-RC5 cleanup: text that still describes the G<20 anomaly as open, to handle in the ADR 0006 section 4 rewrite and the
+  ADR 0004 annotation decision (architect): `docs/adr/0004-no-login-data-path.md:258`;
+  `docs/adr/0006-deep-learning-tabular-comparison.md:55-58, 296, 309, 327`. The `CLAUDE.md` "Status" part is DONE 2026-11-03
+  (coder updated README/CLAUDE.md, reviewer approved).
