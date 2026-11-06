@@ -268,6 +268,15 @@ F5  margin, from LightGBM only, on VAL, before any DL run (written to lgbm_seeds
       the headline uses delta_full,c(P2, 0.80)
 ```
 
+(Clarified 2026-11-04, T-DL-04, clarification, no number changes) F5 populations: for the P3
+sensitivity cell the threshold `t_{L_s<k>},c(C*)` is fitted on ALL val rows of class `c` (F1 does not
+depend on the prior), while the purity `v_k`, the floor check and the block count are taken on the val
+rows of latitude bands B and C only (the P3 population of ADR 0003 D4); P1 and P2 use all val rows for
+all three. The headline `delta_full,c(P2, 0.80)` is unaffected. Reproducibility: val is processed in
+ascending `source_id` order, so `delta.json` is bit-for-bit reproducible; `delta.json` records
+`labels_sha256` and the sha256 of the 10 LightGBM seed prediction files, and `val_freeze.json` hashes
+`delta.json`.
+
 What the margin means (stated so the owner approves it knowingly, H-D8). `delta` is the spread of a
 **single** seed, while `D_c` compares two **5-seed means**. If DL and LightGBM have the same seed SD `s`,
 the seed part of `D_c` has `SD(D_c) = s * sqrt(1/5 + 1/5) = s * sqrt(2/5) ~= 0.63 s`, so `delta = 2 s` is
@@ -808,6 +817,21 @@ ACCEPTANCE: synthetic release where every DL parquet is a copy of the LightGBM s
 RISK: memory of 30 systems x B=1000 in workers (pass only per-class scores of the population); few blocks
   per class (R14)
 ```
+
+(Noted 2026-11-04, T-DL-04, no number or constant changes) (i) The delta writer lives in
+`scripts/compute_delta.py`, not as `--delta` of `scripts/train_lgbm_seeds.py`: `tests/test_lgbm_seeds.py`
+is at its 200-line cap. The `--delta` acceptance item "delta.json identical when test probabilities are
+NaN" is covered by `tests/test_dl_compare.py::test_test_rows_never_affect_output`. (ii) `dl_compare.py`
+imports `pyarrow` / `pyarrow.parquet` and `astro_triage.split` beyond the closed DEPENDS list:
+`pyarrow.parquet` reads labels and predictions with a fold / source_id filter so test rows are never
+loaded (`runner.load_test_set` reads test); `split.pixel_l5` and `split.build_pixel_map` check that every
+val row lies in a val pixel and give the latitude band of the P3 population. (iii) The 340-line target
+cannot hold; the module is split along the val/test boundary WHEN the missing functions are implemented,
+not now: `evaluation/dl_compare.py` = constants + pure functions (F1, F2, contaminant_counts,
+is_low_count, block_ids, class_verdict, pair_verdict, e_sq, risk_coverage_curve; no IO);
+`evaluation/dl_val.py` = val IO only (loaders, `_cell`, compute_delta, build_freeze);
+`evaluation/dl_eval.py` = test side (load_dl_systems, run_compare, render_markdown). No re-export from
+dl_compare (it would create an import cycle).
 
 ```
 FILE: scripts/evaluate_dl.py                                [create, target <= 60 lines]
