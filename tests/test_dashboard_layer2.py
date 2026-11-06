@@ -33,6 +33,7 @@ HOSTILE = (
     "[x](javascript:alert(1))",
 )
 NO_GAIN_TITLE = "não agregou valor mensurável"
+PAGES_BASE = ["Visão geral", "Mapa do céu", "Galáxias", "Método"]
 
 
 # ----------------------------------------------------------------------------- fixtures
@@ -373,25 +374,45 @@ def run_app():
     return at.run()
 
 
+def nav(at):
+    """The page selector: ``st.segmented_control(key="page")`` is a ButtonGroup in AppTest."""
+    found = [w for w in at.button_group if w.key == "page"]
+    assert len(found) == 1, [w.key for w in at.button_group]
+    return found[0]
+
+
+def pages(at) -> list[str]:
+    return list(nav(at).options)
+
+
+def open_page(at, page: str):
+    at.session_state["page"] = page
+    return at.run()
+
+
 def md_values(at) -> list[str]:
     return [m.value for m in at.markdown]
 
 
-def test_app_without_layer2_has_three_tabs(app_env) -> None:
+def test_app_without_layer2_has_three_pages_in_order(app_env) -> None:
     app_env(None)
     at = run_app()
     assert not at.exception
-    assert [t.label for t in at.tabs] == ["Visão geral", "Mapa do céu", "Galáxias"]
+    assert pages(at) == PAGES_BASE  # order and set; no Camada 2 entry
+    assert at.session_state["page"] == "Visão geral" and not at.tabs
     assert not at.error
 
 
-def test_app_with_layer2_has_four_tabs_and_both_verdict_titles(
+def test_app_with_layer2_has_four_pages_and_both_verdict_titles(
     app_env, results: dict
 ) -> None:
     app_env(results["one"])
     at = run_app()
     assert not at.exception
-    assert [t.label for t in at.tabs][-1] == "Camada 2" and len(at.tabs) == 4
+    assert pages(at) == [*PAGES_BASE, "Camada 2"]
+    assert not any("comparações" in s.value for s in at.subheader)  # not rendered yet
+    at = open_page(at, "Camada 2")
+    assert not at.exception and at.session_state["page"] == "Camada 2"
     titles = [s.value for s in at.subheader]
     assert any("em 1 de 2 comparações" in t for t in titles), titles
     assert not any(NO_GAIN_TITLE in t for t in titles)
@@ -400,7 +421,7 @@ def test_app_with_layer2_has_four_tabs_and_both_verdict_titles(
 
 def test_app_with_both_pairs_gaining_says_two_of_two(app_env, results: dict) -> None:
     app_env(results["gain"])
-    at = run_app()
+    at = open_page(run_app(), "Camada 2")
     assert not at.exception
     assert any("em 2 de 2 comparações" in s.value for s in at.subheader)
 
@@ -409,7 +430,9 @@ def test_app_with_both_pairs_gaining_says_two_of_two(app_env, results: dict) -> 
 def test_app_no_gain_title(app_env, results: dict, key: str) -> None:
     app_env(results[key])
     at = run_app()
-    assert not at.exception and len(at.tabs) == 4
+    assert not at.exception and len(pages(at)) == len(PAGES_BASE) + 1
+    at = open_page(at, "Camada 2")
+    assert not at.exception
     titles = [s.value for s in at.subheader]
     assert any(NO_GAIN_TITLE in t for t in titles), titles
     assert not any("comparações" in t for t in titles)
@@ -431,7 +454,9 @@ def test_app_hostile_server_strings_never_reach_markdown_or_html(
     app_env(results["gain"], mutate=hostile)
     at = run_app()
     assert not at.exception
-    assert len(at.tabs) == 4
+    assert len(pages(at)) == len(PAGES_BASE) + 1
+    at = open_page(at, "Camada 2")
+    assert not at.exception
     everything_md = "\n".join(md_values(at))
     for bad in HOSTILE:
         assert bad not in everything_md, bad
@@ -444,20 +469,21 @@ def test_app_hostile_server_strings_never_reach_markdown_or_html(
     assert "x" + HOSTILE[2] in frames  # status key only in the dataframe
 
 
-def test_app_corrupt_json_shows_visible_error_and_keeps_three_tabs(
+def test_app_corrupt_json_shows_visible_error_and_keeps_three_pages(
     app_env,
 ) -> None:
     app_env(None, raw_text="{not json")
     at = run_app()
     assert not at.exception
-    assert len(at.tabs) == 3
+    assert pages(at) == PAGES_BASE
     assert any("ilegível" in e.value for e in at.sidebar.error)
+    assert at.session_state["page"] == "Visão geral"
 
 
 def test_app_missing_key_json_shows_visible_error(app_env) -> None:
     app_env(None, raw_text="{}")
     at = run_app()
-    assert not at.exception and len(at.tabs) == 3
+    assert not at.exception and pages(at) == PAGES_BASE
     assert any("ilegível" in e.value for e in at.sidebar.error)
 
 
