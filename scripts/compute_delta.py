@@ -13,7 +13,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src"))
 
 from astro_triage.dataset.build import DEFAULT_OUTDIR
-from astro_triage.evaluation.dl_compare import compute_delta
+from astro_triage.evaluation.dl_val import compute_delta
 from astro_triage.evaluation.runner import EvalError
 
 SEEDS_DIRNAME = "lgbm_seeds"

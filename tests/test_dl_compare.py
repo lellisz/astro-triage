@@ -17,6 +17,7 @@ import pyarrow.parquet as pq
 import pytest
 
 from astro_triage.evaluation import dl_compare as dc
+from astro_triage.evaluation import dl_val as dv
 from astro_triage.evaluation.runner import GRID, EvalError
 from astro_triage.split import build_pixel_map
 
@@ -277,7 +278,7 @@ def release(tmp_path_factory):
 # --------------------------------------------------------------------- compute_delta
 def test_delta_matches_independent_reference_for_all_cells(release):
     pix, cls, scores, out, sd, _ = release
-    doc = dc.compute_delta(out, sd)
+    doc = dv.compute_delta(out, sd)
     band = band_of(pix)
     for fs in ("full", "noind"):
         sc = [scores(fs, k) for k in range(5)]
@@ -301,7 +302,7 @@ def test_delta_matches_independent_reference_for_all_cells(release):
 
 def test_delta_schema_nesting_and_sha(release):
     _pix, cls, _, out, sd, _ids = release
-    doc = dc.compute_delta(out, sd)
+    doc = dv.compute_delta(out, sd)
     assert doc["schema_name"] == "astro_triage.lgbm_seeds_delta"
     assert (doc["fold"], doc["n_seeds"], doc["delta_ddof"]) == ("val", 5, 1)
     assert doc["delta_sd_multiplier"] == 2.0
@@ -345,7 +346,7 @@ def test_delta_hand_values_two_sd_ddof1(tmp_path):
         return sc
 
     out, sd, _ = make_release(tmp_path / "h", pix, cls, scores)
-    doc = dc.compute_delta(out, sd)
+    doc = dv.compute_delta(out, sd)
     for p in ("P1", "P2", "P3"):
         pq_, ps = GRID[p]["QSO"], GRID[p]["STAR"]
         v = [4 * pq_ / (4 * pq_ + k * ps) for k in range(5)]
@@ -361,7 +362,7 @@ def test_delta_hand_values_two_sd_ddof1(tmp_path):
 
 def test_p3_population_is_bands_b_and_c_threshold_from_all_val(release):
     pix, cls, scores, out, sd, _ = release
-    doc = dc.compute_delta(out, sd)
+    doc = dv.compute_delta(out, sd)
     band = band_of(pix)
     bc = np.isin(band, ("B", "C"))
     p3 = doc["delta"]["full"]["QSO"]["0.80"]["P3"]
@@ -388,7 +389,7 @@ def test_block_floor_is_distinct_pixel16_band_pairs(tmp_path):
     out, sd, _ = make_release(
         tmp_path / "b", pix, cls, lambda fs, k: np.full((16, 3), 0.5)
     )
-    cell = dc.compute_delta(out, sd)["delta"]["full"]["QSO"]["0.80"]["P2"]
+    cell = dv.compute_delta(out, sd)["delta"]["full"]["QSO"]["0.80"]["P2"]
     assert cell["blocks"] == 2
     assert cell["floor"]["pixels"] == 2
 
@@ -418,7 +419,7 @@ def test_test_rows_never_affect_output(tmp_path):
     o2, s2, _ = make_release(
         tmp_path / "g", pix, cls, scores, variant="garbage", n_test=55
     )
-    d1, d2 = dc.compute_delta(o1, s1), dc.compute_delta(o2, s2)
+    d1, d2 = dv.compute_delta(o1, s1), dv.compute_delta(o2, s2)
     # labels.parquet row order differs between the two files, which moves the last ulp
     assert _close(_strip(d1), _strip(d2))
     # sanity: the poison is really on disk
@@ -440,8 +441,8 @@ def test_labels_read_with_val_filter_and_never_whole_file(tmp_path, monkeypatch)
         calls.append((Path(path).name, kw.get("filters"), kw.get("columns")))
         return real(path, *a, **kw)
 
-    monkeypatch.setattr(dc.pq, "read_table", spy)
-    dc.compute_delta(out, sd)
+    monkeypatch.setattr(dv.pq, "read_table", spy)
+    dv.compute_delta(out, sd)
     label_calls = [c for c in calls if c[0] == "labels.parquet"]
     assert len(label_calls) == 1
     assert label_calls[0][1] == [("fold", "==", "val")]
@@ -455,7 +456,7 @@ def test_missing_val_id_in_predictions_raises(tmp_path):
         tmp_path / "m", pix, cls, scores, drop_val_id_from=("noind", 3)
     )
     with pytest.raises(EvalError, match="1 val ids have no prediction"):
-        dc.compute_delta(out, sd)
+        dv.compute_delta(out, sd)
 
 
 def test_missing_seed_file_and_nonfinite_val_score_raise(tmp_path):
@@ -463,7 +464,7 @@ def test_missing_seed_file_and_nonfinite_val_score_raise(tmp_path):
     out, sd, _ids = make_release(tmp_path / "f", pix, cls, scores)
     (sd / "predictions_lgbm_full_s2_v0.parquet").unlink()
     with pytest.raises(EvalError, match="missing seed predictions"):
-        dc.compute_delta(out, sd)
+        dv.compute_delta(out, sd)
 
     def nan_scores(fs: str, k: int) -> np.ndarray:
         sc = scores(fs, k)
@@ -473,7 +474,7 @@ def test_missing_seed_file_and_nonfinite_val_score_raise(tmp_path):
 
     out2, sd2, _ = make_release(tmp_path / "f2", pix, cls, nan_scores)
     with pytest.raises(EvalError, match="non-finite val p_cal"):
-        dc.compute_delta(out2, sd2)
+        dv.compute_delta(out2, sd2)
 
 
 def test_labels_inconsistent_pixel_or_missing_file_raise(tmp_path):
@@ -485,10 +486,10 @@ def test_labels_inconsistent_pixel_or_missing_file_raise(tmp_path):
         pa.Table.from_pandas(lab, preserve_index=False), out / "labels.parquet"
     )
     with pytest.raises(EvalError, match="healpix_l5"):
-        dc.compute_delta(out, sd)
+        dv.compute_delta(out, sd)
     (out / "labels.parquet").unlink()
     with pytest.raises(EvalError, match="cannot read val labels"):
-        dc.compute_delta(out, sd)
+        dv.compute_delta(out, sd)
 
 
 # --------------------------------------------------------------------- reproducibility
@@ -511,7 +512,7 @@ def _twin_docs(tmp_path: Path, labels: bool, preds: bool) -> tuple[dict, dict]:
     o2, s2, _ = make_release(tmp_path / "b", pix, cls, scores)
     _reshuffle(o1, s1, 1000, labels, preds)
     _reshuffle(o2, s2, 2000, labels, preds)
-    return dc.compute_delta(o1, s1), dc.compute_delta(o2, s2)
+    return dv.compute_delta(o1, s1), dv.compute_delta(o2, s2)
 
 
 def test_delta_bit_identical_when_labels_row_order_differs(tmp_path):
