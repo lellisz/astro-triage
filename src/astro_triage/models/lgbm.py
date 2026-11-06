@@ -16,7 +16,9 @@ import json
 import math
 import os
 import subprocess
+import sys
 import tempfile
+import time
 from collections.abc import Callable
 from dataclasses import dataclass
 from datetime import UTC, datetime
@@ -361,7 +363,16 @@ def _atomic(path: Path, write: Callable[[str], object]) -> None:
     os.close(fd)
     try:
         write(tmp_name)
-        os.replace(tmp_name, path)
+        # Windows: transient AV/indexer locks
+        attempts = 5 if sys.platform == "win32" else 1
+        for attempt in range(attempts):
+            try:
+                os.replace(tmp_name, path)
+                break
+            except PermissionError:
+                if attempt == attempts - 1:
+                    raise
+                time.sleep(0.05 * 2**attempt)  # 50ms -> 400ms
     except BaseException:
         Path(tmp_name).unlink(missing_ok=True)
         raise
