@@ -266,7 +266,6 @@ def test_old_public_signatures_unchanged() -> None:
             "abstention_curve",
             "confidence_histogram",
             "mollweide",
-            "sdss_cutout_url",
         )
     }
     assert (

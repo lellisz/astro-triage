@@ -67,8 +67,3 @@ def test_confusion_and_error_types_follow_class_names():
     assert conf.loc["STAR", "QSO"] == 1
     errs = D.errors_by_type(rel)
     assert errs.iloc[0]["true"] == "STAR" and errs.iloc[0]["pred"] == "QSO"
-
-
-def test_cutout_url_has_coordinates():
-    url = D.sdss_cutout_url(10.5, -3.25)
-    assert "ra=10.500000" in url and "dec=-3.250000" in url

@@ -1,4 +1,4 @@
-"""Error rates by magnitude, redshift and astrometric solution; galaxy scatter and gallery."""
+"""Error rates by magnitude, redshift and astrometric solution; galaxy scatter."""
 
 from __future__ import annotations
 
@@ -7,12 +7,10 @@ import math
 from statistics import NormalDist
 from typing import Final
 
-import numpy as np
 import pandas as pd
 
 from astro_triage.dashboard import fmt
 from astro_triage.dashboard.data_release import (
-    SEED,
     Release,
     wilson,
 )
@@ -114,51 +112,3 @@ def galaxy_scatter(rel: Release, model: str = "lgbm_full") -> pd.DataFrame:
         }
     )
     return out.dropna(subset=["z", "G"]).reset_index(drop=True)
-
-
-def sdss_cutout_url(
-    ra: float, dec: float, width_px: int = 160, scale: float = 0.4
-) -> str:
-    """SDSS DR17 SkyServer cutout (64 arcsec wide with the defaults)."""
-    return (
-        "https://skyserver.sdss.org/dr17/SkyServerWS/ImgCutout/getjpeg"
-        f"?ra={ra:.6f}&dec={dec:.6f}&scale={scale}&width={width_px}&height={width_px}"
-    )
-
-
-def gallery_sample(
-    rel: Release,
-    model: str = "lgbm_full",
-    true_class: str = "GALAXY",
-    n_correct: int = 4,
-    n_wrong: int = 4,
-    seed: int = SEED,
-) -> pd.DataFrame:
-    """Seeded draw of correct and wrong objects of one class, with a cutout URL each."""
-    t = rel.test[rel.test["true"] == true_class]
-    rng = np.random.default_rng(seed)
-    parts = []
-    for wrong, k in ((False, n_correct), (True, n_wrong)):
-        pool = t[t[f"err_{model}"] == wrong]
-        pick = rng.choice(len(pool), size=min(k, len(pool)), replace=False)
-        parts.append(pool.iloc[np.sort(pick)])
-    out = pd.concat(parts, ignore_index=True)
-    out = out.assign(
-        correct=~out[f"err_{model}"],
-        pred=out[f"pred_{model}"],
-        confidence=out[f"conf_{model}"],
-        url=[sdss_cutout_url(r, d) for r, d in zip(out["ra"], out["dec"], strict=True)],
-    )
-    cols = [
-        "source_id",
-        "correct",
-        "pred",
-        "confidence",
-        "sdss_z",
-        "phot_g_mean_mag",
-        "astrometric_params_solved",
-        "ra",
-        "dec",
-        "url",
-    ]
-    return out[cols]

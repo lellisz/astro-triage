@@ -38,9 +38,7 @@ from astro_triage.dashboard.data_galaxies import (
     bin_label,
     error_rate_table,
     galaxy_scatter,
-    gallery_sample,
     rate_row,
-    sdss_cutout_url,
     wilson_interval,
 )
 from astro_triage.dashboard.data_galaxies_z import (

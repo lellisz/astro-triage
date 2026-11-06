@@ -62,7 +62,7 @@ def reading_paragraphs(f: MethodFacts) -> list[str]:
 
 
 def usage_paragraphs() -> list[str]:
-    return [N.IMAGE_OFF_NOTE, N.IMAGE_USE_NOTE, N.SCATTER_OFF_NOTE]
+    return [N.SCATTER_OFF_NOTE]
 
 
 def _html(block: str) -> None:
@@ -90,7 +90,7 @@ def method_page(rel: D.Release) -> None:
     st.subheader("Como ler os números")
     for text in reading_paragraphs(method_facts(rel)):
         st.markdown(text)
-    with st.expander("Imagens e dispersão por objeto"):
+    with st.expander("Dispersão por objeto"):
         for text in usage_paragraphs():
             st.markdown(text)
     st.subheader("Glossário")

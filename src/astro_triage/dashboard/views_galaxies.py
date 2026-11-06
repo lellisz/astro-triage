@@ -13,7 +13,6 @@ from astro_triage.dashboard.constants import NO_BAR
 from astro_triage.dashboard.html_galaxies import simple_html
 from astro_triage.dashboard.html_galaxies_tech import tech_html
 from astro_triage.dashboard.views_common import MODEL, tech_on
-from astro_triage.dashboard.views_galaxies_gallery import gallery_section
 
 
 def _scatter_section(rel: D.Release) -> None:
@@ -46,4 +45,3 @@ def galaxies_page(rel: D.Release) -> None:
         return
     st.markdown(tech_html(tot, by_g, by_z, floor), unsafe_allow_html=True)
     _scatter_section(rel)
-    gallery_section(rel)

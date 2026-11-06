@@ -40,8 +40,6 @@ PERSISTED_KEYS = (
     "galaxy_scatter_on",
     "sky_mode",
     "sky_hide_below",
-    "gallery_on",
-    "gallery_mode",
     "tech",
 )
 

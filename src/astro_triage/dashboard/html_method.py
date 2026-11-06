@@ -32,7 +32,7 @@ METHOD_TEXT: Final = (
 )
 SOURCES: Final = (
     "Gaia DR3: fotometria, astrometria e as probabilidades do Gaia DSC.",
-    "SDSS: espectros que fornecem os rótulos de classe e as imagens da galeria.",
+    "SDSS: espectros que fornecem os rótulos de classe.",
     "Gaia DSC (Delchambre+2023): classificador de referência e origem dos priors P2 e P3.",
     "Bailer-Jones+2019: origem do prior P1.",
 )

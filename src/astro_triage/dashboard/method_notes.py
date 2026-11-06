@@ -20,17 +20,6 @@ MAP_NOTE = (
 
 COUNT_UNDER_BAND_NOTE = "O número sob cada faixa é o total de objetos."
 
-IMAGE_USE_NOTE = (
-    "Imagens: SDSS SkyServer; confira os termos de uso antes de publicar. "
-    "Não use estes recortes em README ou capturas de tela. O sorteio usa semente fixa, com "
-    "acertos e erros em número igual."
-)
-
-IMAGE_OFF_NOTE = (
-    "As imagens ficam desligadas por padrão: ativá-las faz o navegador consultar o SDSS. "
-    "Galáxias compactas se parecem com pontos de luz, como as estrelas e os quasares."
-)
-
 SCATTER_OFF_NOTE = (
     "A dispersão por objeto fica desligada por padrão: ligá-la envia ao navegador um ponto "
     "por objeto desenhado."
