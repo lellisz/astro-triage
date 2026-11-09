@@ -328,6 +328,35 @@ def _has_test_key(obj: object) -> bool:
     return False
 
 
+def current_constants() -> dict[str, object]:
+    """Code constants recorded in the freeze (shared by build_freeze and verify_freeze)."""
+    return {
+        "headline_metric": HEADLINE_METRIC,
+        "target_classes": list(TARGET_CLASSES),
+        "completeness_levels": list(COMPLETENESS_LEVELS),
+        "primary_completeness": PRIMARY_COMPLETENESS,
+        "primary_prior": PRIMARY_PRIOR,
+        "sensitivity_priors": list(SENSITIVITY_PRIORS),
+        "priors": {p: GRID[p] for p in DELTA_PRIORS},
+        "delta_sd_multiplier": DELTA_SD_MULTIPLIER,
+        "delta_ddof": DELTA_DDOF,
+        "n_seeds": N_SEEDS,
+        "headline_pairs": [list(p) for p in HEADLINE_PAIRS],
+        "descriptive_pairs": [list(p) for p in DESCRIPTIVE_PAIRS],
+        "block_level": BLOCK_LEVEL,
+        "block_divisor": BLOCK_DIVISOR,
+        "delta_fold": DELTA_FOLD,
+        "p3_bands": list(P3_BANDS),
+        "prediction_version": PREDICTION_VERSION,
+        "max_invalid_fraction": M.MAX_INVALID_FRACTION,
+        "min_blocks": MIN_BLOCKS,
+        "low_count_rule": LOW_COUNT_RULE,
+        "low_count": M.LOW_COUNT,
+        "n_boot": M.N_BOOT,
+        "rng_seed": M.SEED,
+    }
+
+
 def build_freeze(
     outdir: Path, dl_dir: Path, lgbm_dir: Path, approval: str
 ) -> dict[str, object]:
@@ -398,31 +427,7 @@ def build_freeze(
         "prediction_sha256": shas,
         "thresholds": thresholds,
         "train_class_fractions": fractions,
-        "constants": {
-            "headline_metric": HEADLINE_METRIC,
-            "target_classes": list(TARGET_CLASSES),
-            "completeness_levels": list(COMPLETENESS_LEVELS),
-            "primary_completeness": PRIMARY_COMPLETENESS,
-            "primary_prior": PRIMARY_PRIOR,
-            "sensitivity_priors": list(SENSITIVITY_PRIORS),
-            "priors": {p: GRID[p] for p in DELTA_PRIORS},
-            "delta_sd_multiplier": DELTA_SD_MULTIPLIER,
-            "delta_ddof": DELTA_DDOF,
-            "n_seeds": N_SEEDS,
-            "headline_pairs": [list(p) for p in HEADLINE_PAIRS],
-            "descriptive_pairs": [list(p) for p in DESCRIPTIVE_PAIRS],
-            "block_level": BLOCK_LEVEL,
-            "block_divisor": BLOCK_DIVISOR,
-            "delta_fold": DELTA_FOLD,
-            "p3_bands": list(P3_BANDS),
-            "prediction_version": PREDICTION_VERSION,
-            "max_invalid_fraction": M.MAX_INVALID_FRACTION,
-            "min_blocks": MIN_BLOCKS,
-            "low_count_rule": LOW_COUNT_RULE,
-            "low_count": M.LOW_COUNT,
-            "n_boot": M.N_BOOT,
-            "rng_seed": M.SEED,
-        },
+        "constants": current_constants(),
     }
     if _has_test_key(doc):
         raise EvalError("freeze document would contain a key with 'test'")
