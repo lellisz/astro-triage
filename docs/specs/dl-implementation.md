@@ -331,7 +331,7 @@ def load_dl_systems(outdir: Path, ts: runner.TestSet, *, dl_dir: Path, lgbm_dir:
 REFUSALS (ADR §5.2, all EvalError): dl_dir path contains a "pilot" component; any freeze sha differs;
   a planned file missing; ids != val ∪ test (val ids from dl_val.load_val_labels, test ids from ts);
   non-finite p_cal or row sum off by > runner.SUM_TOLERANCE; train_class_fractions differs from LightGBM's
-  by > 1e-9. Aligned on ts.source_id, p_cal read by name.
+  by > 1e-9. (Amended 2026-11-09, owner) the test-exposure marker `dl/test_opened.json` exists -> EvalError("test already opened"), checked before any test read. Aligned on ts.source_id, p_cal read by name.
 DEPENDS: json, pathlib, numpy, pandas, pyarrow.parquet, runner (TestSet, ModelData, EvalError,
   SUM_TOLERANCE), evaluation.dl_val (sha256_file, load_val_labels), evaluation.dl_compare (constants).
 ```
@@ -370,7 +370,7 @@ Descriptive per system and seed: macro-F1 / accuracy / per-class metrics / ECE v
 of §4.4 verbatim when H1 and H2 are both ties, the B0 limitation, R17 limitation, non-reportable cells
 named. Location: `evaluation/dl_report.py` (pure formatting, gap G19; fallback: inside dl_eval.py).
 `scripts/evaluate_dl.py` (<= 60 lines): --outdir --n-boot --workers [--dl-dirname --seeds-dirname];
-writes `dl/eval/results_dl.{json,md}`, `risk_coverage_dl.csv` via `_atomic`; refuses existing outputs;
+writes `dl/eval/results_dl.{json,md}`, `risk_coverage_dl.csv` via `_atomic`; refuses existing outputs; (amended 2026-11-09, owner) only after both report files are written successfully, writes the marker `dl/test_opened.json` via `_atomic` (no metrics: timestamp, git sha, freeze sha); a failed run writes no marker; tests: marker present -> exit 1, refused; exception before the report is written -> no marker;
 exit 1 "dl evaluation refused: <reason>" on EvalError.
 Tests `tests/test_evaluate_dl.py` (<= 200 lines): exit 1 + message for every §5.2 refusal; md contains the
 negative sentence on a tie fixture and never a verdict for ensemble rows; `allow_nan=False` JSON.
@@ -402,7 +402,10 @@ wheel exists (ADR §16.2).
    `subsample_index(n_train, 10000, 20261025)`, full val, val+test predicted) -> `dl/pilot/`.
 2. Resume check: `--arch mlp --features noind --seeds 1 --max-epochs 2 --train-subset 10000`, interrupt
    after the "epoch 1" log line, rerun the same command -> it resumes at epoch 2 and finishes.
-3. `--ensemble --seeds 0` on `dl/pilot/` (uses the existing local `lgbm_full_s0`).
+3. (Corrected 2026-11-09) Not run in P-local: the S7 guard refuses mixtures whose `train_class_fractions`
+   differ, and the pilot models use a 10,000-row subsample while `lgbm_full_s0` uses the full train fold.
+   The guard is correct and kept. `--ensemble` runs only over full-train-fold models (P-gpu or batch);
+   the mixing logic is covered by the S7 tests.
 4. Check: every parquet schema equals `predictions_lgbm_full_s0_v0.parquet`'s; ids = val ∪ test;
    metadata keys; `dl/` (outside pilot) has no `predictions_*`; train_report has no "test" key;
    environment recorded. Timings are printed but **not used** (ADR §9.4). `evaluate_dl.py` is **never**
@@ -427,7 +430,7 @@ Pilot outputs go to `dl/pilot/`; val numbers are not results.
   approval).
 - A4. The P-gpu projection -> batch approval: systems, seeds, `max_epochs`, sessions (ADR §9.4).
 - A5. `val_freeze.json` approval text (human approval line in the freeze, ADR §5.1).
-- A6. Running `evaluate_dl.py` on test (single exposure; ADR §14 reversibility).
+- A6. Running `evaluate_dl.py` on test (single exposure; ADR §14 reversibility). (Amended 2026-11-09) Enforced on disk: S13 writes `dl/test_opened.json` after a successful report and S11 refuses if it exists; reopening needs the owner to delete it manually and a dated ADR note (the deletion clause is the architect's recommendation, pending owner confirmation).
 - A7. Plan B (Colab) or plan C (CPU subsample, N) if Kaggle is short.
 
 ## 5. Open questions for the owner (recommended default in brackets)
@@ -482,6 +485,8 @@ Pilot outputs go to `dl/pilot/`; val numbers are not results.
   `runner.py:270`).
 - G18. `dl_eval` would exceed ~500 lines under note iii; spec proposes `evaluation/dl_report.py` (render
   only) as a fourth module (G19 in the slice text).
+- G20. (Decided 2026-11-09, owner) Test-exposure marker: S13 writes `dl/test_opened.json` (no metrics) only after the final report is written; S11 refuses to open test if it exists. Recorded in ADR 0006 §17 and A6.
+- Status 2026-11-09: G4 (implemented; divergences i-ii pending owner), G10 (list widened) and G15 (deferred) recorded as ADR 0006 §17 notes.
 
 ## 7. Not verified here
 Test count "95" (needs `pytest --collect-only`, not runnable by the architect); torch import (file listing

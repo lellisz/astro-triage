@@ -884,3 +884,43 @@ BP/RP XP: no files (H-D1, out of scope).
    ensemble pairs appear as descriptive with no verdict; realised test completeness and per-class
    contaminant counts are printed next to every `D_c`.
 6. Reviewer verdict with no BLOCKER/MAJOR open.
+
+## 17. Dated notes (2026-11-09)
+
+None of the notes below changes a pre-registered decision rule, metric, threshold or constant of
+sections 4.4 and 15.
+
+(Noted 2026-11-09, T-DL-05 G4, no number or constant changes) FT-Transformer details that amendment A
+left open, as implemented in `models/dl_nets.py`: prediction head LayerNorm -> ReLU -> Linear on the
+[CLS] token; tokenizer weights/bias and [CLS] initialised with `kaiming_uniform_(a=sqrt(5))`; no weight
+decay on tokenizer, [CLS], LayerNorm and bias parameters; the attention normalisation of the first block
+is Identity; ReGLU feed-forward with hidden size 256. Checked against rtdl
+(yandex-research/rtdl-revisiting-models: `bin/ft_transformer.py`, `package/rtdl_revisiting_models.py`);
+confidence medium (read through a summary, no line numbers). Known divergences, not corrected: (i) [CLS]
+is appended at the END of the token sequence here and at the START in the reference; with no attention
+mask the expected effect is nil (inference, not tested); (ii) one shared categorical bias here versus
+one bias per feature in the reference (probable, not verified). Owner decision pending on both.
+
+(Noted 2026-11-09, T-DL-05 G10, no number or constant changes) The closed DEPENDS list of
+`models/dl_train.py` (section 15) is widened to what the module imports: `hashlib`, `random`, `sys`,
+`datetime`, `astro_triage.dataset.build` (`CLASSES`), and from `astro_triage.models.lgbm` additionally
+`CALIBRATION_NAME`, `TEMPERATURE_BOUNDS`, `MODEL_VERSION`, `SEED`, `evaluate_split`. `pandas` and `os`
+are listed but not used.
+
+(Noted 2026-11-09, T-DL-05 G15, deferred) `lgbm._manifest` hard-codes `release="dataset_100k_v0"`;
+the DL manifests inherit this stale label. Recorded, not corrected now.
+
+(Noted 2026-11-09, P-local executed) Local CPU pilot (section 9.4) done: 4 runs (mlp/ftt x full/noind,
+seed 0, 1 epoch, train subset 10,000) finished; resume after interruption worked (epoch 1 -> 2,
+`epoch_seconds` preserved); parquet schema, ids and metadata checked against
+`predictions_lgbm_full_s0_v0`. Spec P-local step 3 (`--ensemble` on `dl/pilot/` with `lgbm_full_s0`)
+cannot run as written: the S7 guard refuses to mix models with different `train_class_fractions`
+(10,000-row subsample vs full train fold). The guard is correct and kept; the spec is corrected: the
+ensemble runs only over full-train-fold models. Local timings are not used (section 9.4). No metric
+number was opened.
+
+(Amended 2026-11-09, owner approval, test-exposure marker; spec S11/S13/A6) After the final report
+(`dl/eval/results_dl.{json,md}`) has been written successfully, `scripts/evaluate_dl.py` (S13) writes an
+on-disk marker under `data/` (e.g. `dl/test_opened.json`, no metrics). `load_dl_systems` / the test
+opening (S11) refuses to open test if the marker exists. This hardens the single test exposure
+(section 14; spec A6). A failed run writes no marker.
