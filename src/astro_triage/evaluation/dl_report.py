@@ -75,8 +75,11 @@ def _headline(pairs: dict) -> list[str]:
             for cs, entry in by_c.items():
                 for cls in TARGET_CLASSES:
                     c = entry["classes"][cls]
+                    vk = c.get("v_k_spread")
                     rows.append([key, p, cs, entry["role"], cls, _f(c["d"]), _ci(c["ci"]),
-                                 _ci(c.get("ci_l5")), _f(c["delta"]), str(c["reportable"]),
+                                 _ci(c.get("ci_l5")), _f(c["delta"]),
+                                 _span(list(vk.values())) if isinstance(vk, dict) else "n/a",
+                                 str(c["reportable"]),
                                  c["class_verdict"], entry["verdict"]])
                     if not c["reportable"]:
                         bad.append(f"- {key} {p} C*={cs} {cls}: {'; '.join(_reasons(c)) or 'unknown'}")
@@ -86,7 +89,7 @@ def _headline(pairs: dict) -> list[str]:
            "is the only guard against chance wins. Only the P2 / C*=0.80 rows are the headline; "
            "the other rows are sensitivity and never override it."), ""]
     out += _table(["pair", "prior", "C*", "role", "class", "D", "CI (block)", "CI (level-5)", "delta",
-                   "reportable", "class verdict", "pair verdict"], rows)
+                   "v_k min / med / max (val, LightGBM seeds)", "reportable", "class verdict", "pair verdict"], rows)
     out += ["### Cells not reportable", "", *(bad or ["none"]), ""]
     verdicts = [pairs[k][PRIMARY[0]][PRIMARY[1]]["verdict"] for k in HEAD_KEYS]
     if all(v == TIE for v in verdicts):

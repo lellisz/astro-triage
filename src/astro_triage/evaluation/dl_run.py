@@ -172,7 +172,9 @@ def _headline(
     )
     d, (lo, hi) = cell["d"], cell["ci"]
     nan = math.nan
+    vk = [float(x) for x in dc.get("v_k") or [] if x is not None and math.isfinite(x)]
     cell.update(
+        v_k_spread=_spread(vk) if vk else None,
         delta=json_float(delta),
         reportable=reportable,
         low_count=low,

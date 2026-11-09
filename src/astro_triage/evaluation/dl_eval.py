@@ -18,7 +18,14 @@ import pandas as pd
 import pyarrow as pa
 import pyarrow.parquet as pq
 
-from astro_triage.evaluation.dl_compare import PREDICTION_VERSION
+from astro_triage.evaluation.dl_compare import (
+    COMPLETENESS_LEVELS,
+    FEATURE_SETS,
+    N_SEEDS,
+    PREDICTION_VERSION,
+    PRIMARY_PRIOR,
+    TARGET_CLASSES,
+)
 from astro_triage.evaluation.dl_val import (
     FRACTION_TOL,
     current_constants,
@@ -110,7 +117,45 @@ def verify_freeze(outdir: Path, dl_dir: Path, lgbm_dir: Path) -> dict[str, objec
     bad = [s for s, p in paths.items() if sha256_file(p) != frozen[s]]
     if bad:
         raise _refuse(f"sha256 differs from the freeze for {bad}")
+    _check_thresholds(freeze, delta)
     return freeze
+
+
+def _check_thresholds(freeze: dict[str, object], delta_path: Path) -> None:
+    """Freeze thresholds: exact structure, finite values in (0, 1], LightGBM ones equal delta.json's."""
+    thr = freeze.get("thresholds")
+    if not isinstance(thr, dict):
+        raise _refuse("freeze thresholds is not an object")
+    systems = planned_systems()
+    if set(thr) != set(systems):
+        raise _refuse("freeze thresholds do not cover exactly the planned systems")
+    cstars = tuple(f"{c:.2f}" for c in COMPLETENESS_LEVELS)
+    for s in systems:
+        per_class = thr[s]
+        if not isinstance(per_class, dict) or set(per_class) != set(TARGET_CLASSES):
+            raise _refuse(f"freeze thresholds {s}: classes are not {list(TARGET_CLASSES)}")
+        for cls in TARGET_CLASSES:
+            per_c = per_class[cls]
+            if not isinstance(per_c, dict) or set(per_c) != set(cstars):
+                raise _refuse(f"freeze thresholds {s}/{cls}: levels are not {list(cstars)}")
+            for c in cstars:
+                v = per_c[c]
+                ok = isinstance(v, float | int) and not isinstance(v, bool)
+                if not ok or not np.isfinite(v) or not 0.0 < v <= 1.0:
+                    raise _refuse(f"freeze thresholds {s}/{cls}/{c} is not a float in (0, 1]: {v!r}")
+    try:
+        cells = json.loads(delta_path.read_text(encoding="utf-8"))["delta"]
+        for fs in FEATURE_SETS:
+            for cls in TARGET_CLASSES:
+                for c in cstars:
+                    ref = cells[fs][cls][c][PRIMARY_PRIOR]["thresholds"]
+                    for k in range(N_SEEDS):
+                        if thr[f"lgbm_{fs}_s{k}"][cls][c] != ref[k]:
+                            raise _refuse(
+                                f"freeze thresholds lgbm_{fs}_s{k}/{cls}/{c} differ from delta.json"
+                            )
+    except (OSError, KeyError, IndexError, ValueError, TypeError) as exc:
+        raise _refuse(f"cannot compare freeze thresholds with {delta_path.name}: {exc!r}") from exc
 
 
 def open_test_set(
