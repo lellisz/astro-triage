@@ -1,0 +1,5 @@
+# Deep-learning comparison (ADR 0006). The torch pin is the version printed by the Kaggle GPU pilot
+# (2026-11-09, Tesla T4): 2.11.0+cu130. On Kaggle torch comes from the image and is never installed by pip
+# (kaggle/run_kaggle_dl.py); this line serves local installs (CPU wheel: use the +cpu build of the same version).
+-r requirements.txt
+torch==2.11.0

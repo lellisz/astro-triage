@@ -1,0 +1,7 @@
+{
+  "seeds": [0],
+  "max_epochs": 100,
+  "patience": 16,
+  "train_subset": null,
+  "ensemble": false
+}
