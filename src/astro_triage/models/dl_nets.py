@@ -132,10 +132,10 @@ class FTTransformer(nn.Module):
     def forward(self, x_cont: Tensor, x_cat: Tensor | None) -> Tensor:
         _check_cat(self.n_cat, x_cat)
         x = self.tok(x_cont, x_cat)
-        x = torch.cat([x, self.cls.expand(x.shape[0], 1, -1)], dim=1)
+        x = torch.cat([self.cls.expand(x.shape[0], 1, -1), x], dim=1)  # [CLS] first, as in rtdl (G4)
         for block in self.blocks:
             x = block(x)
-        return self.head(x[:, -1])
+        return self.head(x[:, 0])
 
 
 def build_model(arch: Literal["mlp", "ftt"], n_cont: int, n_cat: int) -> nn.Module:

@@ -901,6 +901,18 @@ is appended at the END of the token sequence here and at the START in the refere
 mask the expected effect is nil (inference, not tested); (ii) one shared categorical bias here versus
 one bias per feature in the reference (probable, not verified). Owner decision pending on both.
 
+(Decided 2026-11-09, owner, T-DL-05 G4, before any DL result exists; the 1-epoch pilot figures are not
+results) Align FT-Transformer with the reference. (i) [CLS] is now PREPENDED (first token) and the head reads
+token 0 (`models/dl_nets.py`); there are no positional embeddings and no attention mask, so the function
+computed is unchanged and only the floating-point summation order differs. (ii) No code change: the model
+has exactly ONE categorical feature, so one shared categorical bias of shape (1, d) is the same tensor as
+one bias per feature. Disclosed exception (owner chose to let the running batch finish, 2026-11-09): the
+FT-Transformer fits of seed 0 (`ftt_full_s0`, `ftt_noind_s0`, Kaggle batch 1, package built from commit
+f757dff) were trained with [CLS] LAST; fits of seeds 1-4 use the new code. The two forms compute the same
+function (tested numerically in `tests/test_dl_nets_cls.py`, atol 1e-5), so the comparison is not
+materially affected. If the owner prefers a single code version, the two seed-0 FT-Transformer fits can be
+re-run later at the cost of about the same GPU time as batch 1.
+
 (Noted 2026-11-09, T-DL-05 G10, no number or constant changes) The closed DEPENDS list of
 `models/dl_train.py` (section 15) is widened to what the module imports: `hashlib`, `random`, `sys`,
 `datetime`, `astro_triage.dataset.build` (`CLASSES`), and from `astro_triage.models.lgbm` additionally
