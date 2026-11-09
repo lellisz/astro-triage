@@ -100,3 +100,24 @@ def is_low_count(counts: Mapping[str, int]) -> bool:
 
 def block_ids(pixel5: npt.NDArray[np.int64]) -> npt.NDArray[np.int64]:
     return pixel5 // BLOCK_DIVISOR
+
+
+def class_verdict(
+    d: float, lo: float, hi: float, delta: float, reportable: bool
+) -> str:
+    """ADR 0006 4.4: win / worse / tie; any non-finite input on a reportable cell is a tie."""
+    if not reportable or not all(math.isfinite(v) for v in (d, lo, hi, delta)):
+        return "tie"
+    if d > delta and lo > 0:
+        return "win"
+    if d < -delta and hi < 0:
+        return "worse"
+    return "tie"
+
+
+def pair_verdict(per_class: Mapping[str, str]) -> str:
+    missing = [c for c in TARGET_CLASSES if c not in per_class]
+    if missing:
+        raise EvalError(f"pair verdict needs a class verdict for {missing}")
+    wins = all(per_class[c] == "win" for c in TARGET_CLASSES)
+    return "X wins" if wins else "tie: LightGBM stays"
