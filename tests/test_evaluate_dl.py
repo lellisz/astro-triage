@@ -41,7 +41,7 @@ class World:
 
     def patch(self, **over):
         s, mp = self.spy, self.mp
-        mp.setattr(dl_eval, "open_test_set", over.get("open", s("open", ("ts", {}))))
+        mp.setattr(dl_eval, "open_test_set", over.get("open", s("open", ("ts", {"_file_sha256": "f"}))))
         mp.setattr(dl_eval, "load_dl_systems", s("load", {}))
         mp.setattr(dl_run, "run_compare", over.get("cmp", s("cmp", {})))
         mp.setattr(dl_desc, "describe", over.get("desc", s("desc", ({}, []))))

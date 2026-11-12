@@ -50,7 +50,7 @@ def main(argv: list[str] | None = None) -> int:
         systems = dl_eval.load_dl_systems(out, ts, dl_dir=dl, lgbm_dir=lg)
         cmp = dl_run.run_compare(ts, systems, freeze, lgbm_dir=lg, n_boot=a.n_boot)
         desc, rows = dl_desc.describe(ts, systems, costs, workers=a.workers)
-        res = dl_desc.assemble(ts, cmp, desc, dl, a.approval)
+        res = dl_desc.assemble(ts, cmp, desc, str(freeze["_file_sha256"]), a.approval)
         texts = [dl_report.to_json(res), dl_report.render_markdown(res), dl_report.risk_coverage_csv(rows)]
         _free(paths)
         paths[0].parent.mkdir(exist_ok=True)

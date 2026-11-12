@@ -6,6 +6,7 @@ import pytest
 from dl_eval_kit import edit_freeze, frozen_env, write_freeze
 
 from astro_triage.evaluation import dl_eval as E
+from astro_triage.evaluation import dl_val as V
 from astro_triage.evaluation.runner import EvalError
 
 
@@ -74,7 +75,7 @@ def test_load_freeze_sections_must_be_objects(tmp_path, key, bad):
 def test_load_freeze_valid_roundtrip(tmp_path):
     doc = good()
     write_freeze(tmp_path, doc)
-    assert E.load_freeze(tmp_path) == doc
+    assert E.load_freeze(tmp_path) == doc | {"_file_sha256": V.sha256_file(tmp_path / E.FREEZE_NAME)}
 
 
 @pytest.mark.parametrize("part", ["pilot", "Pilot", "PILOT"])
@@ -95,7 +96,7 @@ def test_load_freeze_pilot_substring_is_not_a_component(tmp_path):
 
 def test_verify_freeze_happy(tmp_path):
     out, dl, lg, doc = frozen_env(tmp_path)
-    assert E.verify_freeze(out, dl, lg) == doc
+    assert E.verify_freeze(out, dl, lg) == doc | {"_file_sha256": V.sha256_file(dl / E.FREEZE_NAME)}
 
 
 def test_verify_freeze_labels_tampered_or_absent(tmp_path):

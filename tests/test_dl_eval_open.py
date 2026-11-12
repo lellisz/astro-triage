@@ -9,6 +9,7 @@ import pytest
 from dl_eval_kit import frozen_env
 
 from astro_triage.evaluation import dl_eval as E
+from astro_triage.evaluation import dl_val as V
 from astro_triage.evaluation.runner import EvalError
 
 SENTINEL = object()
@@ -26,7 +27,7 @@ def spy(monkeypatch):
 def test_success_returns_loader_result_and_freeze_and_locks(tmp_path, spy):
     out, dl, lg, doc = frozen_env(tmp_path)
     ts, freeze = E.open_test_set(out, dl, lg, " approved by owner ")
-    assert ts is SENTINEL and freeze == doc and spy == [out]
+    assert ts is SENTINEL and freeze == doc | {"_file_sha256": V.sha256_file(dl / E.FREEZE_NAME)} and spy == [out]
     assert E._TEST_OPENED["done"] is True
 
 

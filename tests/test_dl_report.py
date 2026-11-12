@@ -23,7 +23,7 @@ def _res(tmp, shifts=None):
         ts, systems, {n: {"parameter_count": 3} for n in systems}
     )
     (tmp / dl_eval.FREEZE_NAME).write_text("{}")
-    return dl_desc.assemble(ts, cmp, desc, tmp, "ok go"), rows
+    return dl_desc.assemble(ts, cmp, desc, "0" * 64, "ok go"), rows
 
 
 @pytest.fixture(scope="module")

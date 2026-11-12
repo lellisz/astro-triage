@@ -68,6 +68,10 @@ def sha256_file(path: Path) -> str:
     return h.hexdigest()
 
 
+def lgbm_reference(system: str) -> str:
+    return f"lgbm_{'noind' if '_noind_' in system else 'full'}_s{system.rsplit('_s', 1)[1]}"
+
+
 def json_float(x: float) -> float | None:
     return float(x) if math.isfinite(x) else None
 
@@ -406,7 +410,7 @@ def build_freeze(
 
     fractions = {s: _fractions(p) for s, p in paths.items()}
     for s in paths:
-        ref = f"lgbm_{'noind' if '_noind_' in s else 'full'}_s{s.rsplit('_s', 1)[1]}"
+        ref = lgbm_reference(s)
         if any(abs(fractions[s][c] - fractions[ref][c]) > FRACTION_TOL for c in M.CLASSES):
             raise EvalError(f"train_class_fractions of {s} differ from {ref}")
 

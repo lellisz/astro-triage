@@ -40,7 +40,7 @@ from astro_triage.evaluation.dl_compare import (
     is_low_count,
     pair_verdict,
 )
-from astro_triage.evaluation.dl_eval import _refuse
+from astro_triage.evaluation.dl_eval import refuse
 from astro_triage.evaluation.dl_val import NETS, json_float, sha256_file
 from astro_triage.evaluation.runner import GRID, FloatArr, ModelData, TestSet
 from eval import metrics as M
@@ -234,7 +234,7 @@ def run_compare(
     if not delta_path.is_file() or sha256_file(delta_path) != freeze.get(
         "delta_sha256"
     ):
-        raise _refuse(f"delta.json differs from the freeze ({delta_path})")
+        raise refuse(f"delta.json differs from the freeze ({delta_path})")
     delta_doc = json.loads(delta_path.read_text(encoding="utf-8"))["delta"]
     everyone = np.ones(len(ts.y), dtype=bool)
     plan = [

@@ -18,8 +18,7 @@ import numpy as np
 import numpy.typing as npt
 
 from astro_triage.evaluation.dl_compare import N_SEEDS
-from astro_triage.evaluation.dl_eval import FREEZE_NAME, _refuse
-from astro_triage.evaluation.dl_val import sha256_file
+from astro_triage.evaluation.dl_eval import refuse
 from astro_triage.evaluation.runner import (
     GRID,
     FloatArr,
@@ -69,9 +68,9 @@ def load_costs(dl_dir: Path) -> dict[str, object]:
     try:
         fits = json.loads(path.read_text(encoding="utf-8"))["fits"]
     except (OSError, ValueError, KeyError) as exc:
-        raise _refuse(f"cannot read costs from {path}: {type(exc).__name__}: {exc}") from exc
+        raise refuse(f"cannot read costs from {path}: {type(exc).__name__}: {exc}") from exc
     if not isinstance(fits, dict):
-        raise _refuse(f"{path}: fits is not an object")
+        raise refuse(f"{path}: fits is not an object")
     return {
         k: v["costs"] for k, v in fits.items() if isinstance(v, dict) and "costs" in v
     }
@@ -142,14 +141,14 @@ def assemble(
     ts: TestSet,
     compare: dict[str, object],
     desc: dict[str, object],
-    dl_dir: Path,
+    freeze_sha256: str,
     approval: str,
 ) -> dict[str, object]:
     """The result document: run metadata, the bootstrap comparison and the descriptive section."""
     meta = {
         "n_test": len(ts.y),
         "n_test_pixels": int(np.unique(ts.pixel).size),
-        "freeze_sha256": sha256_file(dl_dir / FREEZE_NAME),
+        "freeze_sha256": freeze_sha256,
         "git_sha": _git_sha(),
         "approval": approval,
     }
