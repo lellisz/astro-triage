@@ -18,4 +18,4 @@ Every metric stays PROVISIONAL because: (1) the `full_v0` evaluation text still 
 Windows/PowerShell, Python 3.12. Always use `.venv\Scripts\python.exe`. Run tests with pytest.
 
 ## Navigation
-If `graphify-out/GRAPH_REPORT.md` exists, read it before architecture decisions. Rebuild it with /graphify; it is not committed.
+If `graphify-out/` exists, run `graphify query "<topic>"` BEFORE any Read/Grep/Glob in `src/` or `docs/` (a query costs ~2k tokens; reading a whole ADR ~16k). Read `GRAPH_REPORT.md` only to orient, not instead of querying. If `graph.json` is older than the last commit, run `/graphify . --update` first. The graph is not committed.
