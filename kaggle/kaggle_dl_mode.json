@@ -1,5 +1,5 @@
 {
-  "seeds": [3],
+  "seeds": [4],
   "max_epochs": 100,
   "patience": 16,
   "train_subset": null,
