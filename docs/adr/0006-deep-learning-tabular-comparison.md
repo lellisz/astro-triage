@@ -936,3 +936,169 @@ number was opened.
 on-disk marker under `data/` (e.g. `dl/test_opened.json`, no metrics). `load_dl_systems` / the test
 opening (S11) refuses to open test if the marker exists. This hardens the single test exposure
 (section 14; spec A6). A failed run writes no marker.
+
+## 18. Amendment B (2026-11-16) (DRAFT)
+
+DRAFT written 2026-11-16 by the architect (closure plan F2-T1..T5), not yet reviewed (section 16, item 6)
+and not yet approved by the owner (OW-3, OW-6). The Status line of this ADR is unchanged: **Proposed**.
+Nothing above is removed or rewritten; where a passage above is superseded, the note below says so and
+the original text stays. Passages taken from the closure plan are marked "(Amendment B)".
+
+Accepted means the protocol was executed as registered; it does not mean deep learning is better.
+
+Sources. Artefact paths are relative to `data/interim/full_v0/`. Byte counts, SHA-256 and times of every
+artefact are in `docs/results/MANIFEST.md` (generated 2026-11-16T20:51:20Z, `MANIFEST.md:5`; SHA-256
+recomputed from the files, not copied from the manifests). Every number below was printed on 2026-11-16 by
+the command quoted next to it (`PY` = `.venv\Scripts\python.exe`, run from the repository root) or is cited
+as file:line or commit sha; none was typed from memory.
+
+### 18.1 Chronology with evidence
+
+Times of 2026-11-09 are in UTC (Z; commit times converted from -03:00) and the rows are ordered by UTC
+instant.
+
+| date | event | evidence |
+|---|---|---|
+| 2026-11-02 | first draft | Status line (line 3, "draft, 2026-11-02"). The first commit of this file is `41028c1` (2026-11-03T10:05:15-03:00, `git log -- docs/adr/0006-deep-learning-tabular-comparison.md`) |
+| 2026-11-03 | rewrite with the purity-at-completeness protocol | `3fd35db` (14:33:38-03:00; `git show --stat`: this file only) |
+| 2026-11-03 | owner answers H-D4, H-D7, H-D8 recorded | `397486b` (14:48:51-03:00; this file only) |
+| 2026-11-03 | amendment A (T3 findings, PreNorm rule) | `9f4b719` (15:42:00-03:00; this file only) |
+| 2026-11-03 | ten LightGBM seed fits | `obtained_utc` 20:37:12Z (`lgbm_full_s0`) to 22:17:37Z (`lgbm_noind_s4`), `MANIFEST.md:49-58` |
+| 2026-11-04 | notes T-DL-04 (lines 271-278 and 821-834); `lgbm_seeds/delta.json` written | `delta.json` mtime 2026-11-04T15:13:34Z (`MANIFEST.md:17`; local 12:13:34-03:00). The notes are dated 2026-11-04 but entered git in `cabd985` (2026-11-06T16:43:39-03:00) |
+| 2026-11-09 17:00:05Z | section 17 notes and test-exposure marker rule | `35342fc` (this file and `docs/specs/dl-implementation.md`) |
+| 2026-11-09 17:43:15Z | evaluator CLI and DL report code | `f757dff` |
+| 2026-11-09 18:53:37Z | first Kaggle GPU session (batch 1, seed 0) | `dl/train_report_dl.json` `environment.kaggle.first_seen` (command C1); estimated start of the `ftt_full_s0` fit 18:53:43Z (18.3, command C5) |
+| 2026-11-09 19:57:16Z | [CLS]-first code with its section 17 note; torch pin and `kaggle/kaggle_dl_mode.json` | `cb587b7` and `46f5872` (same commit time). Both come after the first Kaggle session started |
+| 2026-11-09 21:35:35Z | first DL output of batch 1 | `predictions_ftt_full_s0_v0` `obtained_utc` (`MANIFEST.md:29`) |
+| 2026-11-10 to 2026-11-16 | batches 2-5 (seeds 1-4); ensembles | `MANIFEST.md:30-48` (`obtained_utc`); `c62112d` ("run seed 4 in batch 5"), `3444c99` (2026-11-16T16:07:50-03:00); ensembles obtained 19:08:41Z to 19:09:17Z (`MANIFEST.md:19-28`) |
+| 2026-11-16 | A5: validation freeze | `dl/val_freeze.json` field `approval`: "Aprovado pelo owner em 2026-11-16: congelar thresholds e shas da validacao do full_v0 (ADR 0006 5.1)"; mtime 2026-11-16T19:10:02Z (`MANIFEST.md:13`); sha256 `ca360bf6...` |
+| 2026-11-16 | A6: single test exposure | `dl/test_opened.json` `opened_at` 2026-11-16T19:22:46+00:00, `git_sha` `0d0d918`, `freeze_sha256` `ca360bf6...` (`MANIFEST.md:14`; sha256 `fe77a2e9...`); report approval in `results_dl.json` `meta.approval`: "Aprovado pelo owner em 2026-11-16: exposicao unica ao teste do full_v0 (ADR 0006 5.2 e 14)" |
+
+### 18.2 Hypotheses and pilots
+
+- H-D2 (Amendment B), answered by execution: plan A, Kaggle GPU. `environment.kaggle` = torch
+  2.11.0+cu130, CUDA 13.0, Tesla T4, first seen 2026-11-09T18:53:37Z; every non-ensemble DL fit records
+  platform `kaggle` and device Tesla T4 (command C1). The weekly quota and the session length were never
+  read into the repository; the GPU quota consumed is **not estimated**.
+- H-D6 (Amendment B): LightGBM wall time per seed fit, read by code (command C2): `lgbm_full_s0` 776.2 s;
+  the ten fits range from 624.5 s to 776.2 s. The platform is **not recorded** (no `platform` field in
+  `lgbm_seeds/train_report_lgbm_seeds.json`); it is **inferred** not to be the local `.venv` from
+  `client_versions.python` 3.13.18 in the seed manifests (the local `.venv` is Python 3.12, `CLAUDE.md`);
+  the planned platform is Kaggle (`docs/specs/kaggle-seed-run.md`). The rule "measure one fit, then approve
+  the other nine" (line 564-565): the ten fits were obtained one after another about 11 min apart
+  (`MANIFEST.md:49-58`); a separate approval after `lgbm_full_s0`: NÃO VERIFICADO.
+- H-D7 (Amendment B): `requirements-dl.txt:5` pins `torch==2.11.0`, the version printed by the first Kaggle
+  GPU session (`requirements-dl.txt:1-2`; `46f5872`), which matches `environment.kaggle`. The local `.venv`
+  has torch 2.15.0+cpu (`environment.local`, command C1; `PY -I -c "import torch; print(torch.__version__)"`
+  prints `2.15.0+cpu`). Section 9, item 0 allows a pin per platform and no cross-platform assert, so this is
+  not a breach; consequence: criterion 2 of section 16 was run with 2.15.0+cpu, not with the pin.
+- P-local: done (section 17, lines 925-932).
+- P-gpu: **no isolated pilot in the form of section 9.4** (4 systems, 1 epoch on the full train fold,
+  projection). Substituted by Kaggle batch 1 (seed 0, 2026-11-09), which measured sec/epoch, peak GPU
+  memory and inference time (command C1): `ftt_full_s0` 230.2 s/epoch, 1930 MiB, predict 23.46 s;
+  `mlp_full_s0` 5.3 s/epoch, 108 MiB, 1.44 s; `ftt_noind_s0` 126.8 s/epoch, 979 MiB, 12.66 s;
+  `mlp_noind_s0` 4.9 s/epoch, 106 MiB, 0.93 s. The section 9.4 projection was not produced; the batches
+  ran to early stopping instead. **PROPOSAL PENDING OWNER ACCEPTANCE (OW-3).**
+- Already recorded above, only referenced here: H-D1 (line 550), H-D3 (line 557), H-D4 (line 559), H-D5
+  (line 562; the ten seed fits exist, `MANIFEST.md:49-58`), H-D8 (lines 575-591), H-D9 (line 592).
+
+```
+C1  PY -I -c "import json; t=json.load(open('data/interim/full_v0/dl/train_report_dl.json')); f=t['fits']; print('kaggle', t['environment']['kaggle']); print('local', t['environment']['local']); print('platforms', sorted({(v.get('platform'), v['costs'].get('device_name')) for k,v in f.items() if not k.startswith('ens_')})); [print(m, 'sec/epoch', round(f[m]['costs']['epoch_seconds_mean'],1), 'epochs', f[m]['costs']['epochs_run'], 'peak_gpu_MiB', round(f[m]['costs']['peak_gpu_bytes']/2**20), 'predict_s', round(f[m]['costs']['predict_seconds'],2)) for m in ('ftt_full_s0','mlp_full_s0','ftt_noind_s0','mlp_noind_s0')]"
+C2  PY -I -c "import json; f=json.load(open('data/interim/full_v0/lgbm_seeds/train_report_lgbm_seeds.json'))['fits']; w={k:round(v['wall_seconds'],1) for k,v in f.items()}; print(w); print('min', min(w.values()), 'max', max(w.values()), 'platform field', sorted({str(v.get('platform')) for v in f.values()})); m=json.load(open('data/interim/full_v0/lgbm_seeds/predictions_lgbm_full_s0_v0.manifest.json')); print('client_versions', m['client_versions'])"
+```
+
+### 18.3 Disclosed divergences
+
+- FT-Transformer seed 0 with [CLS] LAST (section 17, lines 909-914). Provenance of the code: the only
+  source is the original note at line 911 ("package built from commit f757dff"); no artefact records a git
+  sha (`scripts/make_kaggle_package.py:4`: the package holds no git state). The runner requires
+  `kaggle/kaggle_dl_mode.json` (`kaggle/run_kaggle_dl.py:8`), which entered git only in `46f5872`
+  (19:57:16Z), together with the torch pin; so the package was the working tree at about `f757dff`, with
+  `kaggle_dl_mode.json` and the pin not yet committed. Timing (command C5): `ftt_full_s0` `wall_seconds`
+  9711.7 and `obtained_utc` 2026-11-09T21:35:35Z give an estimated training start of 18:53:43Z, BEFORE
+  `cb587b7` (19:57:16Z); only the output (`obtained_utc`, and `predictions_ftt_noind_s0_v0` at 23:56:32Z,
+  `MANIFEST.md:29,34`) is later than the commit. Seeds 1-4 use [CLS] first.
+- Kernel v7 (re-run of FT-Transformer seed 0 with [CLS] first): owner decision of 2026-11-16 (OW-9, relayed
+  in the closure session; no repository artefact records it): v7 is **not used and not consolidated**;
+  re-running seed 0 now would be post-test (section 4.4, lines 373-374). The option "can be re-run later"
+  (lines 913-914) is therefore closed; the text stays.
+- Test-exposure marker (section 17, lines 934-938): implemented and present; `dl/test_opened.json` has the
+  same mtime second as `dl/eval/results_dl.{json,md}` and `risk_coverage_dl.csv` (`MANIFEST.md:10-14`).
+- Split of `dl_compare.py` (C11, Amendment B): note (iii) of section 15 (lines 829-834) planned
+  `dl_compare` + `dl_val` + `dl_eval`. As built, `src/astro_triage/evaluation/dl_compare.py` remains (123
+  lines: constants and pure functions, imports `math`, `numpy`, `runner`, `eval.metrics`, `eval.reweight`,
+  no IO) next to six modules: `dl_val.py` 438, `dl_eval.py` 236, `dl_run.py` 258, `dl_report.py` 183,
+  `dl_desc.py` 155, `dl_boot.py` 117 lines (`wc -l`). A split with a remaining core, not a replacement.
+- G15 (Amendment B): all 30 manifests in `dl/` and all 10 in `lgbm_seeds/` carry
+  `release: "dataset_100k_v0"` although the files belong to full_v0 (section 17, lines 922-923). Not
+  corrected; `docs/results/MANIFEST.md:6` declares it and recomputes every SHA-256.
+- G10: see section 17, lines 916-920 (closed DEPENDS list of `models/dl_train.py` widened). No further
+  change.
+
+```
+C5  PY -I -c "import json,datetime as d; f=json.load(open('data/interim/full_v0/dl/train_report_dl.json'))['fits']['ftt_full_s0']; w=f['wall_seconds']; print('wall_seconds', round(w,1), 'start_est', (d.datetime.fromisoformat('2026-11-09T21:35:35+00:00')-d.timedelta(seconds=w)).isoformat())"
+    -> wall_seconds 9711.7 start_est 2026-11-09T18:53:43.336684+00:00
+```
+
+### 18.4 Result of A6 (single test exposure, 2026-11-16)
+
+(Noted 2026-11-16, Amendment B) This note **supersedes** the sentence "No DL metric from the **test** fold
+exists or is used" (line 21) from 2026-11-16T19:22:46Z onwards. Line 21 is kept as the record of the
+pre-registration state.
+
+Read from `dl/eval/results_dl.json` (command C3): 292556 test rows in 597 level-5 pixels, `git_sha`
+`0d0d918`, freeze `ca360bf6`, n_boot 1000, seed 20261025. Headline: P2, `C* = 0.80`, block-bootstrap CI.
+
+| pair (H) | class | D | CI (block) | delta | blocks | reportable | class verdict | pair verdict |
+|---|---|---|---|---|---|---|---|---|
+| `mlp_full-lgbm_full` (H1) | QSO | -0.0014 | [-0.0024, -0.0005] | 0.0005 | 235 | True | worse | tie: LightGBM stays |
+| `mlp_full-lgbm_full` (H1) | GALAXY | -0.0006 | [-0.0444, 0.0342] | 0.0244 | 239 | True | tie | tie: LightGBM stays |
+| `ftt_full-lgbm_full` (H2) | QSO | 0.0014 | [0.0006, 0.0022] | 0.0005 | 235 | True | win | tie: LightGBM stays |
+| `ftt_full-lgbm_full` (H2) | GALAXY | 0.0111 | [-0.028, 0.0582] | 0.0244 | 239 | True | tie | tie: LightGBM stays |
+
+- FT-Transformer: "win" in QSO and tie in GALAXY; a pair win needs both classes (line 349), so the pair
+  verdict is "tie: LightGBM stays".
+- MLP: "worse" in QSO is a descriptive label; it never changes the verdict (line 351).
+- Both headline pairs are "tie: LightGBM stays", so the negative-result sentence of section 4.4 (lines
+  369-372) applies, verbatim (it is printed at `dl/eval/results_dl.md:44`; no cell was non-reportable,
+  `results_dl.md:38-40`): "On the same 21 Gaia DR3 features, MLP and FT-Transformer (5 seeds, untuned
+  defaults) do not raise the purity of QSO and GALAXY at completeness 0.80 under the Delchambre+2023 prior
+  beyond 2 seed-SDs of LightGBM with a block-bootstrap CI above zero."
+- GALAXY: the block CI half-widths are 0.0393 (MLP) and 0.0431 (FT-Transformer), about +-0.04, larger than
+  `delta` 0.0244. A GALAXY tie here is **lack of power, not evidence of equivalence** (section 4.2, lines
+  285-288: power is reduced and was not computed; section 4.4, line 350: a CI containing zero is a tie).
+- Every metric stays PROVISIONAL (`CLAUDE.md`, Status); the ensembles and fronts 2-4 are descriptive only
+  (`results_dl.md:59-90`) and are not summarised here.
+
+```
+C3  PY -I -c "import json; r=json.load(open('data/interim/full_v0/dl/eval/results_dl.json')); m=r['meta']; c=r['compare']; print('meta', m['n_test'], m['n_test_pixels'], m['git_sha'][:7], m['freeze_sha256'][:8], 'n_boot', c['n_boot'], 'seed', c['seed']); [print(p, k, round(x['d'],4), [round(v,4) for v in x['ci']], 'halfwidth', round((x['ci'][1]-x['ci'][0])/2,4), 'delta', round(x['delta'],4), 'blocks', x['blocks'], 'reportable', x['reportable'], x['class_verdict'], '|', c['pairs'][p]['P2']['0.80']['role'], c['pairs'][p]['P2']['0.80']['verdict']) for p in ('mlp_full-lgbm_full','ftt_full-lgbm_full') for k,x in c['pairs'][p]['P2']['0.80']['classes'].items()]"
+```
+
+Output on 2026-11-16:
+
+```
+meta 292556 597 0d0d918 ca360bf6 n_boot 1000 seed 20261025
+mlp_full-lgbm_full QSO -0.0014 [-0.0024, -0.0005] halfwidth 0.0009 delta 0.0005 blocks 235 reportable True worse | headline tie: LightGBM stays
+mlp_full-lgbm_full GALAXY -0.0006 [-0.0444, 0.0342] halfwidth 0.0393 delta 0.0244 blocks 239 reportable True tie | headline tie: LightGBM stays
+ftt_full-lgbm_full QSO 0.0014 [0.0006, 0.0022] halfwidth 0.0008 delta 0.0005 blocks 235 reportable True win | headline tie: LightGBM stays
+ftt_full-lgbm_full GALAXY 0.0111 [-0.028, 0.0582] halfwidth 0.0431 delta 0.0244 blocks 239 reportable True tie | headline tie: LightGBM stays
+```
+
+### 18.5 Section 16 criteria
+
+| # | criterion | status | evidence |
+|---|---|---|---|
+| 1 | H-D2 answered; T3 done | met by this amendment (pending OW-6) | 18.2; T3 done 2026-11-03 (amendment A, line 5) |
+| 2 | section 15 tests pass locally with torch, none skipped; `ruff` clean | met with a declared limitation | Full suite (orchestrator run, 2026-11-16): 1868 passed, 1 skipped, 3 xfailed. The skip is `tests\test_train_dl_guards.py:109` ("symlinks not permitted on this OS/user"); owner decision: declare it as a known limitation of "none skipped", do not enable Windows Developer Mode. Torch is 2.15.0+cpu, not the pin (18.2, H-D7). `ruff check` clean; `ruff format --check` is NOT clean (42 files would be reformatted, formatting only; OW-11 pending) |
+| 3 | P-local done; P-gpu done and reported | P-local met; P-gpu substituted, PROPOSAL PENDING OWNER ACCEPTANCE (OW-3) | 18.2 |
+| 4 | `delta.json` before the first DL batch; `val_freeze.json` before the first test evaluation | met | `delta.json` mtime 2026-11-04T15:13:34Z < first Kaggle session 2026-11-09T18:53:37Z and first DL output 2026-11-09T21:35:35Z; `val_freeze.json` mtime 2026-11-16T19:10:02Z < `opened_at` 2026-11-16T19:22:46Z (18.1; `MANIFEST.md:13,14,17,29`) |
+| 5 | verdict only for H1/H2; ensembles descriptive; completeness and contaminants printed next to every `D_c` | verdict and descriptive parts met; the "next to every `D_c`" part rests on an interpretation, OWNER DECISION PENDING | Verdict column only on `mlp_full`/`ftt_full` vs `lgbm_full` (`results_dl.md:7-36`); descriptive pairs have no verdict column (`results_dl.md:59-90`). Realised test completeness and per-class contaminants are stored for all 108 cells in `results_dl.json`, and only roles `headline`/`sensitivity` carry a `verdict` (command C4); but `results_dl.md` prints them only for the 4 headline cells (P2, `C* = 0.80`), in a separate table (`results_dl.md:46-57`), not next to the sensitivity or descriptive `D` values. Reading "printed next to every `D_c`" (section 16, lines 884-885) as satisfied by this is an interpretation the owner may accept or reject |
+| 6 | reviewer verdict with no BLOCKER/MAJOR | pending | reviewer runs after this draft (closure plan F2-T7) |
+
+```
+C4  PY -I -c "import json; c=json.load(open('data/interim/full_v0/dl/eval/results_dl.json'))['compare']['pairs']; cells=[x for p in c for pr in c[p] for cs in c[p][pr] for x in c[p][pr][cs]['classes'].values()]; print('cells', len(cells), 'missing', sum(1 for x in cells if not (x.get('realised_completeness') and x.get('contaminants')))); print(sorted({(c[p][pr][cs]['role'], 'verdict' in c[p][pr][cs]) for p in c for pr in c[p] for cs in c[p][pr]}))"
+```
+
+Final status of this draft: criterion 6 and the owner decisions OW-3 and OW-6 (and the criterion 5
+interpretation) are pending, so this ADR stays **Proposed**. Only the owner, after a reviewer verdict with
+no BLOCKER/MAJOR, changes line 3.

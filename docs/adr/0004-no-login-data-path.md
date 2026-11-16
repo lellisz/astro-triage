@@ -575,3 +575,56 @@ human approval, which includes the ADR 0003 note of D7.4. G-A1 and G-A3 are pass
 - (A-04c) Adding `non_single_star` or any other column of the 225-column table to the schema.
 - (A-04c) Any imputation of missing astrometry, or any missingness-indicator column beyond
   `astrometric_params_solved`.
+
+## Note 2026-11-16 (state of the gates and of D7.4)
+
+Status unchanged: Proposed. **Owner decision (2026-11-16): this ADR stays Proposed with the declared
+limitation "VizieR-to-Gaia column map not verified against the Gaia Archive (gate G-B)".** No text above
+is removed; the "Remaining" lists of section 7 (`:535-539`) are read together with this note.
+
+- **G-A1: passed 2026-10-26** (`:470-472`; R-09 `:107-128`).
+- **G-A3: passed 2026-10-26** (`:501-505`; R-09 `:121-126` and `:148-149`;
+  `manifests/column_map_vizier_v1.csv`).
+- **G-A2: the criterion's verdict is accepted (`r_match` = 0.75 arcsec, R-09 `:133`), obtained
+  without local epoch propagation, `m_c(r)` and the 0.1" grid (R-09 `:147`); this ADR does not mark
+  G-A2 as PASSED** (no PASSED marker, unlike G-A1 `:470` and G-A3 `:501`; the gate definition at
+  `:473`, `:481` and `:495` asks for propagated separations, `m_c` and the histogram). G-A therefore
+  stays "partially passed", as the Status line says. The offset run is dated 2026-10-26: R-09
+  section header `:130` ("E1 / G-A2 result (T19, verified by the orchestrator, 2026-10-26)") and the offset manifest
+  `data/interim/xmatch/xmatch_gaiadr3_offset180_n100000_r5_all.manifest.json` (`obtained_utc`
+  2026-10-26T12:34:48+00:00). R-09 `:133-134`: "Verdict by the fixed ADR 0004 criterion:
+  r_match = 0.75 arcsec, accepted". Script: `scripts/xmatch_offset.py`; result file
+  `data/interim/xmatch/e1_report.json` (`r_match` 0.75); used by full_v0
+  (`data/interim/full_v0/dataset_report.json` `r_match_arcsec` = 0.75). Caveat (R-09 `:135-146`):
+  `N_true(r)` is not monotone, so the 0.995 plateau threshold is met at small radii; 0.75" is driven by
+  STAR, not by a real plateau; and 0.75" biases the sample against high-proper-motion stars (R-PM, D3).
+  Not produced (R-09 `:147`): `m_c(r)`, the 0.1" grid, and local epoch propagation of both runs. The
+  criterion was therefore applied to unpropagated separations, unlike the wording "after local epoch
+  propagation" at `:473` and `:481`.
+- **G-B (G-B1 to G-B6): no execution evidence found in the repository.**
+  `data/interim/xmatch_check1k/` holds files dated 2026-10-26 (local time 00:13): an upload of 1,000
+  positions, one gaiadr3 and one paramp XMatch output with manifests (`source` "CDS XMatch", `release`
+  "vizier:I/355"), and `column_report.json` (keys `columns`, `raw_comparison`: canonical name against
+  expected VizieR name; R-09 `:148-149` calls its status stale). None of these is a Gaia Archive
+  output, so none is a G-B comparison. Consequences while G-B is open: the D1 rows marked
+  "inference only" (combmod `PQSO`/`PGal`/`PSS`, `:135`) or "unverified" (allosmod `-A`, `:136`) stay
+  so, and the items that D1 leaves to be "checked in G-B" (the `RAdeg`/`DEdeg` epoch `:119`, the unit
+  of `e_RAdeg`/`e_DEdeg` `:120`, the semantics of `sepsi` `:128`, the `Solved` encoding `:129`) stay
+  unchecked; every DSC number carries this limitation; reversal triggers 3 and 7 cannot be evaluated;
+  and the ADR 0003 note proposed in D7.4 (`:389-392`) is not applied, because it depends on this ADR being accepted.
+- **D7.4: met in part** (full_v0 test fold, `data/interim/full_v0/eval/results.md`):
+  - Ablation M-full against M-noind, with paired bootstrap differences: present for cut (a)
+    (population `a_all`, for example `:97` and `:127`) and for cut (c) on `S_dsc` (population
+    `c_sdsc`, for example `:501` and `:547`).
+  - Cut (c) on `S`: no population with that label appears (populations: `a_all` `:64`, `c_sdsc`
+    `:453`, `a_combmod` `:1000`). Whether `a_all` stands for cut (c) on `S` is NOT VERIFIED.
+  - Strata by `astrometric_params_solved` (3, 31, 95): present only in BALANCED/P0 and only on the
+    whole test fold, not per cut (`:1547-1628`; the three stratum sizes 123,195 + 127,953 + 41,408 sum
+    to the 292,556 test rows of `:1`). Accuracy and macro-F1 per stratum have bootstrap CIs; per-class
+    purity and completeness per stratum have no CI; the DSC rows are point estimates ("no CI").
+- **Reversal trigger 8 does not fire.** Macro-F1 loss of M-noind against M-full on cut (a), P0:
+  0.038 [0.036, 0.040] as_shipped (`results.md:97`) and 0.037 [0.035, 0.039] prior_matched
+  (`results.md:127`), below the 0.10 threshold (`:558`). In the `Solved` = 3 stratum the difference is
+  -0.001 [-0.003, 0.001] as_shipped and -0.000 [-0.002, 0.001] prior_matched (`results.md:1566-1567`),
+  so the loss is not concentrated there. For reference, on `c_sdsc` P0 the loss is 0.042 and 0.040
+  (`results.md:501`, `:547`).

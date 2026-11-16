@@ -116,3 +116,44 @@ Let `S` = labelled set after sections 2-3 restricted to the test split defined b
 [4] `specObj-dr17.fits` on SDSS SAS (6.7 GB), per research round 2 (2026-10-25). The "primary spectra only" claim in that round was wrong; see the correction in section 1.
 [5] `docs/research/R-09-no-login-path.md`, sections "Update" (2026-10-25) and "XMatch smoke test" (2026-10-26).
 [1-round2] Gaia Archive ADQL crossmatch functions (ESDC_CROSSMATCH_POSITIONAL, DISTANCE/CONTAINS), per research round 2.
+
+## Note 2026-11-16 (state of experiments E1 to E6)
+
+Status unchanged: Accepted. This note records which experiments ran, with their sources. It changes no
+decision above, and no text above is removed.
+
+- **E1 (`r_match`): run.** `r_match` = 0.75 arcsec, chosen by the ADR 0004 G-A2 criterion on the
+  100k batch plus one offset run (`scripts/xmatch_offset.py`; offset manifest
+  `data/interim/xmatch/xmatch_gaiadr3_offset180_n100000_r5_all.manifest.json`, `obtained_utc`
+  2026-10-26T12:34:48+00:00; `data/interim/xmatch/e1_report.json`: `r_c` STAR 0.75, GALAXY 0.25,
+  QSO 0.5). Recorded in `docs/research/R-09-no-login-path.md:130-151`. Used by full_v0:
+  `data/interim/full_v0/dataset_report.json` `r_match_arcsec` = 0.75, and ADR 0001 `:19-21`. Caveats
+  (R-09 `:135-146`): the plateau criterion is weak on this data, 0.75" is driven by STAR, and the radius
+  biases the sample against high-proper-motion stars. Not produced by that run (R-09 `:147`): the
+  multi-pair rate, the 0.1" grid, and local epoch propagation. The E1 text above ("epoch-propagated",
+  "compare with DR13 `best_neighbour`") is therefore met only in part.
+- **E2 (DR13 check): not run.** It is deferred (as text, not a status) by ADR 0004 D1 (`:177-180`) and
+  ADR 0004 Consequences (`:408-409`): no DR13 source exists on the XMatch path. Trigger 3 of "What would
+  change my mind" cannot be evaluated.
+- **E3 (`z_star_max`, `z_qso_min`): not run, and the §2 redshift-consistency rule is not implemented.**
+  Owner decision of 2026-11-03 (GCUT-RC3): keep full_v0 as built. Recorded in ADR 0006 `:82-85`
+  (known limitation), risk R13 (`:522`) and reversal trigger T7 (`:542-544`: implementing the rule
+  changes the labels and redoes the LightGBM seeds, `delta.json`, every DL run and `val_freeze.json`).
+  No occurrence of `z_star_max` or `z_qso_min` in `src/`, `scripts/`, `kaggle/` or `tests/` (search
+  of 2026-11-16). The columns an optional measurement would need exist in
+  `data/interim/full_v0/labels.parquet` (`sdss_z`, `sdss_zwarning`, `sdss_class`; schema read, values
+  not read).
+- **E4 (DR15 first-release date) and E5 (DSC training flag): not run.** Both serve only cut (b), and
+  cut (b) was not produced on full_v0: `data/interim/full_v0/eval/results.md:12` and `:21`
+  ("ADR 0002 cut (b): not available: DR14Q/DR15 not ingested"; the same text is emitted by
+  `src/astro_triage/evaluation/runner.py:79` and `:912`). No execution evidence found in the
+  repository for either.
+- **E6 (DR20 SpecObj): not run.** No DR20 reference in `src/`, `scripts/`, `kaggle/` or `tests/`.
+  Labels stay DR17 (§1, L2).
+- **`labels_v1`: not built.** The Status line above makes E1 to E6 a precondition, and only E1 ran.
+  The labels in use are the full_v0 release
+  (`data/interim/full_v0/full_v0_labels.manifest.json`: `release` full_v0, 2,044,246 rows).
+- **Documented deviation from §2.** full_v0 applies the §2 conditions `ZWARNING == 0`, class in
+  {STAR, GALAXY, QSO}, `SPECPRIMARY == 1` and finite plug positions (ADR 0001 `:17-19`;
+  `src/astro_triage/labels/specobj.py:130`), but not the redshift-consistency condition (E3 above).
+  Every full_v0 metric is computed on labels that did not pass the full §2 filter.
