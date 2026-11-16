@@ -5,7 +5,6 @@
 astro-triage classifies Gaia DR3 sources as STAR, GALAXY or QSO. Labels come from SDSS spectroscopy; the model is LightGBM with calibration, compared against the Gaia DSC classifier as baseline.
 
 > **WARNING: all results are PROVISIONAL.**
-> - The `full_v0` evaluation text still carries a stale `PROVISIONAL: 100k sample` header (the numbers are `full_v0`'s; text fix pending).
 > - The reporting floor is not met in some cells.
 > - The deep-learning comparison protocol (ADR 0006) is not frozen.
 > - The population has no magnitude cut (see the ADR 0001 amendment).
@@ -34,7 +33,6 @@ astro-triage classifies Gaia DR3 sources as STAR, GALAXY or QSO. Labels come fro
 O astro-triage classifica fontes do Gaia DR3 como STAR, GALAXY ou QSO. Os rótulos vêm da espectroscopia do SDSS; o modelo é LightGBM com calibração, comparado ao classificador Gaia DSC como baseline.
 
 > **AVISO: todos os resultados são PROVISÓRIOS.**
-> - O texto da avaliação `full_v0` ainda traz um cabeçalho obsoleto `PROVISIONAL: 100k sample` (os números são do `full_v0`; correção do texto pendente).
 > - O piso de reporte não é atingido em algumas células.
 > - O protocolo de comparação com deep learning (ADR 0006) não está congelado.
 > - A população não tem corte de magnitude (ver a emenda da ADR 0001).

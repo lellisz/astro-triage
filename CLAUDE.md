@@ -12,7 +12,7 @@ Authority: `docs/adr/` and `.claude/CONTRACT.md` (agent protocol). The CONTRACT 
 - Raw data and outputs never enter git (`data/`, `logs/`, `*.parquet`, `*.duckdb`, `graphify-out/`).
 
 ## Status
-Every metric stays PROVISIONAL because: (1) the `full_v0` evaluation text still carries a stale "PROVISIONAL: 100k sample" header (numbers are full_v0's; text fix pending), (2) several cells are below the reporting floor, (3) the deep-learning comparison protocol (ADR 0006) is not frozen. The population has no magnitude cut (ADR 0001 amendment). Do not present numbers as final.
+Every metric stays PROVISIONAL because: (1) several cells are below the reporting floor, (2) the deep-learning comparison protocol (ADR 0006) is not frozen. (The stale "PROVISIONAL: 100k sample" header of the `full_v0` evaluation text was fixed on 2026-11-03.) The population has no magnitude cut (ADR 0001 amendment). Do not present numbers as final.
 
 ## Environment
 Windows/PowerShell, Python 3.12. Always use `.venv\Scripts\python.exe`. Run tests with pytest.
