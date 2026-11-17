@@ -157,6 +157,16 @@ def test_a_pair_verdict_not_taken_from_class(rel):
     assert html_dl.class_verdict(ftt_qso.verdict) != "vitória do par"
 
 
+def test_pair_verdict_uses_the_producer_vocabulary():
+    # dl_compare.pair_verdict writes "X wins" / "tie: LightGBM stays"; a real win must not
+    # fall into "não disponível".
+    assert html_dl.pair_verdict("X wins") == "vitória do par"
+    assert html_dl.pair_verdict("tie: LightGBM stays") == "empate: fica o LightGBM"
+    assert html_dl.pair_verdict("win") == "vitória do par"
+    assert html_dl.pair_verdict("sem sentido") == html_dl.UNAVAILABLE
+    assert html_dl.pair_verdict(None) == html_dl.UNAVAILABLE
+
+
 def test_rev01_headline_qso_row_has_class_label_not_pair_label(rel, monkeypatch):
     html = _page(rel, True, monkeypatch)
     row = next(

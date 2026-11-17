@@ -14,6 +14,7 @@ from astro_triage.dashboard import fmt
 from astro_triage.dashboard.constants import ADR_NUMBER
 from astro_triage.dashboard.data_headline import PAIR_NAMES
 from astro_triage.dashboard.html_kit import box, section, stat, table
+from astro_triage.dashboard.html_system import PAIR_ALIAS
 
 if TYPE_CHECKING:
     from astro_triage.dashboard.views_dl import Cell, PriorRow, QsoPurity, RuleFacts
@@ -132,7 +133,8 @@ def class_verdict(key: str | None) -> str:
 def pair_verdict(text: str | None) -> str:
     if not text:
         return UNAVAILABLE
-    return _PAIR_VERDICT.get(text.partition(":")[0].strip(), UNAVAILABLE)
+    head = text.partition(":")[0].strip().lower()
+    return _PAIR_VERDICT.get(PAIR_ALIAS.get(head, ""), UNAVAILABLE)
 
 
 def _p(text: str) -> str:
