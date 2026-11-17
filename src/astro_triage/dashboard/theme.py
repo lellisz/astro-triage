@@ -36,6 +36,7 @@ SPACE_SM = 8
 SPACE_MD = 12
 SPACE_LG = 24
 PAGE_TOP_PX = 40
+NARROW_SCREEN_PX = 640
 PAGE_BOTTOM_PX = 56
 
 FONT_SERIF = "'Instrument Serif', Georgia, serif"
@@ -117,6 +118,7 @@ def css(wide: bool = False) -> str:
 html, body, [class*="css"], .stApp {{ font-family: {FONT_SANS}; }}
 .stApp {{ background: {BG}; color: {TEXT}; }}
 [data-testid="stHeader"] {{ background: transparent; }}
+@media (max-width: {NARROW_SCREEN_PX}px) {{ [data-testid="stHeader"] {{ background: {BG}; }} }}
 .block-container {{ max-width: {width}px; padding-top: {PAGE_TOP_PX}px; padding-bottom: {PAGE_BOTTOM_PX}px; }}
 [data-testid="stVerticalBlock"] {{ gap: {SPACE_MD}px; }}
 .stApp, [data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] li {{ font-size: {BODY_PX}px; line-height: 1.55; font-weight: 400; letter-spacing: normal; }}

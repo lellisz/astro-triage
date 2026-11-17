@@ -8,6 +8,7 @@ import streamlit as st
 from astro_triage.dashboard import data as D
 from astro_triage.dashboard import data_cached as DC
 from astro_triage.dashboard import data_sky, fmt, html_kit, sky_map_html, sky_text
+from astro_triage.dashboard.html_system import lang_root
 from astro_triage.dashboard.views_common import MODEL, tech_on
 
 MODE_KEY = "sky_mode"
@@ -16,7 +17,7 @@ MODES = (sky_text.MODE_RATE, sky_text.MODE_COUNT)
 
 
 def _md(html: str) -> None:
-    st.markdown(html, unsafe_allow_html=True)
+    st.markdown(lang_root(html), unsafe_allow_html=True)
 
 
 def _pick_mode() -> bool:

@@ -110,13 +110,13 @@ def rule_lines(f: DeltaFacts) -> list[str]:
         lines.append(f"δ medido na validação: {values}.")
     lines += [
         (
-            "Intervalo de confiança por bootstrap em blocos do céu, acima de zero nas duas "
-            "classes. Em caso de empate, fica o LightGBM."
+            "Vitória na classe: a diferença de pureza D é maior que δ e o limite inferior "
+            "do intervalo de confiança (bootstrap em blocos do céu) fica acima de zero. "
+            "O par vence só com vitória nas duas classes. Em caso de empate, fica o LightGBM."
         ),
         (
             "O teste do aprendizado profundo foi aberto uma vez, depois de "
-            "congelar a validação. Resultado provisório: no destaque, todos os pares dão "
-            "empate e o LightGBM permanece."
+            "congelar a validação. O resultado, sempre provisório, está na aba Comparação."
         ),
         f"O protocolo da ADR {ADR_NUMBER:04d} foi executado como registrado; a ADR segue em rascunho.",
     ]

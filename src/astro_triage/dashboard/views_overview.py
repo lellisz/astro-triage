@@ -20,15 +20,19 @@ from astro_triage.dashboard.html_overview import (
 )
 from astro_triage.dashboard.html_overview_plots import errors_html
 from astro_triage.dashboard.html_overview_triage import triage_html
-from astro_triage.dashboard.html_system import seal, system_css
+from astro_triage.dashboard.html_system import lang_root, seal, system_css
 from astro_triage.dashboard.style_overview import overview_css
 from astro_triage.dashboard.views_common import MODEL, tech_on
 
 PRIOR_KEY = "overview_prior"
 
 
+def _css(css: str) -> None:
+    st.markdown(css, unsafe_allow_html=True)
+
+
 def _md(html: str) -> None:
-    st.markdown(html, unsafe_allow_html=True)
+    st.markdown(lang_root(html), unsafe_allow_html=True)
 
 
 def _pick_prior() -> str:
@@ -55,7 +59,7 @@ def overview(rel: D.Release) -> None:
         MODEL,
     )
     states = DC.prior_states(rel, MODEL)
-    _md(system_css() + overview_css())
+    _css(system_css() + overview_css())
     _md(seal(rel.name))
     _md(inscription_html())
     selected = _pick_prior()

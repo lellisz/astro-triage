@@ -11,6 +11,7 @@ from astro_triage.dashboard import data_cached as DC
 from astro_triage.dashboard import fmt
 from astro_triage.dashboard import html_method as HM
 from astro_triage.dashboard import method_notes as N
+from astro_triage.dashboard.html_system import lang_root
 from astro_triage.dashboard.limits_pt import limitation_lines
 from astro_triage.dashboard.views_common import tech_on
 
@@ -67,7 +68,7 @@ def usage_paragraphs() -> list[str]:
 
 
 def _html(block: str) -> None:
-    st.markdown(block, unsafe_allow_html=True)
+    st.markdown(lang_root(block), unsafe_allow_html=True)
 
 
 def _limitations(rel: D.Release) -> None:

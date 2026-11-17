@@ -44,6 +44,15 @@ class Release:
         return "PROVISIONAL" in str(self.meta.get("header", "")).upper()
 
 
+def strip_sha256(node: object) -> object:
+    """Copy of a parsed JSON tree without any key that contains ``sha256``."""
+    if isinstance(node, dict):
+        return {k: strip_sha256(v) for k, v in node.items() if "sha256" not in k}
+    if isinstance(node, list):
+        return [strip_sha256(v) for v in node]
+    return node
+
+
 def single_file(root: Path, pattern: str) -> Path:
     files = sorted(root.glob(pattern))
     if len(files) != 1:

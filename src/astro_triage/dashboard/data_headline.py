@@ -11,9 +11,10 @@ import re
 import pandas as pd
 
 from astro_triage.dashboard import fmt
+from astro_triage.dashboard.data_dl import load_results_dl
 from astro_triage.dashboard.data_eval import results_variant
 from astro_triage.dashboard.data_overview import errors_by_type
-from astro_triage.dashboard.data_release import CLASSES, Release
+from astro_triage.dashboard.data_release import CLASSES, Release, strip_sha256
 
 PURITY_POPULATION = "a_all"
 SKY_PRIORS = ("P1", "P2", "P3")
@@ -27,16 +28,8 @@ _METRIC_FIELDS = (
     "completeness_lo",
     "completeness_hi",
 )
-PAIR_NAMES ={"STAR": "estrela", "GALAXY": "galáxia", "QSO": "quasar"}
+PAIR_NAMES = {"STAR": "estrela", "GALAXY": "galáxia", "QSO": "quasar"}
 _PAIR_ORDER = (("STAR", "QSO"), ("GALAXY", "QSO"), ("GALAXY", "STAR"))
-
-
-def _strip_sha256(node: object) -> object:
-    if isinstance(node, dict):
-        return {k: _strip_sha256(v) for k, v in node.items() if "sha256" not in k}
-    if isinstance(node, list):
-        return [_strip_sha256(v) for v in node]
-    return node
 
 
 def load_delta(rel: Release) -> dict | None:
@@ -44,7 +37,7 @@ def load_delta(rel: Release) -> dict | None:
     path = rel.root / "lgbm_seeds" / "delta.json"
     if not path.is_file():
         return None
-    return _strip_sha256(json.loads(path.read_text(encoding="utf-8")))
+    return strip_sha256(json.loads(path.read_text(encoding="utf-8")))
 
 
 def _test_point(rel: Release, variant: str, model: str, prior: str) -> dict | None:
@@ -103,9 +96,6 @@ def accuracy_defs(rel: Release, model: str = "lgbm_full") -> dict:
         ]["variants"]["as_shipped"]["models"][model]["detail"]["accuracy"]
     except KeyError:
         shipped = None
-    # data_dl imports _strip_sha256 from this module, so the import is deferred.
-    from astro_triage.dashboard.data_dl import load_results_dl
-
     descriptive = (load_results_dl(rel) or {}).get("descriptive", {})
     fam = descriptive.get("families", {}).get(model, {}).get("accuracy", {})
     systems = descriptive.get("systems", {})

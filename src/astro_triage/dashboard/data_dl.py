@@ -18,8 +18,7 @@ from pathlib import Path
 import pandas as pd
 
 from astro_triage.dashboard.constants import ADR_NUMBER
-from astro_triage.dashboard.data_headline import _strip_sha256
-from astro_triage.dashboard.data_release import REPO_ROOT, Release
+from astro_triage.dashboard.data_release import REPO_ROOT, Release, strip_sha256
 from astro_triage.evaluation.dl_compare import TARGET_CLASSES
 
 _EVAL_DIR = ("dl", "eval")
@@ -95,7 +94,7 @@ def load_results_dl(rel: Release) -> dict | None:
     path = rel.root.joinpath(*_EVAL_DIR, "results_dl.json")
     if not path.is_file():
         return None
-    return _strip_sha256(json.loads(path.read_text(encoding="utf-8")))
+    return strip_sha256(json.loads(path.read_text(encoding="utf-8")))
 
 
 def load_risk_coverage_dl(rel: Release) -> pd.DataFrame | None:
