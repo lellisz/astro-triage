@@ -11,9 +11,10 @@ from astro_triage.dashboard import data_cached as DC
 from astro_triage.dashboard import fmt
 from astro_triage.dashboard import html_method as HM
 from astro_triage.dashboard import method_notes as N
-from astro_triage.dashboard.html_system import lang_root
-from astro_triage.dashboard.limits_pt import limitation_lines
+from astro_triage.dashboard.html_system import lang_root, system_css
 from astro_triage.dashboard.views_common import tech_on
+
+USAGE_TITLE = "Dispersão por objeto"
 
 
 @dataclass(frozen=True)
@@ -75,32 +76,20 @@ def _html(block: str) -> None:
     st.markdown(lang_root(block), unsafe_allow_html=True)
 
 
-def _limitations(rel: D.Release) -> None:
-    originals = list(rel.results["limitations"])
-    st.subheader("Limitações da avaliação")
-    st.markdown("\n".join(limitation_lines(originals)))
-    with st.expander("Texto original (inglês)"):
-        st.markdown("\n".join(f"- {text}" for text in originals))
-
-
 def method_page(rel: D.Release) -> None:
+    st.markdown(system_css(), unsafe_allow_html=True)
     if not tech_on():
         _html(HM.simple_html())
         _html(HM.sources_line())
         return
-    _html(HM.lead_html())
-    _html(HM.dl_box(DC.load_delta(rel)))
     mix = rel.test["true"].value_counts(normalize=True).to_dict()
-    st.markdown(HM.METHOD_TEXT)
-    st.markdown(HM.mix_sentence(mix))
-    st.subheader("Como ler os números")
-    for text in reading_paragraphs(method_facts(rel)):
-        st.markdown(text)
-    with st.expander("Dispersão por objeto"):
-        for text in usage_paragraphs():
-            st.markdown(text)
-    st.subheader("Glossário")
-    _html(HM.glossary_html())
-    _limitations(rel)
-    st.subheader("Fontes")
-    st.markdown("\n".join(f"- {line}" for line in HM.SOURCES))
+    _html(
+        HM.lead_html()
+        + HM.dl_box(DC.load_delta(rel))
+        + HM.method_html(mix)
+        + HM.reading_html(reading_paragraphs(method_facts(rel)))
+        + HM.usage_html(USAGE_TITLE, usage_paragraphs())
+        + HM.glossary_details()
+        + HM.limitations_html(list(rel.results["limitations"]))
+        + HM.sources_html()
+    )

@@ -2,8 +2,6 @@
 
 from __future__ import annotations
 
-from html import escape
-
 import pandas as pd
 import streamlit as st
 
@@ -12,12 +10,16 @@ from astro_triage.dashboard import data_cached as DC
 from astro_triage.dashboard import (
     data_sky,
     fmt,
-    html_kit,
     method_notes,
     sky_map_html,
     sky_text,
 )
-from astro_triage.dashboard.html_system import lang_root
+from astro_triage.dashboard.html_system import (
+    details,
+    lang_root,
+    small_note,
+    system_css,
+)
 from astro_triage.dashboard.views_common import MODEL, tech_on
 
 MODE_KEY = "sky_mode"
@@ -53,8 +55,9 @@ def sky_page(rel: D.Release, px: pd.DataFrame) -> None:
                 key=HIDE_KEY,
             )
     n_hidden = int((stats["n"] < floor).sum())
+    st.markdown(system_css(), unsafe_allow_html=True)
     _md(
-        html_kit.section(
+        sky_text.header_html(
             sky_text.TITLE,
             sky_text.lead(len(stats)),
             sky_text.how(by_rate, n_hidden, floor, hide),
@@ -62,17 +65,22 @@ def sky_page(rel: D.Release, px: pd.DataFrame) -> None:
     )
     _md(sky_map_html.lead_line(sky_text.map_lead(stats, floor)))
     _md(sky_map_html.build_map(stats, by_rate, floor, hide))
-    _md(f"<p class='at-cap'>{escape(method_notes.NEIGHBOUR_NOTE)}</p>")
+    _md(small_note(method_notes.NEIGHBOUR_NOTE))
     if not tech:
         return
-    _md(sky_text.bands_box(D.lat_band_table(stats)))
-    _md(sky_text.top_box(data_sky.top_error_regions(stats, floor), floor))
+    top = data_sky.top_error_regions(stats, floor)
+    _md(
+        details(sky_text.BANDS_TITLE, sky_text.bands_body(D.lat_band_table(stats)))
+        + details(sky_text.top_title(floor), sky_text.top_body(top, floor))
+    )
     chance = D.chance_share_of_pixels_with_error(
         stats, float(stats["errors"].sum()) / float(stats["n"].sum())
     )
     with_error = int((stats["errors"] > 0).sum())
-    st.markdown(
-        f"{fmt.pt_int(with_error)} regiões têm ao menos um erro "
-        f"({fmt.pt_pct(with_error / len(stats), 0)}); ao acaso, "
-        f"seriam ≈{fmt.pt_pct(chance, 0)}."
+    _md(
+        small_note(
+            f"{fmt.pt_int(with_error)} regiões têm ao menos um erro "
+            f"({fmt.pt_pct(with_error / len(stats), 0)}); ao acaso, "
+            f"seriam ≈{fmt.pt_pct(chance, 0)}."
+        )
     )

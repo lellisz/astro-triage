@@ -17,7 +17,9 @@ from astro_triage.dashboard import fmt
 from astro_triage.dashboard.constants import ADR_NUMBER, FIXED_COMPLETENESS
 from astro_triage.dashboard.data_headline import PAIR_NAMES
 from astro_triage.dashboard.data_release import CLASSES
-from astro_triage.dashboard.html_kit import box, section
+from astro_triage.dashboard.html_kit import box
+from astro_triage.dashboard.html_system import details, section, small_note
+from astro_triage.dashboard.limits_pt import translate
 
 LEAD: Final = (
     "Um modelo de árvores aprende com objetos cujo tipo já é conhecido pelo espectro "
@@ -45,9 +47,22 @@ GLOSSARY: Final = (
         "a medida detalhada da luz de um objeto, que revela o tipo dele com certeza.",
     ),
     ("Prior", "proporção das classes que o classificador assume que existe no céu."),
-    ("Piso de relato", "tamanho mínimo de uma célula para que seu valor seja publicado."),
-    ("IC", "intervalo de confiança: a faixa em que o valor verdadeiro provavelmente está."),
+    (
+        "Piso de relato",
+        "tamanho mínimo de uma célula para que seu valor seja publicado.",
+    ),
+    (
+        "IC",
+        "intervalo de confiança: a faixa em que o valor verdadeiro provavelmente está.",
+    ),
 )
+READING_TITLE: Final = "Como ler os números"
+GLOSSARY_TITLE: Final = "Glossário"
+LIMITS_TITLE: Final = "Limitações da avaliação"
+ORIGINAL_TITLE: Final = "Texto original (inglês)"
+SOURCES_TITLE: Final = "Fontes"
+UNTRANSLATED: Final = " (sem tradução)"
+ADR_WIDTH: Final = 4
 _DELTA_CLASSES: Final = ("GALAXY", "QSO")
 _FEATURE_SET: Final = "full"
 
@@ -74,6 +89,10 @@ def _dig(node: object, *keys: str) -> object:
     return node
 
 
+def _adr() -> str:
+    return str(ADR_NUMBER).zfill(ADR_WIDTH)
+
+
 def delta_facts(delta: Mapping[str, object] | None) -> DeltaFacts:
     """Seed count, multiplier, C* and per-class margins from delta.json; absent -> None/default."""
     doc = delta or {}
@@ -97,7 +116,9 @@ def delta_facts(delta: Mapping[str, object] | None) -> DeltaFacts:
 
 def rule_lines(f: DeltaFacts) -> list[str]:
     mult = "um múltiplo do" if f.multiplier is None else f"{fmt.pt_g(f.multiplier)} × o"
-    seeds = "das sementes" if f.n_seeds is None else f"de {fmt.pt_int(f.n_seeds)} sementes"
+    seeds = (
+        "das sementes" if f.n_seeds is None else f"de {fmt.pt_int(f.n_seeds)} sementes"
+    )
     lines = [
         (
             "Métrica principal: pureza de quasar e de galáxia com completude fixa em "
@@ -118,19 +139,21 @@ def rule_lines(f: DeltaFacts) -> list[str]:
             "O teste do aprendizado profundo foi aberto uma vez, depois de "
             "congelar a validação. O resultado, sempre provisório, está na aba Comparação."
         ),
-        f"O protocolo da ADR {ADR_NUMBER:04d} foi executado como registrado; a ADR segue em rascunho.",
+        f"O protocolo da ADR {_adr()} foi executado como registrado; a ADR segue em rascunho.",
     ]
     return lines
 
 
 def dl_box(delta: Mapping[str, object] | None) -> str:
     items = "".join(f"<li>{escape(t)}</li>" for t in rule_lines(delta_facts(delta)))
-    title = f"Comparação com aprendizado profundo (ADR {ADR_NUMBER:04d}, rascunho)"
+    title = f"Comparação com aprendizado profundo (ADR {_adr()}, rascunho)"
     return box(title, f"<ul>{items}</ul>")
 
 
 def mix_sentence(mix: Mapping[str, float]) -> str:
-    parts = ", ".join(f"{PAIR_NAMES[c]} {fmt.pt_pct(mix.get(c, 0.0), 0)}" for c in CLASSES)
+    parts = ", ".join(
+        f"{PAIR_NAMES[c]} {fmt.pt_pct(mix.get(c, 0.0), 0)}" for c in CLASSES
+    )
     return (
         "A amostra só tem objetos que o SDSS observou e que casam com o Gaia, então a "
         f"mistura do teste ({parts}) não é a do céu."
@@ -142,13 +165,13 @@ def lead_html() -> str:
 
 
 def simple_html() -> str:
-    return lead_html() + f"<p class='at-cap'>{escape(HINT)}</p>"
+    return lead_html() + small_note(HINT)
 
 
 def sources_line() -> str:
     """'Fontes: ...' with the source names (text before the colon of each entry)."""
     names = " · ".join(line.split(":")[0] for line in SOURCES)
-    return f"<p class='at-cap'>{escape('Fontes: ' + names)}</p>"
+    return small_note("Fontes: " + names)
 
 
 def glossary_html() -> str:
@@ -156,3 +179,40 @@ def glossary_html() -> str:
         f"<div class='at-gl'><b>{escape(term)}</b><span>{escape(text)}</span></div>"
         for term, text in GLOSSARY
     )
+
+
+def _list(items: list[str]) -> str:
+    return "<ul>" + "".join(f"<li>{escape(t)}</li>" for t in items) + "</ul>"
+
+
+def method_html(mix: Mapping[str, float]) -> str:
+    """How the model was built and tested: the method sentence and the test-mix caveat."""
+    return f"<p class='hs-sen'>{escape(METHOD_TEXT)}</p>" + small_note(
+        mix_sentence(mix)
+    )
+
+
+def usage_html(title: str, paragraphs: list[str]) -> str:
+    return details(title, "".join(small_note(p) for p in paragraphs))
+
+
+def reading_html(paragraphs: list[str]) -> str:
+    return usage_html(READING_TITLE, paragraphs)
+
+
+def glossary_details() -> str:
+    return details(GLOSSARY_TITLE, glossary_html())
+
+
+def limitations_html(originals: list[str]) -> str:
+    """Translated limitations; the original (English) text is a nested collapsed block."""
+    shown = []
+    for text in originals:
+        line, translated = translate(text)
+        shown.append(line if translated else line + UNTRANSLATED)
+    nested = details(ORIGINAL_TITLE, _list(list(originals)))
+    return details(LIMITS_TITLE, _list(shown) + nested)
+
+
+def sources_html() -> str:
+    return section(SOURCES_TITLE, body_html=_list(list(SOURCES)))

@@ -8,12 +8,15 @@ from typing import Final
 import pandas as pd
 
 from astro_triage.dashboard import fmt, html_kit
+from astro_triage.dashboard import html_system as hs
 from astro_triage.dashboard.constants import ERROR_HIGH
 from astro_triage.dashboard.data_sky import BAND_EDGES_DEG, HEALPIX_NSIDE
 
 MODE_RATE: Final = "Taxa de erro"
 MODE_COUNT: Final = "Quantidade de objetos"
 TITLE: Final = "Onde o modelo erra, região por região"
+HOW_LABEL: Final = "Como ler:"
+BANDS_TITLE: Final = "Por faixa de latitude galáctica"
 
 
 def lead(n_regions: int) -> str:
@@ -36,6 +39,12 @@ def how(by_rate: bool, n_hidden: int, floor: int, hidden_on_map: bool) -> str:
         else f"Anel vazio = {few}, sem taxa confiável."
     )
     return f"quanto mais azul, maior a taxa de erro da região. {tail}"
+
+
+def header_html(title: str, lead_text: str, how_text: str) -> str:
+    """Title, opening sentence and the 'Como ler' line in the calm section pattern."""
+    how_html = f"<p class='hs-small'><b>{escape(HOW_LABEL)}</b> {escape(how_text)}</p>"
+    return hs.section(title, lead_text, how_html)
 
 
 def map_lead(stats: pd.DataFrame, floor: int) -> str:
@@ -63,7 +72,7 @@ def _note(text: str) -> str:
     return f"<p>{escape(text)}</p>"
 
 
-def bands_box(bands: pd.DataFrame) -> str:
+def bands_body(bands: pd.DataFrame) -> str:
     names = band_names()
     rows = [
         [
@@ -81,9 +90,11 @@ def bands_box(bands: pd.DataFrame) -> str:
         "A latitude é a do centro de cada região. "
         "As linhas tracejadas no mapa marcam os limites entre as faixas."
     )
-    return html_kit.box(
-        "Por faixa de latitude galáctica", html_kit.table(head, rows) + note
-    )
+    return html_kit.table(head, rows) + note
+
+
+def bands_box(bands: pd.DataFrame) -> str:
+    return html_kit.box(BANDS_TITLE, bands_body(bands))
 
 
 def _sign(b: float) -> str:
@@ -96,7 +107,11 @@ def position_text(l_deg: float, b_deg: float) -> str:
     return f"l = {lon}°, b = {_sign(b_deg)}{abs(round(b_deg))}°"
 
 
-def top_box(top: pd.DataFrame, floor: int) -> str:
+def top_title(floor: int) -> str:
+    return f"Regiões com mais erro (mínimo de {fmt.pt_int(floor)} objetos)"
+
+
+def top_body(top: pd.DataFrame, floor: int) -> str:
     rows = [
         [
             position_text(r.l, r.b),
@@ -110,7 +125,8 @@ def top_box(top: pd.DataFrame, floor: int) -> str:
         f"Regiões HEALPix (nside {HEALPIX_NSIDE}) com objetos de teste. "
         f"Anel vazio = menos de {fmt.pt_int(floor)} objetos, sem taxa confiável."
     )
-    return html_kit.box(
-        f"Regiões com mais erro (mínimo de {fmt.pt_int(floor)} objetos)",
-        html_kit.table(["Posição (l, b)", "Objetos", "Erros", "Taxa"], rows) + note,
-    )
+    return html_kit.table(["Posição (l, b)", "Objetos", "Erros", "Taxa"], rows) + note
+
+
+def top_box(top: pd.DataFrame, floor: int) -> str:
+    return html_kit.box(top_title(floor), top_body(top, floor))

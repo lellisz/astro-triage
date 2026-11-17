@@ -313,6 +313,23 @@ def lang_root(body_html: str) -> str:
     return f"<div class='hs-page' lang='{PAGE_LANG}'>{body_html}</div>"
 
 
+def section(title: str, sentence: str = "", body_html: str = "") -> str:
+    """Quiet titled block: heading, an optional one-sentence lead and trusted markup.
+
+    ``title`` and ``sentence`` are escaped; ``body_html`` is built by this module's callers.
+    """
+    lead = f"<p class='hs-sen'>{_t(sentence)}</p>" if sentence else ""
+    return (
+        f"<section class='hs-sec'><div class='hs-pt' role='heading' "
+        f"aria-level='{CARD_LEVEL}'>{_t(title)}</div>{lead}{body_html}</section>"
+    )
+
+
+def small_note(text: str) -> str:
+    """Secondary-size paragraph; ``text`` is escaped."""
+    return f"<p class='hs-small'>{_t(text)}</p>"
+
+
 def verdict_oneline(text: str) -> str:
     """The one-line verdict in italic serif; ``text`` is escaped."""
     return f"<p class='hs-vline'>{_t(text)}</p>"
