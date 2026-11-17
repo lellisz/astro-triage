@@ -18,6 +18,11 @@ MAP_NOTE = (
     "O mapa mostra onde estão os erros, mas não permite comparar regiões individuais."
 )
 
+NEIGHBOUR_NOTE = (
+    "Regiões vizinhas não são independentes: não há margem de exclusão entre treino e teste "
+    "(decisão da divisão do céu), então a correlação em escala de graus é medida, não removida."
+)
+
 COUNT_UNDER_BAND_NOTE = "O número sob cada faixa é o total de objetos."
 
 SCATTER_OFF_NOTE = (

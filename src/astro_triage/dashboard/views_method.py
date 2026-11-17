@@ -58,7 +58,11 @@ def reading_paragraphs(f: MethodFacts) -> list[str]:
             + " "
             + N.INTERVAL_NOTE
         ),
-        N.sky_scale_note(f.min_objects, True) + " " + N.MAP_NOTE,
+        N.sky_scale_note(f.min_objects, True)
+        + " "
+        + N.MAP_NOTE
+        + " "
+        + N.NEIGHBOUR_NOTE,
         N.COUNT_UNDER_BAND_NOTE,
     ]
 

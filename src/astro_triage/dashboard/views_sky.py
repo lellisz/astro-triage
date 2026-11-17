@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
+from html import escape
+
 import pandas as pd
 import streamlit as st
 
 from astro_triage.dashboard import data as D
 from astro_triage.dashboard import data_cached as DC
-from astro_triage.dashboard import data_sky, fmt, html_kit, sky_map_html, sky_text
+from astro_triage.dashboard import (
+    data_sky,
+    fmt,
+    html_kit,
+    method_notes,
+    sky_map_html,
+    sky_text,
+)
 from astro_triage.dashboard.html_system import lang_root
 from astro_triage.dashboard.views_common import MODEL, tech_on
 
@@ -53,6 +62,7 @@ def sky_page(rel: D.Release, px: pd.DataFrame) -> None:
     )
     _md(sky_map_html.lead_line(sky_text.map_lead(stats, floor)))
     _md(sky_map_html.build_map(stats, by_rate, floor, hide))
+    _md(f"<p class='at-cap'>{escape(method_notes.NEIGHBOUR_NOTE)}</p>")
     if not tech:
         return
     _md(sky_text.bands_box(D.lat_band_table(stats)))
