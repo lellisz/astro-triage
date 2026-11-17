@@ -47,6 +47,22 @@ SEAL_TRACK = 0.04
 HEAD_WEIGHT = 600
 ONE = 1
 MEDIA_PX = 1000
+PAGE_LANG = "pt-BR"
+NARROW_VIEWPORT_PX = 390
+WIDE_VIEWPORT_PX = 1440
+PAGE_PAD_PX = 16
+PANEL_GAP_PX = 32
+NAME_COL_PX = 72
+ROW_GAP_PX = 12
+POINT_PX = 18
+BAND_MIN_PX = 6
+CI_MIN_PX = 2
+LABEL_GAP_PX = 4
+VLINE_MIN_PX = 26
+VLINE_VW = 3.6
+VLINE_MAX_PX = 44
+DELTA = "δ"
+CARD_LEVEL = 3
 
 
 def _t(text: object) -> str:
@@ -284,6 +300,133 @@ def verdict_html(pairs: Sequence[Mapping]) -> str:
     return f"<div class='hs-verdict'>{_t(verdict_line(pairs))}</div>"
 
 
+def lang_root(body_html: str) -> str:
+    """Wrap trusted markup in a container that declares the page language."""
+    return f"<div class='hs-page' lang='{PAGE_LANG}'>{body_html}</div>"
+
+
+def verdict_oneline(text: str) -> str:
+    """The one-line verdict in italic serif; ``text`` is escaped."""
+    return f"<p class='hs-vline'>{_t(text)}</p>"
+
+
+def track_px(viewport_px: float) -> float:
+    """Width of a ruler track at a viewport width (the layout model of ``system_css``)."""
+    page = min(viewport_px, theme.WIDE_WIDTH_PX) - 2 * PAGE_PAD_PX
+    panel = page if viewport_px <= MEDIA_PX else (page - PANEL_GAP_PX) / 2
+    return panel - NAME_COL_PX - ROW_GAP_PX
+
+
+def pair_card(title: str, verdict: str, rows: Sequence[Mapping], warn: str = "") -> str:
+    """Card of one pair. The DOM is the same for every pair: title, verdict, one block per
+    class (name, verdict, numbers, note) and a warning line that is empty when not needed."""
+    blocks = "".join(
+        "<div class='hs-card-r'>"
+        f"<span class='k'>{_t(r.get('name', ''))}</span>"
+        f"<span class='v'>{_t(r.get('verdict', ''))}</span>"
+        f"<span class='n'>{_t(r.get('numbers', ''))}</span>"
+        f"<span class='w'>{_t(r.get('note', ''))}</span></div>"
+        for r in rows
+    )
+    return (
+        f"<article class='hs-card'><div class='hs-card-t' role='heading' aria-level='{CARD_LEVEL}'>"
+        f"{_t(title)}</div><p class='hs-card-v'>{_t(verdict)}</p>{blocks}"
+        f"<p class='hs-card-x' role='note'>{_t(warn)}</p></article>"
+    )
+
+
+def cards(items_html: Sequence[str]) -> str:
+    return f"<div class='hs-cards'>{''.join(items_html)}</div>"
+
+
+def _delta_row(row: Mapping, half: float, delta: float, two_marks: bool) -> str:
+    d, lo, hi = (row.get(k) for k in ("d", "lo", "hi"))
+    a, b = _pos(-delta, half), _pos(delta, half)
+    if two_marks:
+        marks = f"<div class='dm' style='left:{a:.2f}%'></div>"
+        marks += f"<div class='dm' style='left:{b:.2f}%'></div>"
+    else:
+        marks = f"<div class='band' style='left:{a:.2f}%;width:{b - a:.2f}%'></div>"
+    marks += "<div class='lo'></div><div class='zero'></div>"
+    if _valid(lo) and _valid(hi):
+        x, y = _pos(lo, half), _pos(hi, half)
+        marks += f"<div class='ci' style='left:{x:.2f}%;width:{y - x:.2f}%'></div>"
+    if _valid(d):
+        marks += f"<div class='pt' style='left:{_pos(d, half):.2f}%'></div>"
+    detail = _t(row.get("detail", ""))
+    return (
+        f"<div class='hs-dr hs-dx'><div class='dn'>{_t(row.get('name', ''))}</div>"
+        f"<div class='trk' role='img' aria-label='{detail}'>{marks}</div>"
+        f"<div class='dv'>{detail}</div></div>"
+    )
+
+
+def delta_ruler(panel: Mapping) -> str:
+    """One ruler: own symmetric scale, band of +-delta, interval and point D.
+
+    The axis carries only -delta, 0 and +delta. When the band would be narrower than
+    ``BAND_MIN_PX`` on the narrowest layout, delta is drawn as two labelled marks instead.
+    """
+    rows = list(panel.get("rows") or ())
+    delta = panel.get("delta")
+    head = f"<div class='hs-pt'>{_t(panel.get('title') or '')}</div>"
+    vals = [
+        abs(v) for r in rows for v in (r.get(k) for k in ("d", "lo", "hi")) if _valid(v)
+    ]
+    if not _valid(delta) or delta <= 0 or not vals:
+        return f"<section class='hs-panel'>{head}{_na_block()}</section>"
+    half = max(*vals, delta) * SCALE_PAD
+    a, b = _pos(-delta, half), _pos(delta, half)
+    narrow = track_px(NARROW_VIEWPORT_PX)
+    two_marks = (b - a) / PERCENT * narrow < BAND_MIN_PX
+    low, high = f"−{DELTA}", f"+{DELTA}"
+    stacked = (b - HALF) / PERCENT * narrow < len(high) * CHAR_PX + LABEL_GAP_PX
+    cls = " class='u'" if stacked else ""
+    spans = (
+        f"<span{cls} style='left:{a:.2f}%'>{low}</span>"
+        f"<span style='left:{HALF:.2f}%'>{fmt.pt_num(0.0, 0)}</span>"
+        f"<span{cls} style='left:{b:.2f}%'>{high}</span>"
+    )
+    two = " two" if stacked else ""
+    axis = (
+        f"<div class='hs-dr'><div></div><div class='hs-ax{two}' aria-hidden='true'>"
+        f"{spans}</div></div>"
+    )
+    body = "".join(_delta_row(r, half, delta, two_marks) for r in rows)
+    return f"<section class='hs-panel'>{head}{body}{axis}</section>"
+
+
+def delta_rulers(panels: Sequence[Mapping]) -> str:
+    return f"<div class='hs-panels'>{''.join(delta_ruler(p) for p in panels)}</div>"
+
+
+def abs_bars(rows: Sequence[Mapping]) -> str:
+    """Bars from zero to the median with a min-max whisker; one scale, only '0' labelled."""
+    highs = [r["high"] for r in rows if _valid(r.get("high"))]
+    if not highs or max(highs) <= 0:
+        return _na_block()
+    top = max(highs) * SCALE_PAD
+    out = []
+    for r in rows:
+        low, mid, high = (r.get(k) for k in ("low", "median", "high"))
+        marks = "<div class='lo'></div>"
+        if all(_valid(v) for v in (low, mid, high)):
+            x, y = low / top * PERCENT, high / top * PERCENT
+            marks += f"<div class='bar' style='width:{mid / top * PERCENT:.2f}%'></div>"
+            marks += f"<div class='ci' style='left:{x:.2f}%;width:{y - x:.2f}%'></div>"
+        detail = _t(r.get("detail", ""))
+        out.append(
+            f"<div class='hs-dr hs-ab'><div class='dn'>{_t(r.get('name', ''))}</div>"
+            f"<div class='trk' role='img' aria-label='{detail}'>{marks}</div>"
+            f"<div class='dv'>{detail}</div></div>"
+        )
+    axis = (
+        "<div class='hs-dr'><div></div><div class='hs-ax' aria-hidden='true'>"
+        f"<span class='l' style='left:{0.0:.2f}%'>{fmt.pt_num(0.0, 0)}</span></div></div>"
+    )
+    return f"<section class='hs-panel'>{''.join(out)}{axis}</section>"
+
+
 def system_css() -> str:
     t = theme
     hair = f"{_px(1)} solid"
@@ -417,8 +560,8 @@ def system_css() -> str:
         _r(
             ".hs-dr",
             display="grid",
-            grid_template_columns=f"{_px(72)} minmax({_px(0)},{ONE}fr)",
-            gap=f"{_px(4)} {_px(12)}",
+            grid_template_columns=f"{_px(NAME_COL_PX)} minmax({_px(0)},{ONE}fr)",
+            gap=f"{_px(4)} {_px(ROW_GAP_PX)}",
             margin_top=_px(20),
             align_items="center",
         ),
@@ -453,9 +596,9 @@ def system_css() -> str:
             ".hs-dr .pt",
             position="absolute",
             top=_px(9),
-            width=_px(18),
-            height=_px(18),
-            margin_left=_px(-9),
+            width=_px(POINT_PX),
+            height=_px(POINT_PX),
+            margin_left=_px(-POINT_PX // 2),
             border_radius=_pc(HALF),
             background=t.ACCENT,
             box_shadow=f"{_px(0)} {_px(0)} {_px(0)} {_px(2)} {t.BG}",
@@ -484,6 +627,70 @@ def system_css() -> str:
         ),
         _r(".hs-ax span.l", transform="none"),
         _r(".hs-ax span.r", transform=f"translateX(-{_pc(PERCENT)})"),
-        f"@media(max-width:{_px(MEDIA_PX)}){{{_r('.hs-panels', grid_template_columns=f'{ONE}fr')}}}",
+        _r(".hs-dx .band", min_width=_px(BAND_MIN_PX)),
+        _r(".hs-dx .ci", min_width=_px(CI_MIN_PX)),
+        _r(
+            ".hs-dr .dm",
+            position="absolute",
+            top=_px(0),
+            bottom=_px(0),
+            border_left=f"{_px(2)} solid {t.ACCENT}",
+        ),
+        _r(".hs-ax.two", height=_px(48)),
+        _r(".hs-ax span.u", top=_px(24)),
+        _r(
+            ".hs-ab .bar",
+            position="absolute",
+            left=_px(0),
+            top=_px(11),
+            height=_px(14),
+            background=t.DASH,
+        ),
+        _r(".hs-ab .ci", top=_px(7), height=_px(22), min_width=_px(CI_MIN_PX)),
+        _r(
+            ".hs-vline",
+            font_family=t.FONT_SERIF,
+            font_style="italic",
+            font_weight=400,
+            font_size=f"clamp({_px(VLINE_MIN_PX)},{VLINE_VW}vw,{_px(VLINE_MAX_PX)})",
+            line_height=1.2,
+            margin=f"{_px(24)} {_px(0)}",
+            color=t.TEXT,
+        ),
+        _r(
+            ".hs-cards",
+            display="grid",
+            grid_template_columns=f"{ONE}fr {ONE}fr",
+            gap=_px(PANEL_GAP_PX),
+        ),
+        _r(
+            ".hs-card",
+            border_top=f"{hair} {t.HAIRLINE}",
+            padding_top=_px(16),
+            min_width=_px(0),
+        ),
+        _r(
+            ".hs-card-t",
+            font=f"{HEAD_WEIGHT} {_px(t.HEADING_PX)} {t.FONT_SANS}",
+            color=t.TEXT,
+        ),
+        _r(
+            ".hs-card-v",
+            font_weight=HEAD_WEIGHT,
+            color=t.TEXT,
+            margin=f"{_px(8)} {_px(0)}",
+        ),
+        _r(".hs-card-r", margin_top=_px(12), border_top=f"{hair} {t.HAIRLINE}"),
+        _r(".hs-card-r span", display="block"),
+        _r(".hs-card-r .k", color=t.SOFT, font_weight=HEAD_WEIGHT),
+        _r(".hs-card-r .v", color=t.TEXT),
+        _r(".hs-card-r .n", font=small, color=t.TEXT_SECONDARY),
+        _r(
+            ".hs-card-r .w,.hs-card-x",
+            font_size=_px(t.MIN_SECONDARY_PX),
+            color=t.TEXT_SECONDARY,
+        ),
+        _r(".hs-page", min_width=_px(0), overflow_wrap="anywhere"),
+        f"@media(max-width:{_px(MEDIA_PX)}){{{_r('.hs-panels,.hs-cards', grid_template_columns=f'{ONE}fr')}}}",
     ]
     return f"<style>{''.join(rules)}</style>"

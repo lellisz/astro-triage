@@ -223,3 +223,22 @@ The reviewer rebuilt the split from ADR 0003 rule 2 independently and it matches
   ADR 0004 annotation decision (architect): `docs/adr/0004-no-login-data-path.md:258`;
   `docs/adr/0006-deep-learning-tabular-comparison.md:55-58, 296, 309, 327`. The `CLAUDE.md` "Status" part is DONE 2026-11-03
   (coder updated README/CLAUDE.md, reviewer approved).
+
+## Dashboard, aba Comparação "Régua do prior" (2026-11-17, out of scope, not implemented)
+- Card "Próximo passo: comparar com redes neurais" (Resultado, `html_overview.py`) is outdated: the comparison already has a page.
+- ADR 0006 box of the Método tab (`html_method.py`) states the class rule without "D > delta"; align with the Comparação method note.
+- `PARTIAL_PRIORS` (`data_headline.py`) is a fixed set; derive it from the artifact.
+- Import cycle `data_headline` <-> `data_dl` (lazy import in `accuracy_defs`); move `_strip_sha256` to a neutral module.
+- Prior labels overlap on the Resultado ruler (`prior_ruler`).
+- "regime balanceado" (Resultado text) vs "raw, unweighted" (results_dl.md, accuracy/risk-coverage): owner decision on one wording.
+- Also: the Método tab hardcodes "rascunho" for the ADR status (it does not read the header); `charts_dl.py` and the risk-coverage loader are now unused by the page.
+
+## Comparação tab redesign, MINOR findings of 2026-11-17 (tester + reviewer; no fixer cycle, CONTRACT §3)
+- TST-01 / REV-04: `html_dl.honesty()` leaves a tie with CI <= 2*delta that crosses +-delta without a sentence. Reviewer proposes a containment rule (CI inside [-delta, +delta] -> "within delta"; otherwise "no power / inconclusive"). Owner decides the criterion.
+- TST-02 / REV-05: `html_system.delta_ruler` stacks the -delta and +delta labels on the same row when delta is tiny (1.5 px slack on real data at 390 px); alternate one side or fall back to unlabelled marks. Check in a browser.
+- TST-03: `test_a9_page_does_not_write` is tautological; replace with a real write-guard (monkeypatch open/Path.write_*).
+- REV-02: dead code after the rewrite (`charts_dl` risk-coverage figure and loaders, `html_dl.LEAD`, `html_system.diff_ruler`/`verdict_html`). The removed risk-coverage curve contradicts `scripts/design_mockups/cortes.py:78` ("keep until a substitute exists"): owner decides keep or record the cut, then remove orphans.
+- REV-03: hand-typed `L5_LEVEL = 5` and counts written in words ("dois pares", "duas classes") in `html_dl.py`; read from the producer or the artifact.
+- REV-06: a not-reportable cell with a "win" token becomes NA silently; raise `DlDataError` when `na` comes with a token other than "tie".
+- Test coverage lost with the old layout (still-existing code, no test): escape of `seal`, `delta_ruler`, `abs_bars`, `verdict_oneline`, `sensitivity_html`, `descriptive_html`, `method_html`; `ddof`/`block_level`/`block_divisor`/`min_blocks` of the rule text; `unavailable_html` / `results is None` branch.
+- Not run: tester item 11 (manual mutations) and A8 (browser, 1440 and 390 px).
