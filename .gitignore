@@ -50,3 +50,6 @@ graphify-out/
 # Archives and stray Windows device-name file
 *.zip
 NUL
+
+# Playwright MCP session snapshots
+.playwright-mcp/
