@@ -54,6 +54,7 @@ PAGE_PAD_PX = 16
 PANEL_GAP_PX = 32
 NAME_COL_PX = 72
 ROW_GAP_PX = 12
+NOTE_MAX_PX = 720
 POINT_PX = 18
 BAND_MIN_PX = 6
 CI_MIN_PX = 2
@@ -63,6 +64,13 @@ VLINE_VW = 3.6
 VLINE_MAX_PX = 44
 DELTA = "δ"
 CARD_LEVEL = 3
+RAIL_PX = 2
+BAR_PX = 6
+TICK_W_PX = 2
+TICK_H_PX = 16
+STRIP_H_PX = 24
+DR_TRACK_PX = 36  # height of the track of an ``hs-dr`` row
+BIG_PX = 54
 
 
 def _t(text: object) -> str:
@@ -361,8 +369,10 @@ def _delta_row(row: Mapping, half: float, delta: float, two_marks: bool) -> str:
     )
 
 
-def delta_ruler(panel: Mapping) -> str:
+def delta_ruler(panel: Mapping, tick: bool = False) -> str:
     """One ruler: own symmetric scale, band of +-delta, interval and point D.
+
+    ``tick`` draws point D as a thin vertical tick instead of a disc (the default).
 
     The axis carries only -delta, 0 and +delta. When the band would be narrower than
     ``BAND_MIN_PX`` on the narrowest layout, delta is drawn as two labelled marks instead.
@@ -393,7 +403,67 @@ def delta_ruler(panel: Mapping) -> str:
         f"{spans}</div></div>"
     )
     body = "".join(_delta_row(r, half, delta, two_marks) for r in rows)
-    return f"<section class='hs-panel'>{head}{body}{axis}</section>"
+    cls = "hs-panel hs-tkp" if tick else "hs-panel"
+    return f"<section class='{cls}'>{head}{body}{axis}</section>"
+
+
+def interval_strip(
+    point: float | None,
+    lo: float | None,
+    hi: float | None,
+    label: str = "",
+    extra: str = "",
+) -> str:
+    """Row with a 0-100% interval strip: thin rail, interval bar and a tick for the point.
+
+    Fractions in [0, 1]; any missing value gives the n/a block instead of a bar.
+    ``extra`` is appended to the caption (for example the object count).
+    """
+    name = f"<div class='dn'>{_t(label)}</div>"
+    if not all(_valid(v) for v in (point, lo, hi)):
+        return f"<div class='hs-st'>{name}<div class='sv'>{NA}</div></div>"
+    x, y = _clamp_pc(lo), _clamp_pc(hi)  # type: ignore[arg-type]
+    text = fmt.pt_pct_interval(point, lo, hi)  # type: ignore[arg-type]
+    track = (
+        f"<div class='trk' role='img' aria-label='{_t(text)}'><div class='rail'></div>"
+        f"<div class='ic' style='left:{x:.2f}%;width:{y - x:.2f}%'></div>"
+        f"<div class='tk' style='left:{_clamp_pc(point):.2f}%'></div></div>"  # type: ignore[arg-type]
+    )
+    axis = (
+        "<div class='ax' aria-hidden='true'>"
+        f"<span>{fmt.pt_pct(0.0, 0)}</span><span>{fmt.pt_pct(1.0, 0)}</span></div>"
+    )
+    caption = f"{text} · {extra}" if extra else text
+    return f"<div class='hs-st'>{name}<div>{track}{axis}</div><div class='sv'>{_t(caption)}</div></div>"
+
+
+def _clamp_pc(frac: float) -> float:
+    return max(0.0, min(PERCENT, frac * PERCENT))
+
+
+def big_pair(items: Sequence[Mapping]) -> str:
+    """Large numbers of the same size and weight, each with its interval beside it.
+
+    Each item has ``name``, ``point``, ``lo`` and ``hi`` (fractions or None).
+    """
+    out = []
+    for it in items:
+        point, lo, hi = (it.get(k) for k in ("point", "lo", "hi"))
+        ok = all(_valid(v) for v in (point, lo, hi))
+        big = fmt.pt_pct(point) if ok else NA
+        ci = f"{fmt.pt_ci_label()}: {fmt.pt_pct(lo)} a {fmt.pt_pct(hi)}" if ok else NA
+        out.append(
+            f"<div class='bp-i'><div class='bp-k'>{_t(it.get('name', ''))}</div>"
+            f"<div class='bp-n'>{_t(big)}</div><div class='bp-c'>{_t(ci)}</div></div>"
+        )
+    return f"<div class='hs-bp'>{''.join(out)}</div>"
+
+
+def details(summary: str, body_html: str) -> str:
+    """Collapsed block with a keyboard-focusable summary; ``summary`` is escaped."""
+    return (
+        f"<details class='hs-det'><summary>{_t(summary)}</summary>{body_html}</details>"
+    )
 
 
 def delta_rulers(panels: Sequence[Mapping]) -> str:
@@ -567,7 +637,7 @@ def system_css() -> str:
         ),
         _r(".hs-dr .dn", font_size=_px(t.CONTROL_PX), color=t.SOFT),
         _r(".hs-dr .dv", grid_column=2, font=small, color=t.TEXT_SECONDARY),
-        _r(".hs-dr .trk", position="relative", height=_px(36)),
+        _r(".hs-dr .trk", position="relative", height=_px(DR_TRACK_PX)),
         _r(
             ".hs-dr .zero",
             position="absolute",
@@ -635,6 +705,98 @@ def system_css() -> str:
             top=_px(0),
             bottom=_px(0),
             border_left=f"{_px(2)} solid {t.ACCENT}",
+        ),
+        _r(
+            ".hs-tkp .hs-dr .pt",
+            top=_px(DR_TRACK_PX // 2 - TICK_H_PX // 2),
+            width=_px(TICK_W_PX),
+            height=_px(TICK_H_PX),
+            margin_left=_px(-TICK_W_PX // 2),
+            border_radius=_px(0),
+            box_shadow="none",
+        ),
+        _r(
+            ".hs-st",
+            display="grid",
+            grid_template_columns=f"{_px(NAME_COL_PX)} minmax({_px(0)},{ONE}fr)",
+            gap=f"{_px(4)} {_px(ROW_GAP_PX)}",
+            margin_top=_px(16),
+            align_items="center",
+        ),
+        _r(".hs-st .dn", font_size=_px(t.CONTROL_PX), color=t.SOFT),
+        _r(".hs-st .sv", grid_column=2, font=small, color=t.TEXT_SECONDARY),
+        _r(".hs-st .trk", position="relative", height=_px(STRIP_H_PX)),
+        _r(
+            ".hs-st .rail",
+            position="absolute",
+            left=_px(0),
+            right=_px(0),
+            top=_px(STRIP_H_PX // 2 - RAIL_PX // 2),
+            height=_px(RAIL_PX),
+            background=t.HAIRLINE,
+        ),
+        _r(
+            ".hs-st .ic",
+            position="absolute",
+            top=_px(STRIP_H_PX // 2 - BAR_PX // 2),
+            height=_px(BAR_PX),
+            min_width=_px(CI_MIN_PX),
+            background=t.ACCENT,
+            opacity=CI_ALPHA,
+        ),
+        _r(
+            ".hs-st .tk",
+            position="absolute",
+            top=_px(STRIP_H_PX // 2 - TICK_H_PX // 2),
+            width=_px(TICK_W_PX),
+            height=_px(TICK_H_PX),
+            margin_left=_px(-TICK_W_PX // 2),
+            background=t.ACCENT,
+        ),
+        _r(
+            ".hs-st .ax",
+            display="flex",
+            justify_content="space-between",
+            font=small,
+            color=t.TEXT_SECONDARY,
+        ),
+        _r(
+            ".hs-bp",
+            display="flex",
+            flex_wrap="wrap",
+            gap=f"{_px(16)} {_px(PANEL_GAP_PX)}",
+            margin=f"{_px(24)} {_px(0)}",
+        ),
+        _r(".hs-bp .bp-i", min_width=_px(0)),
+        _r(".hs-bp .bp-k", font_size=_px(t.CONTROL_PX), color=t.SOFT),
+        _r(
+            ".hs-bp .bp-n",
+            font=f"{HEAD_WEIGHT} {_px(BIG_PX)} {t.FONT_SANS}",
+            line_height=1.1,
+            color=t.TEXT,
+        ),
+        _r(".hs-bp .bp-c", font=small, color=t.TEXT_SECONDARY),
+        _r(
+            ".hs-det summary",
+            display="flex",
+            align_items="center",
+            min_height=_px(t.MIN_TARGET_PX),
+            cursor="pointer",
+            color=t.SOFT,
+        ),
+        _r(
+            ".hs-det summary:focus-visible",
+            outline=f"{_px(2)} solid {t.ACCENT}",
+            outline_offset=_px(2),
+        ),
+        _r(".hs-sec", margin_top=_px(48), min_width=_px(0)),
+        _r(".hs-sen", color=t.TEXT_SECONDARY, margin=f"{_px(4)} {_px(0)}"),
+        _r(
+            ".hs-small",
+            font=f"{_px(t.MIN_SECONDARY_PX)} {t.FONT_SANS}",
+            line_height=1.5,
+            color=t.TEXT_SECONDARY,
+            max_width=_px(NOTE_MAX_PX),
         ),
         _r(".hs-ax.two", height=_px(48)),
         _r(".hs-ax span.u", top=_px(24)),

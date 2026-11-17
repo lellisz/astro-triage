@@ -242,3 +242,10 @@ The reviewer rebuilt the split from ADR 0003 rule 2 independently and it matches
 - REV-06: a not-reportable cell with a "win" token becomes NA silently; raise `DlDataError` when `na` comes with a token other than "tie".
 - Test coverage lost with the old layout (still-existing code, no test): escape of `seal`, `delta_ruler`, `abs_bars`, `verdict_oneline`, `sensitivity_html`, `descriptive_html`, `method_html`; `ddof`/`block_level`/`block_divisor`/`min_blocks` of the rule text; `unavailable_html` / `results is None` branch.
 - Not run: tester item 11 (manual mutations) and A8 (browser, 1440 and 390 px).
+
+## Galáxias v3 (2026-11-17), MINOR em aberto
+- REV-03: `data_galaxy_prior.py` importa `extreme_bands` de `html_galaxies` e casa as faixas extremas pelo rótulo; mover a seleção para a camada de dados com chave estável (enum). Guarda atual: `test_labels_match_extreme_bands_descriptions`.
+- TST-01: a completude de GALAXY como entregue é igual em P1 e P2 (ruído de float) e difere na 4ª casa em P3 (parcial); decidir se a régua de completude deve mostrar P3.
+- Código possivelmente órfão após D1: `DC.galaxy_scatter`, `DC.z_low_summary`, `html_galaxies.simple_html`, `html_galaxies_tech.tech_html` (confirmar uso fora de testes antes de remover).
+- `runner.py:71` gera "not recomputed for other releases", sem chave em `limits_pt.LIMITS_PT`: a nota sai em inglês numa reavaliação.
+- Nao verificado no navegador depois do fixer (REV-01/02/06/07): só testes e smoke de HTML.
