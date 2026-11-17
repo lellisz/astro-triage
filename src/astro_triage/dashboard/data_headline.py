@@ -6,6 +6,7 @@ No Streamlit import. Hashes in ``delta.json`` are dropped on load and never expo
 from __future__ import annotations
 
 import json
+import re
 
 import pandas as pd
 
@@ -15,7 +16,18 @@ from astro_triage.dashboard.data_overview import errors_by_type
 from astro_triage.dashboard.data_release import CLASSES, Release
 
 PURITY_POPULATION = "a_all"
-PAIR_NAMES = {"STAR": "estrela", "GALAXY": "galáxia", "QSO": "quasar"}
+SKY_PRIORS = ("P1", "P2", "P3")
+SHIPPED_PRIOR = "P2"
+PARTIAL_PRIORS = frozenset({"P3"})  # ADR 0003: P3 applies only to test bands B and C
+_METRIC_FIELDS = (
+    "purity",
+    "purity_lo",
+    "purity_hi",
+    "completeness",
+    "completeness_lo",
+    "completeness_hi",
+)
+PAIR_NAMES ={"STAR": "estrela", "GALAXY": "galáxia", "QSO": "quasar"}
 _PAIR_ORDER = (("STAR", "QSO"), ("GALAXY", "QSO"), ("GALAXY", "STAR"))
 
 
@@ -53,6 +65,62 @@ def _test_point(rel: Release, variant: str, model: str, prior: str) -> dict | No
         "completeness_lo": com["lo"],
         "completeness_hi": com["hi"],
         "fold": "teste",
+    }
+
+
+def _prior_state(rel: Release, model: str, prior: str, variant: str) -> dict:
+    """QSO prior and the six QSO metric fields of one cell; metrics None unless usable."""
+    try:
+        qso_prior = rel.results["populations"][PURITY_POPULATION]["priors"][prior][
+            "prior"
+        ]["QSO"]
+    except KeyError:
+        qso_prior = None
+    point = _test_point(rel, variant, model, prior) or {}
+    return {
+        "prior": prior,
+        "qso_prior": qso_prior,
+        **{k: point.get(k) for k in _METRIC_FIELDS},
+        "partial": prior in PARTIAL_PRIORS,
+    }
+
+
+def prior_states(rel: Release, model: str = "lgbm_full") -> dict[str, dict]:
+    """QSO state adjusted to each sky prior (P1, P2, P3), in that order."""
+    return {p: _prior_state(rel, model, p, "prior_matched") for p in SKY_PRIORS}
+
+
+def shipped_state(rel: Release, model: str = "lgbm_full") -> dict | None:
+    """QSO state as shipped, fixed at the shipped prior."""
+    return _prior_state(rel, model, SHIPPED_PRIOR, "as_shipped")
+
+
+def accuracy_defs(rel: Release, model: str = "lgbm_full") -> dict:
+    """The two overall-accuracy definitions, kept apart: as shipped and over seeds."""
+    try:
+        shipped = rel.results["populations"][PURITY_POPULATION]["priors"][
+            SHIPPED_PRIOR
+        ]["variants"]["as_shipped"]["models"][model]["detail"]["accuracy"]
+    except KeyError:
+        shipped = None
+    # data_dl imports _strip_sha256 from this module, so the import is deferred.
+    from astro_triage.dashboard.data_dl import load_results_dl
+
+    descriptive = (load_results_dl(rel) or {}).get("descriptive", {})
+    fam = descriptive.get("families", {}).get(model, {}).get("accuracy", {})
+    systems = descriptive.get("systems", {})
+    n_seeds = sum(1 for k in systems if re.fullmatch(rf"{re.escape(model)}_s\d+", k))
+    regime = descriptive.get("regime")
+    return {
+        "shipped": shipped,
+        "seeds_mean": fam.get("mean"),
+        "seeds_min": fam.get("min"),
+        "seeds_max": fam.get("max"),
+        "n_seeds": n_seeds or None,
+        "regime": regime,
+        "balanced": isinstance(regime, str)
+        and "BALANCED" in regime
+        and "unweighted" in regime,
     }
 
 

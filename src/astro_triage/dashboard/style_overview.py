@@ -39,4 +39,26 @@ def overview_css() -> str:
 .ao-xt {{ margin-top: 6px; }}
 .ao-xc {{ text-align: center; margin-top: 6px; }}
 .ao-note {{ margin: 14px 0 0; }}
+.ao-r-insc {{ font-family: {T.FONT_SERIF}; font-style: italic; font-weight: 400; font-size: clamp(28px, 4.2vw, 52px); line-height: 1.15; margin: 24px 0 24px; max-width: 900px; color: {T.TEXT}; }}
+.ao-r-states {{ display: grid; grid-template-columns: 1fr 1fr; gap: 32px; margin-top: 16px; }}
+.ao-r-st {{ border-top: 1px solid {T.HAIRLINE}; padding-top: 16px; min-width: 0; }}
+.ao-r-h {{ font-weight: 600; font-size: {T.HEADING_PX}px; color: {T.TEXT}; }}
+.ao-r-sub, .ao-r-cap, .ao-r-ciline, .ao-r-prior {{ font-size: {T.MIN_SECONDARY_PX}px; color: {T.TEXT_SECONDARY}; }}
+.ao-r-prior {{ margin-top: 4px; }}
+.ao-r-warn {{ margin-top: 8px; padding: 6px 10px; border: 1px solid {T.DASH}; font-size: {T.MIN_SECONDARY_PX}px; color: {T.TEXT}; }}
+.ao-r-pair {{ display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; }}
+.ao-r-m {{ min-width: 0; }}
+.ao-r-k {{ font-size: {T.CONTROL_PX}px; color: {T.SOFT}; }}
+.ao-r-num, .ao-r-accv {{ font-family: {T.FONT_SERIF}; font-weight: 400; font-size: clamp(44px, 5vw, 72px); line-height: 1; color: {T.ACCENT}; }}
+.ao-r-ciline {{ font-family: ui-monospace, Menlo, Consolas, monospace; margin-top: 4px; }}
+.ao-r-bar {{ position: relative; height: 12px; background: {T.GRID}; margin: 10px 0 4px; }}
+.ao-r-ci {{ position: absolute; top: -4px; bottom: -4px; border: solid {T.TEXT}; border-width: 0 1px; }}
+.ao-r-ci b {{ position: absolute; left: 0; right: 0; top: 50%; border-top: 1px solid {T.TEXT}; }}
+.ao-r-tick {{ position: absolute; top: -4px; bottom: -4px; width: 2px; background: {T.ACCENT}; }}
+.ao-r-field {{ margin-top: 20px; }}
+.ao-r-field .ao-r-cap {{ margin-top: 8px; }}
+.ao-r-acc {{ display: flex; flex-direction: column; gap: 24px; margin-top: 8px; }}
+.ao-r-def {{ border-top: 1px solid {T.HAIRLINE}; padding-top: 12px; }}
+@media (max-width: 1000px) {{ .ao-r-states {{ grid-template-columns: 1fr; }} }}
+@media (max-width: 560px) {{ .ao-r-pair {{ grid-template-columns: 1fr; }} }}
 </style>"""

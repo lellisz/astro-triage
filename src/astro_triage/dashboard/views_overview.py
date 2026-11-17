@@ -9,19 +9,43 @@ from astro_triage.dashboard import data as D
 from astro_triage.dashboard import data_cached as DC
 from astro_triage.dashboard import fmt
 from astro_triage.dashboard.constants import NO_BAR
+from astro_triage.dashboard.data_headline import SHIPPED_PRIOR, SKY_PRIORS
 from astro_triage.dashboard.data_overview_page import PRIOR, load_page
-from astro_triage.dashboard.html_overview import data_box_html, hero_html, numbers_html
-from astro_triage.dashboard.html_overview_plots import (
-    errors_html,
-    purity_html,
+from astro_triage.dashboard.html_overview import (
+    accuracy_html,
+    data_box_html,
+    inscription_html,
+    ruler_html,
+    states_html,
 )
+from astro_triage.dashboard.html_overview_plots import errors_html
 from astro_triage.dashboard.html_overview_triage import triage_html
+from astro_triage.dashboard.html_system import seal, system_css
 from astro_triage.dashboard.style_overview import overview_css
 from astro_triage.dashboard.views_common import MODEL, tech_on
 
+PRIOR_KEY = "overview_prior"
+
+
+def _md(html: str) -> None:
+    st.markdown(html, unsafe_allow_html=True)
+
+
+def _pick_prior() -> str:
+    """Native selector of the sky prior; a stale saved value falls back to the shipped prior."""
+    if st.session_state.get(PRIOR_KEY) not in SKY_PRIORS:
+        st.session_state[PRIOR_KEY] = SHIPPED_PRIOR
+    chosen = st.segmented_control(
+        "Prior de quasar da coluna “Ajustada ao prior”",
+        SKY_PRIORS,
+        key=PRIOR_KEY,
+        required=True,
+    )
+    return chosen if chosen in SKY_PRIORS else SHIPPED_PRIOR
+
 
 def overview(rel: D.Release) -> None:
-    """Visão geral: simple by default; the technical switch adds details and the old charts."""
+    """Visão geral: prior-ruler result screen; the technical switch adds details."""
     tech = tech_on()
     d = load_page(
         rel,
@@ -30,17 +54,18 @@ def overview(rel: D.Release) -> None:
         DC.abstention_curve(rel, MODEL),
         MODEL,
     )
-    blocks = [overview_css(), hero_html(d)]
+    states = DC.prior_states(rel, MODEL)
+    _md(system_css() + overview_css())
+    _md(seal(rel.name))
+    _md(inscription_html())
+    selected = _pick_prior()
+    _md(states_html(DC.shipped_state(rel, MODEL), states, selected))
+    _md(ruler_html(states, selected))
+    _md(accuracy_html(DC.accuracy_defs(rel, MODEL)))
     if tech:
-        blocks.append(data_box_html(d))
-    blocks += [
-        numbers_html(d, tech),
-        purity_html(d, tech),
-        errors_html(d, tech),
-        triage_html(d, tech),
-    ]
-    for block in blocks:
-        st.markdown(block, unsafe_allow_html=True)
+        _md(data_box_html(d))
+    _md(errors_html(d, tech))
+    _md(triage_html(d, tech))
     if tech:
         st.markdown("<div class='at-sec'></div>", unsafe_allow_html=True)
         technical(rel)

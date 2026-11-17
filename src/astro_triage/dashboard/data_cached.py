@@ -14,7 +14,7 @@ import pandas as pd
 import streamlit as st
 
 from astro_triage.dashboard import data as D
-from astro_triage.dashboard import data_dl
+from astro_triage.dashboard import data_dl, data_headline
 
 _ARTIFACTS = (
     "eval/results.json",
@@ -58,6 +58,37 @@ def purity_points(
     rel: D.Release, model: str = "lgbm_full", prior: str = "P2"
 ) -> list[dict]:
     return _purity_points(rel.name, stamp(rel), model, prior, rel)
+
+
+@st.cache_data(show_spinner=False, max_entries=_MAX)
+def _prior_states(
+    rel_name: str, rel_stamp: int, model: str, _rel: D.Release
+) -> dict[str, dict]:
+    return data_headline.prior_states(_rel, model)
+
+
+def prior_states(rel: D.Release, model: str = "lgbm_full") -> dict[str, dict]:
+    return _prior_states(rel.name, stamp(rel), model, rel)
+
+
+@st.cache_data(show_spinner=False, max_entries=_MAX)
+def _shipped_state(
+    rel_name: str, rel_stamp: int, model: str, _rel: D.Release
+) -> dict | None:
+    return data_headline.shipped_state(_rel, model)
+
+
+def shipped_state(rel: D.Release, model: str = "lgbm_full") -> dict | None:
+    return _shipped_state(rel.name, stamp(rel), model, rel)
+
+
+@st.cache_data(show_spinner=False, max_entries=_MAX)
+def _accuracy_defs(rel_name: str, rel_stamp: int, model: str, _rel: D.Release) -> dict:
+    return data_headline.accuracy_defs(_rel, model)
+
+
+def accuracy_defs(rel: D.Release, model: str = "lgbm_full") -> dict:
+    return _accuracy_defs(rel.name, stamp(rel), model, rel)
 
 
 @st.cache_data(show_spinner=False, max_entries=_MAX)
