@@ -20,11 +20,13 @@ import streamlit as st
 
 from astro_triage.dashboard import data as D
 from astro_triage.dashboard import data_cached as DC
+from astro_triage.dashboard import html_dl as HD
 from astro_triage.dashboard import theme
 from astro_triage.dashboard.constants import DEFAULT_RELEASE_NAME
 from astro_triage.dashboard.page_errors import describe_error, page_error
 from astro_triage.dashboard.sidebar_info import sidebar_counts
 from astro_triage.dashboard.views_common import tech_toggle
+from astro_triage.dashboard.views_dl import dl_page
 from astro_triage.dashboard.views_galaxies import galaxies_page
 from astro_triage.dashboard.views_layer2 import layer2_page
 from astro_triage.dashboard.views_method import method_page
@@ -33,6 +35,7 @@ from astro_triage.dashboard.views_sky import sky_page
 
 _LOG = logging.getLogger(__name__)
 PAGES = ("Visão geral", "Mapa do céu", "Galáxias", "Método")
+DL_PAGE = HD.TITLE
 LAYER2_PAGE = "Camada 2"
 NARROW_PAGES = frozenset({"Método"})
 # Widgets on pages that are not rendered lose their state; re-assigning keeps it across pages.
@@ -105,6 +108,7 @@ def main() -> None:
         PAGES[2]: lambda: galaxies_page(rel),
         PAGES[3]: lambda: method_page(rel),
     }
+    renderers[DL_PAGE] = lambda: dl_page(rel)
     if layer2 is not None:
         renderers[LAYER2_PAGE] = lambda: layer2_page(layer2)
     if st.session_state.get("page") not in renderers:

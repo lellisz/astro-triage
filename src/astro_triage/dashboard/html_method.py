@@ -1,7 +1,8 @@
 """Método page blocks as HTML (design kit). Pure: no streamlit; no number is written here.
 
-The deep-learning box states the pre-registered rule only. The seed count and the margin
-come from ``delta.json`` when it exists; otherwise they are left out. No DL result appears.
+The deep-learning box states the pre-registered rule and how it was run. The seed count and
+the margin come from ``delta.json`` when it exists; otherwise they are left out. DL numbers
+are not written here.
 """
 
 from __future__ import annotations
@@ -112,14 +113,19 @@ def rule_lines(f: DeltaFacts) -> list[str]:
             "Intervalo de confiança por bootstrap em blocos do céu, acima de zero nas duas "
             "classes. Em caso de empate, fica o LightGBM."
         ),
-        "O teste do aprendizado profundo só é aberto uma vez, depois de congelar a validação.",
+        (
+            "O teste do aprendizado profundo foi aberto uma vez, depois de "
+            "congelar a validação. Resultado provisório: no destaque, todos os pares dão "
+            "empate e o LightGBM permanece."
+        ),
+        f"O protocolo da ADR {ADR_NUMBER:04d} foi executado como registrado; a ADR segue em rascunho.",
     ]
     return lines
 
 
 def dl_box(delta: Mapping[str, object] | None) -> str:
     items = "".join(f"<li>{escape(t)}</li>" for t in rule_lines(delta_facts(delta)))
-    title = f"Comparação com aprendizado profundo (proposta, ADR {ADR_NUMBER:04d})"
+    title = f"Comparação com aprendizado profundo (ADR {ADR_NUMBER:04d}, rascunho)"
     return box(title, f"<ul>{items}</ul>")
 
 

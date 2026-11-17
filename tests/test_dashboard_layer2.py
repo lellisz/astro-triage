@@ -33,7 +33,13 @@ HOSTILE = (
     "[x](javascript:alert(1))",
 )
 NO_GAIN_TITLE = "não agregou valor mensurável"
-PAGES_BASE = ["Visão geral", "Mapa do céu", "Galáxias", "Método"]
+PAGES_BASE = [
+    "Visão geral",
+    "Mapa do céu",
+    "Galáxias",
+    "Método",
+    "Comparação: LightGBM × deep learning",
+]
 
 
 # ----------------------------------------------------------------------------- fixtures

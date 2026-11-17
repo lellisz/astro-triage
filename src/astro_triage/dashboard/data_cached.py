@@ -14,12 +14,15 @@ import pandas as pd
 import streamlit as st
 
 from astro_triage.dashboard import data as D
+from astro_triage.dashboard import data_dl
 
 _ARTIFACTS = (
     "eval/results.json",
     "train_report.json",
     "lgbm_seeds/delta.json",
     "layer2/eval_l2.json",
+    "dl/eval/results_dl.json",
+    "dl/eval/risk_coverage_dl.csv",
 )
 _MAX = 16
 
@@ -170,6 +173,26 @@ def _load_layer2(rel_name: str, rel_stamp: int, _rel: D.Release) -> dict | None:
 
 def load_layer2(rel: D.Release) -> dict | None:
     return _load_layer2(rel.name, stamp(rel), rel)
+
+
+@st.cache_data(show_spinner=False, max_entries=_MAX)
+def _load_results_dl(rel_name: str, rel_stamp: int, _rel: D.Release) -> dict | None:
+    return data_dl.load_results_dl(_rel)
+
+
+def load_results_dl(rel: D.Release) -> dict | None:
+    return _load_results_dl(rel.name, stamp(rel), rel)
+
+
+@st.cache_data(show_spinner=False, max_entries=_MAX)
+def _load_risk_coverage_dl(
+    rel_name: str, rel_stamp: int, _rel: D.Release
+) -> pd.DataFrame | None:
+    return data_dl.load_risk_coverage_dl(_rel)
+
+
+def load_risk_coverage_dl(rel: D.Release) -> pd.DataFrame | None:
+    return _load_risk_coverage_dl(rel.name, stamp(rel), rel)
 
 
 @st.cache_data(show_spinner=False, max_entries=1)

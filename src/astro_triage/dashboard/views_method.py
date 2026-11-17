@@ -47,7 +47,8 @@ def reading_paragraphs(f: MethodFacts) -> list[str]:
         N.PRIOR_NOTE,
         (
             "A pureza só tem sentido junto com a completude. A pureza à completude fixa de "
-            f"{f.completeness} só foi medida em validação."
+            f"{f.completeness} aparece na validação e, na comparação com aprendizado profundo, "
+            "no teste."
         ),
         N.floor_note(f.min_objects, f.min_pixels),
         (

@@ -90,7 +90,7 @@ def test_hero_omits_pairs_sentence_without_total():
 
 def test_hero_has_no_deep_learning_numbers():
     steps = HO.hero_html(_data(n_pairs=None))
-    assert "Ainda sem resultado" in steps
+    assert "Teste aberto uma vez" in steps
     assert not re.search(r"\d", re.sub(r"<[^>]*>|\d · ", "", steps))
 
 

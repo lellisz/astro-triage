@@ -36,7 +36,7 @@ _STEPS = (
         "Comparar com redes neurais",
         (
             "A mesma prova, com as mesmas regras, para o aprendizado profundo. "
-            "Ainda sem resultado."
+            "Teste aberto uma vez; resultado provisório."
         ),
     ),
 )
