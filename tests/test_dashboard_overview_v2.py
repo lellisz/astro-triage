@@ -75,11 +75,11 @@ def test_blocks_are_single_line_without_blank_lines(tech):
         assert "\n" not in html and "trace" not in html.lower()
 
 
-def test_hero_shows_pairs_from_data_and_three_steps():
+def test_hero_shows_pairs_from_data_and_two_steps():
     html = HO.hero_html(_data())
     assert "1.234.567" in html
-    assert re.findall(r"(\d) · ", html) == ["1", "2", "3"]
-    assert "O problema" in html and "Já medido" in html and "Próximo passo" in html
+    assert re.findall(r"(\d) · ", html) == ["1", "2"]
+    assert "O problema" in html and "Já medido" in html
     assert HO.TITLE in html
 
 
@@ -90,7 +90,7 @@ def test_hero_omits_pairs_sentence_without_total():
 
 def test_hero_has_no_deep_learning_numbers():
     steps = HO.hero_html(_data(n_pairs=None))
-    assert "Teste aberto uma vez" in steps
+    assert "Treinado e avaliado" in steps
     assert not re.search(r"\d", re.sub(r"<[^>]*>|\d · ", "", steps))
 
 

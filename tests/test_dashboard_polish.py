@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-from astro_triage.dashboard import html_method as HM
+from astro_triage.dashboard import verdict_rule as VR
 
 
 def test_v4_method_box_states_the_full_win_rule_and_no_hand_written_result():
-    text = " ".join(HM.rule_lines(HM.delta_facts(None)))
+    text = " ".join(VR.rule_lines())
     assert "maior que δ" in text and "limite inferior" in text
-    assert "acima de zero" in text and "nas duas classes" in text
+    assert "maior que zero" in text and "nas duas classes" in text
     assert "todos os pares" not in text and "permanece" not in text
-    assert "aba Comparação" in text
 
 
 def test_v5_fragments_of_every_tab_carry_the_page_language(monkeypatch):

@@ -28,8 +28,7 @@ def _rel():
 
 
 @pytest.fixture
-def facts(monkeypatch):
-    monkeypatch.setattr(VM.DC, "load_delta", lambda rel: None)
+def facts():
     return VM.method_facts(_rel())
 
 

@@ -23,7 +23,6 @@ from astro_triage.dashboard.html_system import prior_ruler as _prior_ruler
 
 TITLE = "Estrela, galáxia ou quasar? Ensinamos um modelo a decidir."
 _CHIP_ACCENT = "ao-chip-a"
-_CHIP_OUTLINE = "ao-chip-o"
 _STEPS = (
     (
         "O problema",
@@ -39,15 +38,6 @@ _STEPS = (
         _CHIP_ACCENT,
         "Um modelo de árvores (LightGBM)",
         "Treinado e avaliado em objetos que ele nunca viu. Os resultados estão abaixo.",
-    ),
-    (
-        "Próximo passo",
-        _CHIP_OUTLINE,
-        "Comparar com redes neurais",
-        (
-            "A mesma prova, com as mesmas regras, para o aprendizado profundo. "
-            "Teste aberto uma vez; resultado provisório."
-        ),
     ),
 )
 
@@ -65,7 +55,7 @@ def _step(index: int, chip: str, style: str, title: str, body: str) -> str:
 
 
 def hero_html(d: PageData) -> str:
-    """Title, supporting sentence (only when the pair total exists) and the three step cards."""
+    """Title, supporting sentence (only when the pair total exists) and the step cards."""
     lead = ""
     if d.n_pairs is not None:
         lead = (

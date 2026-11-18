@@ -9,7 +9,6 @@ from __future__ import annotations
 
 import json
 import math
-import re
 from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
@@ -17,6 +16,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from astro_triage.dashboard.adr_board import ADR_HEADER_LINES, parse_status
 from astro_triage.dashboard.constants import ADR_NUMBER
 from astro_triage.dashboard.data_release import REPO_ROOT, Release, strip_sha256
 from astro_triage.evaluation.dl_compare import TARGET_CLASSES
@@ -30,8 +30,6 @@ VERDICT_ROLES = (HEADLINE_ROLE, SENSITIVITY_ROLE)
 # Vocabulary of dl_compare.pair_verdict (pinned against the producer in the tests).
 PAIR_TIE_TOKEN = "tie: LightGBM stays"
 PAIR_WIN_TOKEN = "X wins"  # literal: the producer never writes the system name
-_ADR_STATUS = re.compile(r"- Status: \*\*([A-Za-z]+)\*\*")
-_ADR_HEADER_LINES = 12
 
 
 class DlDataError(ValueError):
@@ -247,14 +245,10 @@ def adr_status(adr_dir: Path | None = None) -> str | None:
     base = adr_dir or REPO_ROOT / "docs" / "adr"
     try:
         path = min(base.glob(f"{ADR_NUMBER:04d}-*.md"))
-        head = path.read_text(encoding="utf-8").splitlines()[:_ADR_HEADER_LINES]
+        head = path.read_text(encoding="utf-8").splitlines()[:ADR_HEADER_LINES]
     except (OSError, ValueError):
         return None
-    for line in head:
-        found = _ADR_STATUS.match(line)
-        if found:
-            return found.group(1)
-    return None
+    return parse_status(head)
 
 
 def freeze_exists(rel: Release) -> bool:

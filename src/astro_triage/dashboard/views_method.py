@@ -7,10 +7,11 @@ from dataclasses import dataclass
 import streamlit as st
 
 from astro_triage.dashboard import data as D
-from astro_triage.dashboard import data_cached as DC
 from astro_triage.dashboard import fmt
 from astro_triage.dashboard import html_method as HM
 from astro_triage.dashboard import method_notes as N
+from astro_triage.dashboard import verdict_rule as VR
+from astro_triage.dashboard.adr_board import load_board
 from astro_triage.dashboard.html_system import lang_root, system_css
 from astro_triage.dashboard.views_common import tech_on
 
@@ -39,7 +40,7 @@ def method_facts(rel: D.Release) -> MethodFacts:
         min_objects=fmt.pt_int(meta["floor"]["min_objects"]),
         min_pixels=fmt.pt_int(meta["floor"]["min_pixels"]),
         n_boot=fmt.pt_int(meta["n_boot"]),
-        completeness=fmt.pt_num(HM.delta_facts(DC.load_delta(rel)).completeness, 2),
+        completeness=fmt.pt_num(VR.RULE_COMPLETENESS, 2),
     )
 
 
@@ -78,18 +79,30 @@ def _html(block: str) -> None:
 
 def method_page(rel: D.Release) -> None:
     st.markdown(system_css(), unsafe_allow_html=True)
-    if not tech_on():
-        _html(HM.simple_html())
-        _html(HM.sources_line())
-        return
     mix = rel.test["true"].value_counts(normalize=True).to_dict()
+    limitations = list(rel.results["limitations"])
+    common = (
+        HM.method_html(mix)
+        + HM.rule_html()
+        + HM.adr_board_html(load_board())
+        + HM.three_limits_html(limitations)
+    )
+    if not tech_on():
+        _html(
+            HM.simple_html()
+            + common
+            + HM.glossary_details()
+            + HM.links_html()
+            + HM.sources_line()
+        )
+        return
     _html(
         HM.lead_html()
-        + HM.dl_box(DC.load_delta(rel))
-        + HM.method_html(mix)
+        + common
         + HM.reading_html(reading_paragraphs(method_facts(rel)))
         + HM.usage_html(USAGE_TITLE, usage_paragraphs())
         + HM.glossary_details()
-        + HM.limitations_html(list(rel.results["limitations"]))
+        + HM.limitations_html(limitations)
+        + HM.links_html()
         + HM.sources_html()
     )

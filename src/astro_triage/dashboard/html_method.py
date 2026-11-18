@@ -1,24 +1,30 @@
 """Método page blocks as HTML (design kit). Pure: no streamlit; no number is written here.
 
-The deep-learning box states the pre-registered rule and how it was run. The seed count and
-the margin come from ``delta.json`` when it exists; otherwise they are left out. DL numbers
-are not written here.
+The decision rule is the one text of ``verdict_rule`` (the same as on the Comparação page).
+The ADR board shows the status read from each ADR header. Deep-learning numbers are not
+written here.
 """
 
 from __future__ import annotations
 
-import math
-from collections.abc import Mapping
-from dataclasses import dataclass
+from collections.abc import Mapping, Sequence
 from html import escape
 from typing import Final
 
 from astro_triage.dashboard import fmt
-from astro_triage.dashboard.constants import ADR_NUMBER, FIXED_COMPLETENESS
+from astro_triage.dashboard import method_notes as notes
+from astro_triage.dashboard import verdict_rule as VR
+from astro_triage.dashboard.adr_board import AdrEntry
 from astro_triage.dashboard.data_headline import PAIR_NAMES
 from astro_triage.dashboard.data_release import CLASSES
-from astro_triage.dashboard.html_kit import box
-from astro_triage.dashboard.html_system import details, section, small_note
+from astro_triage.dashboard.html_system import (
+    NA,
+    details,
+    method_note,
+    section,
+    small_note,
+    status_chip,
+)
 from astro_triage.dashboard.limits_pt import translate
 
 LEAD: Final = (
@@ -39,7 +45,7 @@ SOURCES: Final = (
     "Gaia DSC (Delchambre+2023): classificador de referência e origem dos priors P2 e P3.",
     "Bailer-Jones+2019: origem do prior P1.",
 )
-GLOSSARY: Final = (
+GLOSSARY: Final[tuple[tuple[str, str | None], ...]] = (
     ("Pureza", "dos que o modelo aponta como de uma classe, quantos são dela."),
     ("Completude", "dos objetos de uma classe que existem, quantos o modelo acha."),
     (
@@ -61,93 +67,18 @@ GLOSSARY_TITLE: Final = "Glossário"
 LIMITS_TITLE: Final = "Limitações da avaliação"
 ORIGINAL_TITLE: Final = "Texto original (inglês)"
 SOURCES_TITLE: Final = "Fontes"
+RULE_TITLE: Final = "Regra de decisão"
+BOARD_TITLE: Final = "Decisões registradas (ADRs)"
+THREE_LIMITS_TITLE: Final = "Três limitações"
+LINKS_TITLE: Final = "Links"
 UNTRANSLATED: Final = " (sem tradução)"
-ADR_WIDTH: Final = 4
-_DELTA_CLASSES: Final = ("GALAXY", "QSO")
-_FEATURE_SET: Final = "full"
-
-
-@dataclass(frozen=True)
-class DeltaFacts:
-    n_seeds: int | None
-    multiplier: float | None
-    completeness: float
-    margins: tuple[tuple[str, float], ...]
-
-
-def _finite(value: object) -> float | None:
-    if isinstance(value, bool) or not isinstance(value, (int, float)):
-        return None
-    return float(value) if math.isfinite(value) else None
-
-
-def _dig(node: object, *keys: str) -> object:
-    for key in keys:
-        if not isinstance(node, Mapping) or key not in node:
-            return None
-        node = node[key]
-    return node
-
-
-def _adr() -> str:
-    return str(ADR_NUMBER).zfill(ADR_WIDTH)
-
-
-def delta_facts(delta: Mapping[str, object] | None) -> DeltaFacts:
-    """Seed count, multiplier, C* and per-class margins from delta.json; absent -> None/default."""
-    doc = delta or {}
-    comp = _finite(doc.get("primary_completeness"))
-    n_seeds = _finite(doc.get("n_seeds"))
-    margins: list[tuple[str, float]] = []
-    prior = doc.get("primary_prior")
-    if comp is not None and isinstance(prior, str):
-        for cls in _DELTA_CLASSES:
-            keys = ("delta", _FEATURE_SET, cls, f"{comp:.2f}", prior, "delta")
-            value = _finite(_dig(doc, *keys))
-            if value is not None:
-                margins.append((PAIR_NAMES[cls], value))
-    return DeltaFacts(
-        None if n_seeds is None else int(n_seeds),
-        _finite(doc.get("delta_sd_multiplier")),
-        FIXED_COMPLETENESS if comp is None else comp,
-        tuple(margins),
-    )
-
-
-def rule_lines(f: DeltaFacts) -> list[str]:
-    mult = "um múltiplo do" if f.multiplier is None else f"{fmt.pt_g(f.multiplier)} × o"
-    seeds = (
-        "das sementes" if f.n_seeds is None else f"de {fmt.pt_int(f.n_seeds)} sementes"
-    )
-    lines = [
-        (
-            "Métrica principal: pureza de quasar e de galáxia com completude fixa em "
-            f"{fmt.pt_num(f.completeness, 2)}."
-        ),
-        f"Margem δ = {mult} desvio-padrão {seeds} do LightGBM, medido na validação.",
-    ]
-    if f.margins:
-        values = "; ".join(f"{name} {fmt.pt_num(v, 3)}" for name, v in f.margins)
-        lines.append(f"δ medido na validação: {values}.")
-    lines += [
-        (
-            "Vitória na classe: a diferença de pureza D é maior que δ e o limite inferior "
-            "do intervalo de confiança (bootstrap em blocos do céu) fica acima de zero. "
-            "O par vence só com vitória nas duas classes. Em caso de empate, fica o LightGBM."
-        ),
-        (
-            "O teste do aprendizado profundo foi aberto uma vez, depois de "
-            "congelar a validação. O resultado, sempre provisório, está na aba Comparação."
-        ),
-        f"O protocolo da ADR {_adr()} foi executado como registrado; a ADR segue em rascunho.",
-    ]
-    return lines
-
-
-def dl_box(delta: Mapping[str, object] | None) -> str:
-    items = "".join(f"<li>{escape(t)}</li>" for t in rule_lines(delta_facts(delta)))
-    title = f"Comparação com aprendizado profundo (ADR {_adr()}, rascunho)"
-    return box(title, f"<ul>{items}</ul>")
+CROSSMATCH_PREFIX: Final = "Selection by crossmatch"
+CHIP_LABEL: Final[dict[str, str]] = {
+    "accepted": "Aceita",
+    "proposed": "Proposta",
+    "closed": "Encerrada",
+    "na": NA,
+}
 
 
 def mix_sentence(mix: Mapping[str, float]) -> str:
@@ -174,10 +105,43 @@ def sources_line() -> str:
     return small_note("Fontes: " + names)
 
 
-def glossary_html() -> str:
+def rule_html() -> str:
+    """The decision rule; same renderer and same text as the Comparação page."""
+    return section(RULE_TITLE, "", method_note(VR.rule_text()))
+
+
+def adr_board_html(entries: Sequence[AdrEntry]) -> str:
+    """One line per ADR: number (from the file name), title and the chip read from its header."""
+    if not entries:
+        return section(BOARD_TITLE, "", small_note(NA))
+    items = "".join(
+        f"<li>ADR {escape(e.number)}: {escape(e.title)} "
+        f"{status_chip(CHIP_LABEL[e.chip], e.chip)}</li>"
+        for e in entries
+    )
+    return section(BOARD_TITLE, "", f"<ul>{items}</ul>")
+
+
+def crossmatch_limit(limitations: Sequence[str]) -> str:
+    """Translated 'Selection by crossmatch' limitation from the artifact; n/a when absent."""
+    for text in limitations:
+        if text.startswith(CROSSMATCH_PREFIX):
+            line, translated = translate(text)
+            return line if translated else line + UNTRANSLATED
+    return NA
+
+
+def three_limits_html(limitations: Sequence[str]) -> str:
+    """Catalogue intersection, neighbouring regions (ADR 0003) and the assumed prior."""
+    items = [crossmatch_limit(limitations), notes.NEIGHBOUR_NOTE, notes.PRIOR_NOTE]
+    return section(THREE_LIMITS_TITLE, "", _list(items))
+
+
+def glossary_html(entries: Sequence[tuple[str, str | None]] = GLOSSARY) -> str:
+    """Term and definition; a term without a definition shows n/a (none is invented)."""
     return "".join(
-        f"<div class='at-gl'><b>{escape(term)}</b><span>{escape(text)}</span></div>"
-        for term, text in GLOSSARY
+        f"<div class='at-gl'><b>{escape(term)}</b><span>{escape((text or '').strip() or NA)}</span></div>"
+        for term, text in entries
     )
 
 
@@ -202,6 +166,11 @@ def reading_html(paragraphs: list[str]) -> str:
 
 def glossary_details() -> str:
     return details(GLOSSARY_TITLE, glossary_html())
+
+
+def links_html() -> str:
+    """External links are undecided: n/a until the owner chooses them."""
+    return section(LINKS_TITLE, "", small_note(NA))
 
 
 def limitations_html(originals: list[str]) -> str:

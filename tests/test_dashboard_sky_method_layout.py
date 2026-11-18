@@ -96,7 +96,7 @@ def test_method_blocks_are_collapsed_details():
 
 
 def test_method_rule_box_and_sources_stay_visible():
-    box = HM.dl_box(None)
+    box = HM.rule_html()
     assert "maior que δ" in box and "<details" not in box
     src = HM.sources_html()
     assert "<details" not in src and "Bailer-Jones" in src
@@ -134,7 +134,6 @@ _REL = SimpleNamespace(
 def test_method_page_wraps_every_fragment_in_the_language_root(monkeypatch, tech):
     cap = _Capture(monkeypatch, views_method)
     monkeypatch.setattr(views_method, "tech_on", lambda: tech)
-    monkeypatch.setattr(views_method.DC, "load_delta", lambda rel: None)
     views_method.method_page(_REL)
     css, *frags = cap.sent
     assert css.startswith("<style>") and frags
@@ -157,7 +156,7 @@ def _has_digits(text: str) -> bool:
     return bool(re.search(r"\d", text))
 
 
-@pytest.mark.parametrize("name", ["method_notes.py", "html_method.py"])
+@pytest.mark.parametrize("name", ["method_notes.py", "html_method.py", "adr_board.py"])
 def test_no_digit_in_string_literals(name):
     tree = ast.parse((DASH / name).read_text(encoding="utf-8"))
     docs = {

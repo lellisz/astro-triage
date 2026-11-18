@@ -142,23 +142,6 @@ def test_method_simple_has_one_sentence_and_hint():
     assert "ADR" not in out and not re.search(r"provis", out, re.IGNORECASE)
 
 
-def test_dl_box_numbers_only_from_delta_and_none_when_absent():
-    bare = HM.dl_box(None)
-    assert "ADR 0006" in bare and "0,80" in bare
-    assert "sementes" in bare and not re.search(r"\d+ sementes", bare)
-    delta = {
-        "n_seeds": 5,
-        "delta_sd_multiplier": 2,
-        "primary_completeness": 0.8,
-        "primary_prior": "P2",
-        "delta": {"full": {"QSO": {"0.80": {"P2": {"delta": 0.0123}}}}},
-    }
-    out = HM.dl_box(delta)
-    assert "2 × o desvio-padrão de 5 sementes" in out
-    assert "quasar 0,012" in out and "galáxia" not in out.split("δ medido")[1]
-    assert "empate" in out and "uma vez" in out
-
-
 def test_mix_sentence_and_glossary_terms():
     text = HM.mix_sentence({"STAR": 0.5, "GALAXY": 0.3, "QSO": 0.2})
     assert "estrela 50%" in text and "galáxia 30%" in text and "quasar 20%" in text
