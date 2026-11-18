@@ -35,7 +35,8 @@ SPACE_XS = 4
 SPACE_SM = 8
 SPACE_MD = 12
 SPACE_LG = 24
-PAGE_TOP_PX = 40
+# The fixed Streamlit header is 60 px tall at every width; keep the first block clear of it.
+PAGE_TOP_PX = 76
 NARROW_SCREEN_PX = 640
 PAGE_BOTTOM_PX = 56
 
@@ -119,8 +120,7 @@ html, body, [class*="css"], .stApp {{ font-family: {FONT_SANS}; }}
 .stApp {{ background: {BG}; color: {TEXT}; }}
 [data-testid="stHeader"] {{ background: transparent; }}
 @media (max-width: {NARROW_SCREEN_PX}px) {{ [data-testid="stHeader"] {{ background: {BG}; }} }}
-.block-container {{ max-width: {width}px; padding-top: {PAGE_TOP_PX}px; padding-bottom: {PAGE_BOTTOM_PX}px; }}
-[data-testid="stVerticalBlock"] {{ gap: {SPACE_MD}px; }}
+.block-container {{ max-width: {width}px; padding-top: {PAGE_TOP_PX}px; padding-bottom: {PAGE_BOTTOM_PX}px; }}[data-testid="stVerticalBlock"] {{ gap: {SPACE_MD}px; }}
 .stApp, [data-testid="stMarkdownContainer"] p, [data-testid="stMarkdownContainer"] li {{ font-size: {BODY_PX}px; line-height: 1.55; font-weight: 400; letter-spacing: normal; }}
 [data-testid="stCaptionContainer"], [data-testid="stCaptionContainer"] p {{ font-size: {MIN_SECONDARY_PX}px; line-height: 1.5; color: {TEXT_SECONDARY}; }}
 h1 {{ font-family: {FONT_SERIF} !important; font-weight: 400 !important; color: {TEXT}; letter-spacing: normal; padding: {SPACE_SM}px 0; }}
