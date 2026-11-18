@@ -13,16 +13,9 @@ import pandas as pd
 
 from astro_triage.dashboard import fmt, theme
 from astro_triage.dashboard.constants import ERROR_HIGH
-from astro_triage.dashboard.data_galaxies_z import GalaxyTotals
-from astro_triage.dashboard.html_kit import h_bar, section
 
 # Rates below this share are written with two decimals.
 SMALL_RATE: Final = 0.01
-
-TITLE_SPIKE: Final = "Galáxias: o erro dispara nas pontas"
-TITLE_NEUTRAL: Final = "Galáxias: onde o modelo erra"
-HOW_SIMPLE: Final = "cada barra é a parte das galáxias que o modelo erra."
-WRAP: Final = f"max-width:{theme.READING_WIDTH_PX}px"
 
 
 @dataclass(frozen=True)
@@ -81,42 +74,3 @@ def extreme_bands(
         picks.append(("As mais próximas", _band(z.loc[z["lo"].idxmin()], "z")))
         picks.append(("As mais distantes", _band(z.loc[z["lo"].idxmax()], "z")))
     return [(what, band) for what, band in picks if band.n >= floor]
-
-
-def spikes_at_the_ends(total_rate: float, extremes: list[tuple[str, Band]]) -> bool:
-    """True only if the Wilson lower bound of every extreme band is above the overall rate."""
-    lows = [b.ci_lo for _, b in extremes]
-    return (
-        bool(lows)
-        and not math.isnan(total_rate)
-        and not any(math.isnan(v) for v in lows)
-        and min(lows) > total_rate
-    )
-
-
-def lead_text(tot: GalaxyTotals, spike: bool) -> str:
-    text = (
-        f"Em {fmt.pt_int(tot.n)} galáxias de teste o modelo errou "
-        f"{fmt.pt_int(tot.errors)} ({fmt.pt_pct(tot.rate)}): "
-        f"{fmt.pt_int(tot.to_qso)} viraram quasar e {fmt.pt_int(tot.to_star)} viraram estrela."
-    )
-    return f"{text} Mas o erro não é parelho." if spike else text
-
-
-def simple_html(
-    tot: GalaxyTotals, by_g: pd.DataFrame, by_z: pd.DataFrame, floor: int
-) -> str:
-    extremes = extreme_bands(by_g, by_z, floor)
-    spike = spikes_at_the_ends(tot.rate, extremes)
-    title = TITLE_SPIKE if spike else TITLE_NEUTRAL
-    bars = [("Todas as galáxias", tot.rate)] + [
-        (f"{what} ({band.name})", band.rate) for what, band in extremes
-    ]
-    rows = "".join(
-        h_bar(name, 0.0 if math.isnan(rate) else rate, rate_text(rate), rate_color(rate))
-        for name, rate in bars
-    )
-    return (
-        section(title, lead_text(tot, spike), HOW_SIMPLE)
-        + f"<div style='{WRAP}'>{rows}</div>"
-    )

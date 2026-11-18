@@ -65,12 +65,3 @@ def sky_scale_note(n_floor: str, by_rate: bool) -> str:
 def bootstrap_note(n_boot: str) -> str:
     """Resampling used for the intervals of the Gaia DSC comparison."""
     return f"Bootstrap em blocos de pixel do céu, {n_boot} repetições."
-
-
-def scatter_note(max_points: str, z_label: str) -> str:
-    """How the per-galaxy scatter is sampled."""
-    return (
-        "Os acertos são sorteados com semente fixa e estratificados por faixa de redshift "
-        f"(limite de {max_points} acertos, com a faixa {z_label} sempre inteira); "
-        "todos os erros aparecem."
-    )

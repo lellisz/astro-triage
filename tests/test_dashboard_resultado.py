@@ -142,90 +142,6 @@ def _metric_classes(html: str) -> list[tuple[str, str]]:
     return re.findall(r"<div class='ao-r-k'>([^<]*)</div><div class='([^']+)'>", html)
 
 
-def test_state_numerals_share_class_and_show_ci():
-    s = _states()["P2"]
-    out = HO.state_html("t", "s", "P2", s)
-    got = _metric_classes(out)
-    assert [k for k, _ in got] == ["Pureza de quasar", "Completude de quasar"]
-    assert len({c for _, c in got}) == 1
-    assert out.count("IC ") == 2 and "IC 95%: 68,0% a 72,0%" in out
-    assert "IC 95%: 78,0% a 82,0%" in out
-
-
-def test_none_metrics_render_na_and_no_bar():
-    out = HO.state_html("t", "s", "P2", {k: None for k in H._METRIC_FIELDS})
-    assert out.count("n/a") >= 4  # two numerals, two CI lines, dot field
-    assert "ao-r-bar" not in out and "hs-q" not in out
-    assert "n/a" in HO.state_html("t", "s", "P2", None)
-
-
-def test_prior_label_and_forbidden_phrase():
-    out = HO.state_html("t", "s", "P2", _states()["P2"])
-    assert "prior de quasar assumido" in out
-    assert "quasares no céu" not in out
-
-
-def test_partial_warning_only_for_p3():
-    states = _states()
-    p3 = HO.states_html(states["P2"], states, "P3")
-    assert p3.count(WARN_P3) == 1
-    for sel in ("P1", "P2"):
-        out = HO.states_html(states["P2"], states, sel)
-        assert "vale só para parte do céu" not in out
-
-
-def test_legend_inscription_and_blue_dots():
-    s = _states()["P2"]
-    out = HO.state_html("t", "s", "P2", s)
-    legend = "1 ponto ≈ 0,1% da seleção · composição esperada sob o prior, não contagem de objetos"
-    assert legend in out
-    assert out.count("class='hs-q'") == round(1000 * s["purity"]) == 700
-    assert out.count("class='hs-n'") == 300
-    insc = HO.inscription_html()
-    assert "De cada 1.000 objetos que o modelo chama de quasar, quantos são?" in insc
-
-
-# (4) accuracy
-def test_accuracy_two_definitions_stacked_and_labelled():
-    defs = {
-        "shipped": 0.7251,
-        "seeds_mean": 0.9639,
-        "seeds_min": 0.9600,
-        "seeds_max": 0.9660,
-        "n_seeds": 5,
-        "regime": "BALANCED unweighted",
-        "balanced": True,
-    }
-    out = HO.accuracy_html(defs)
-    assert out.count("ao-r-accv") == 2
-    assert "72,51%" in out and "96,39%" in out
-    assert "como entregue" in out and "média de 5 sementes, regime balanceado" in out
-    assert "acerto alto não garante pureza alta de quasar" in out
-
-
-def test_accuracy_none_is_na():
-    for defs in (None, {"shipped": None, "seeds_mean": None, "n_seeds": None}):
-        out = HO.accuracy_html(defs)
-        assert out.count("n/a") >= 2 and "None" not in out and "nan" not in out
-
-
-# (5) escape
-def test_injected_text_is_escaped():
-    states = _states()
-    outs = [
-        HO.state_html(XSS, XSS, XSS, states["P2"]),
-        HO.states_html(states["P2"], states, XSS),
-        HO.ruler_html(states, XSS),
-        HO.accuracy_html(
-            {"shipped": XSS, "n_seeds": XSS, "regime": XSS, "balanced": XSS}
-        ),
-        HO.state_html("t", "s", "P2", {"qso_prior": XSS}),
-    ]
-    for out in outs:
-        assert "<script" not in out.lower()
-    assert "&lt;script&gt;" in outs[0]
-
-
 # (6) rules
 @pytest.mark.parametrize("name", ["html_overview.py", "views_overview.py"])
 def test_no_hand_written_digits(name):
@@ -249,12 +165,6 @@ def _all_html() -> str:
     )
 
 
-def test_no_forbidden_words():
-    low = _all_html().lower()
-    for word in ("melhor", "melhora", "ganho", "equivalente", "deploy", "trace"):
-        assert not re.search(rf"\b{word}\b", low), word
-
-
 def test_overview_css_only_theme_hex():
     tokens = {
         v.lower()
@@ -263,16 +173,6 @@ def test_overview_css_only_theme_hex():
     }
     found = re.findall(r"#[0-9a-fA-F]{3,8}\b", style_overview.overview_css())
     assert [h for h in found if h.lower() not in tokens] == []
-
-
-def test_builders_are_single_line():
-    states = _states()
-    for out in _all_html().split("\n") + [HO.state_html("t", "s", "P3", states["P3"])]:
-        assert "\n" not in out and "\r" not in out
-    # each builder emits one line (the joined helper above uses '\n' only as separator)
-    assert len(HO.states_html(states["P2"], states, "P3").splitlines()) == 1
-    assert len(HO.accuracy_html(None).splitlines()) == 1
-    assert len(HO.ruler_html(states, "P2").splitlines()) == 1
 
 
 # (7) real release

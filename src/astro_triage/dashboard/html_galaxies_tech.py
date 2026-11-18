@@ -14,24 +14,14 @@ import pandas as pd
 
 from astro_triage.dashboard import fmt, theme
 from astro_triage.dashboard.constants import ERROR_HIGH
-from astro_triage.dashboard.data_galaxies_z import GalaxyTotals
 from astro_triage.dashboard.html_galaxies import (
-    TITLE_NEUTRAL,
-    TITLE_SPIKE,
-    extreme_bands,
-    lead_text,
     rate_color,
     rate_text,
-    spikes_at_the_ends,
 )
-from astro_triage.dashboard.html_kit import PERCENT, axis, dot, section, span
+from astro_triage.dashboard.html_kit import PERCENT, axis, dot, span
 
 LOG_LO_PCT: Final = 0.1
 LOG_HI_PCT: Final = 100.0
-HOW_TECH: Final = (
-    "cada ponto é uma faixa. Quanto mais à direita, maior a taxa de erro. A escala é "
-    "logarítmica (cada marca é 10 vezes a anterior), e a linha cinza é a incerteza (Wilson)."
-)
 _LO_EXP: Final = round(math.log10(LOG_LO_PCT))
 _HI_EXP: Final = round(math.log10(LOG_HI_PCT))
 _DECADES: Final = tuple(10.0**e for e in range(_LO_EXP, _HI_EXP + 1))
@@ -103,16 +93,3 @@ def missing_note(by_g: pd.DataFrame) -> str:
             "que não entram na parte de brilho."
         )
     return f"<p class='at-cap' style='margin:14px 0 0'>{escape(note)}</p>"
-
-
-def tech_html(
-    tot: GalaxyTotals, by_g: pd.DataFrame, by_z: pd.DataFrame, floor: int
-) -> str:
-    spike = spikes_at_the_ends(tot.rate, extreme_bands(by_g, by_z, floor))
-    title = TITLE_SPIKE if spike else TITLE_NEUTRAL
-    return (
-        section(title, lead_text(tot, spike), HOW_TECH)
-        + band_table("Por brilho (magnitude G; menor = mais brilhante)", by_g)
-        + band_table("Por distância (redshift z; maior = mais distante)", by_z)
-        + missing_note(by_g)
-    )

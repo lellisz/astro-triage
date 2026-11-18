@@ -48,12 +48,9 @@ from astro_triage.dashboard.charts_layer2 import layer2_f1
 from astro_triage.dashboard.charts_model import dumbbell, error_bars, pair_text, per_100
 from astro_triage.dashboard.charts_overview import (
     _DTICKS,
-    error_types,
     f1_with_ci,
     importance,
     paired_diffs,
     paired_dtick,
-    recall_dots,
-    waffle,
 )
 from astro_triage.dashboard.charts_triage import triage_curve

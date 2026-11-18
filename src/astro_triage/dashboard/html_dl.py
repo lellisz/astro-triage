@@ -15,12 +15,8 @@ from astro_triage.dashboard import fmt
 from astro_triage.dashboard import html_system as hs
 from astro_triage.dashboard.constants import ADR_NUMBER
 from astro_triage.dashboard.data_dl import (
-    ClassCell,
     ClassVerdict,
-    DlDataError,
-    Headline,
     PairCell,
-    PairVerdict,
     parse_class_verdict,
 )
 from astro_triage.dashboard.data_headline import PAIR_NAMES
@@ -33,34 +29,8 @@ UNAVAILABLE_NOTE: Final = (
     "versão na barra lateral."
 )
 NA: Final = hs.NA
-LEAD: Final = (
-    "Duas redes neurais (MLP e FT-Transformer, FTT) foram postas contra o LightGBM, no "
-    "teste, com uma regra escrita antes de olhar o resultado."
-)
-LIGHTGBM: Final = "LightGBM"
 DESCRIPTIVE_TITLE: Final = "Descritivo: conjuntos de sementes e frentes de indicadores"
 LIMITS_TITLE: Final = "Limitações registradas no results_dl (texto original, inglês)"
-INCONSISTENT: Final = (
-    "inconsistência no artefato: o veredito do par não segue os vereditos das classes."
-)
-NO_POWER: Final = "sem poder para decidir; isso é falta de poder, não indica que os sistemas sejam iguais"
-WITHIN_DELTA: Final = "diferença dentro de ±δ"
-ONE_CLASS_NOT_ENOUGH: Final = (
-    "Vencer só numa classe não basta: o par exige as duas classes."
-)
-RULER_LEGEND: Final = (
-    "Cada régua tem a própria escala, simétrica em torno de zero. A faixa clara é a margem "
-    "±δ, a barra é o intervalo de confiança e o ponto é D, a diferença de pureza (rede "
-    "menos LightGBM). O eixo marca só −δ, zero e +δ."
-)
-ABS_NOTE: Final = (
-    "Barras a partir de zero: a mediana das sementes e, na linha fina, o mínimo e o máximo. "
-    "A pureza de quasar é baixa em todos os sistemas porque o prior de quasar do ponto de "
-    "operação é pequeno; a comparação entre eles é a diferença D, não o nível."
-)
-SENSITIVITY_LEAD: Final = (
-    "Só os vereditos, em outros priors e outra completude. Nunca substituem o destaque."
-)
 _STATUS_PT: Final = {"Proposed": "Proposta", "Accepted": "Aceita"}
 _ACCEPTED: Final = "Accepted"
 _NET: Final = {"mlp": "MLP", "ftt": "FTT"}
@@ -73,24 +43,12 @@ _ROLE: Final = {
     "descriptive": "descritivo",
 }
 _FRONT: Final = "front"
-# State tables: (long text for cards and reading, short text for the sensitivity table).
 _CLASS_STATE: Final = {
-    ClassVerdict.WIN: ("vitória na classe", "vitória"),
-    ClassVerdict.TIE: ("empate na classe", "empate"),
-    ClassVerdict.WORSE: (
-        "pior na classe (descritivo; não decide o par)",
-        "pior (descritivo)",
-    ),
-    ClassVerdict.NA: ("n/a: célula não relatável; conta como empate", NA),
+    ClassVerdict.WIN: "vitória na classe",
+    ClassVerdict.TIE: "empate na classe",
+    ClassVerdict.WORSE: "pior na classe (descritivo; não decide o par)",
+    ClassVerdict.NA: "n/a: célula não relatável; conta como empate",
 }
-_PAIR_STATE: Final = {
-    PairVerdict.TIE: ("Empate: fica o LightGBM.", "empate"),
-    PairVerdict.WIN: ("{net} vence o par: vitória nas duas classes.", "vitória do par"),
-}
-_PRIMARY_PURITY: Final = "lgbm_full"
-L5_LEVEL: Final = (
-    5  # sky-block level of the alternative interval ('ci_l5' in the artifact)
-)
 
 
 def system_label(name: str) -> str:
@@ -126,17 +84,7 @@ def class_verdict(key: str | None) -> str:
     """Text of a class verdict token; ``None`` is a cell without verdict, an unknown token raises."""
     if key is None:
         return "descritivo"
-    return _CLASS_STATE[parse_class_verdict(key, "veredito de classe")][0]
-
-
-def class_text(verdict: ClassVerdict | None) -> str:
-    return "descritivo" if verdict is None else _CLASS_STATE[verdict][0]
-
-
-def pair_text(cell: PairCell) -> str:
-    if cell.verdict is None:
-        return UNAVAILABLE
-    return _PAIR_STATE[cell.verdict][0].format(net=net_name(cell.pair))
+    return _CLASS_STATE[parse_class_verdict(key, "veredito de classe")]
 
 
 def signed(x: float | None) -> str:
@@ -156,25 +104,6 @@ def interval(lo: float | None, hi: float | None) -> str:
     if lo is None or hi is None:
         return NA
     return f"[{signed(lo)}; {signed(hi)}]"
-
-
-def numbers_text(c: ClassCell) -> str:
-    """D, interval and delta spelled out beside a mark."""
-    return (
-        f"D = {signed(c.d)} · {fmt.pt_ci_label()}: {interval(c.lo, c.hi)} · "
-        f"δ = {plain(c.delta)}"
-    )
-
-
-def honesty(c: ClassCell) -> str:
-    """Note under a tied class: no power (interval wider than the band) or inside the band."""
-    if c.verdict is not ClassVerdict.TIE or None in (c.lo, c.hi, c.delta):
-        return ""
-    if c.hi - c.lo > 2 * c.delta:
-        return NO_POWER
-    if c.lo >= -c.delta and c.hi <= c.delta:
-        return WITHIN_DELTA
-    return ""
 
 
 def c_star(level: str) -> str:
@@ -230,158 +159,6 @@ def seal_html(
         else f"limitações do results_dl: {NA}"
     )
     return hs.seal(release) + _p("Razões: " + "; ".join(reasons) + ".", "at-cap")
-
-
-def verdict_text(cells: Sequence[PairCell]) -> str:
-    """One line derived from the pair and class verdicts, in the kit vocabulary."""
-    items = [
-        {
-            "family": net_name(c.pair),
-            "pair_verdict": c.verdict.value if c.verdict else None,
-            "classes": {
-                class_label(k).lower(): v.verdict.value if v.verdict else None
-                for k, v in c.classes.items()
-            },
-        }
-        for c in cells
-    ]
-    return hs.verdict_line(items)
-
-
-def card_html(cell: PairCell) -> str:
-    rows = [
-        {
-            "name": class_label(cls),
-            "verdict": class_text(c.verdict),
-            "numbers": numbers_text(c),
-            "note": honesty(c),
-        }
-        for cls, c in cell.classes.items()
-    ]
-    warn = INCONSISTENT if cell.inconsistent else ""
-    return hs.pair_card(
-        f"{net_name(cell.pair)} × {LIGHTGBM}", pair_text(cell), rows, warn
-    )
-
-
-def ruler_panels(head: Headline) -> list[dict]:
-    """One panel per class with both networks on the same ruler; delta must agree."""
-    panels = []
-    classes = next(iter(head.cells)).classes
-    for cls in classes:
-        rows = [
-            {
-                "name": net_name(cell.pair),
-                "d": cell.classes[cls].d,
-                "lo": cell.classes[cls].lo,
-                "hi": cell.classes[cls].hi,
-                "detail": numbers_text(cell.classes[cls]),
-            }
-            for cell in head.cells
-        ]
-        deltas = [
-            cell.classes[cls].delta
-            for cell in head.cells
-            if cell.classes[cls].delta is not None
-        ]
-        if deltas and any(abs(x - deltas[0]) > abs(deltas[0]) * 1e-9 for x in deltas):
-            raise DlDataError(f"δ difere entre os pares na classe {cls}")
-        panels.append(
-            {
-                "title": class_label(cls),
-                "delta": deltas[0] if deltas else None,
-                "rows": rows,
-            }
-        )
-    return panels
-
-
-def reading_html(head: Headline) -> str:
-    out = []
-    for cls in next(iter(head.cells)).classes:
-        clauses = []
-        for cell in head.cells:
-            c = cell.classes[cls]
-            extra = honesty(c)
-            text = f"{net_name(cell.pair)}: {class_text(c.verdict)}"
-            clauses.append(f"{text} ({extra})" if extra else text)
-        out.append(_p(f"{class_label(cls)}. " + "; ".join(clauses) + "."))
-    if any(
-        cell.verdict is PairVerdict.TIE
-        and any(c.verdict is ClassVerdict.WIN for c in cell.classes.values())
-        for cell in head.cells
-    ):
-        out.append(_p(ONE_CLASS_NOT_ENOUGH))
-    return "".join(out)
-
-
-def abs_rows(head: Headline, cls: str) -> list[dict]:
-    """Seed range of the absolute purity of every system in the headline pairs, LightGBM first."""
-    seen: dict[str, tuple[float, float, float]] = {}
-    for cell in head.cells:
-        for system, stats in cell.classes[cls].purity.items():
-            seen.setdefault(system, stats)
-    names = sorted(seen, key=lambda s: s != _PRIMARY_PURITY)
-    return [
-        {
-            "name": LIGHTGBM if s == _PRIMARY_PURITY else net_name(s),
-            "low": seen[s][0],
-            "median": seen[s][1],
-            "high": seen[s][2],
-            "detail": (
-                f"mediana {fmt.pt_pct(seen[s][1], 2)} · mínimo a máximo das sementes: "
-                f"{fmt.pt_pct(seen[s][0], 2)} a {fmt.pt_pct(seen[s][2], 2)}"
-            ),
-        }
-        for s in names
-    ]
-
-
-def _short(c: ClassCell) -> str:
-    return NA if c.verdict is None else _CLASS_STATE[c.verdict][1]
-
-
-def sensitivity_html(cells: Sequence[PairCell]) -> str:
-    if not cells:
-        return section("Sensibilidade", f"{SENSITIVITY_LEAD} {UNAVAILABLE}.")
-    rows = []
-    for cell in cells:
-        l5 = all(c.ci_l5 is not None for c in cell.classes.values())
-        rows.append(
-            [
-                level_text(cell.prior, cell.level),
-                f"{net_name(cell.pair)} × {LIGHTGBM}",
-                *(_short(c) for c in cell.classes.values()),
-                _PAIR_STATE[cell.verdict][1] if cell.verdict else NA,
-                "disponível" if l5 else NA,
-            ]
-        )
-    classes = [class_label(k) for k in cells[0].classes]
-    headers = ("Prior e C*", "Par", *classes, "Par vence?", f"IC nível {L5_LEVEL}")
-    return section("Sensibilidade", SENSITIVITY_LEAD) + _scroll(table(headers, rows))
-
-
-def page_html(head: Headline, sensitivity: Sequence[PairCell], seal: str) -> str:
-    """Seal, verdict line, pair cards, rulers, reading, absolute purity and sensitivity."""
-    level = level_text(head.prior, head.level)
-    abs_title = f"Pureza absoluta de {PAIR_NAMES['QSO']}"
-    qso = next((c for c in head.cells if "QSO" in c.classes), None)
-    abs_block = (
-        hs.abs_bars(abs_rows(head, "QSO")) if qso is not None else _p(UNAVAILABLE)
-    )
-    parts = [
-        seal,
-        hs.verdict_oneline(verdict_text(head.cells)),
-        section("Os dois pares", f"Ponto de destaque: {level}.")
-        + hs.cards([card_html(c) for c in head.cells]),
-        section("Diferença de pureza por classe", RULER_LEGEND)
-        + hs.delta_rulers(ruler_panels(head)),
-        section("Leitura por classe", f"Ponto de destaque: {level}.")
-        + reading_html(head),
-        section(abs_title, ABS_NOTE) + abs_block,
-        sensitivity_html(sensitivity),
-    ]
-    return hs.lang_root("".join(parts))
 
 
 def _cell_rows(cells: Sequence[PairCell]) -> list[list[str]]:

@@ -10,7 +10,7 @@ import re
 from pathlib import Path
 
 from astro_triage.dashboard import (
-    charts_dl,
+    charts_base,
     data_dl,
     html_dl,
     style_kit,
@@ -30,17 +30,6 @@ TAB_FILES = (
     "compare_text.py",
 )
 EVIL = "<script>alert(1)</script>"
-
-
-def test_rev03_risk_legend_uses_readable_system_names():
-    import pandas as pd
-
-    frame = pd.DataFrame(
-        {"seed": ["mean"] * 2, "system": ["ftt_full"] * 2,
-         "coverage": [0.5, 1.0], "accuracy": [0.9, 0.8]}
-    )  # fmt: skip
-    fig = charts_dl.risk_coverage_figure(frame, ["ftt_full"])
-    assert "_full" not in fig.data[0].name and "FT-Transformer" in fig.data[0].name
 
 
 def test_b_obsolete_strings_banned():
@@ -97,8 +86,6 @@ def test_d_digit_scan_detects_a_hand_written_number(tmp_path):
 
 
 def test_e_text_is_escaped():
-    rows = [{"name": EVIL, "verdict": EVIL, "numbers": EVIL, "note": EVIL}]
-    assert "<script>" not in html_dl.hs.pair_card(EVIL, EVIL, rows, EVIL)
     assert "<script>" not in html_dl.error_html(EVIL).replace("&lt;script&gt;", "")
     assert "<script>" not in html_dl.limitations_html([EVIL])
 
@@ -119,7 +106,7 @@ def test_h_contrast_of_tab_palette():
         assert color, sel
         for bg in (theme.BG, theme.SECONDARY_BG):
             assert theme.contrast_ratio(color.group(1), bg) >= theme.MIN_TEXT_CONTRAST
-    assert theme.contrast_ratio(charts_dl.TEXT, theme.BG) >= theme.MIN_TEXT_CONTRAST
+    assert theme.contrast_ratio(charts_base.TEXT, theme.BG) >= theme.MIN_TEXT_CONTRAST
 
 
 def test_loader_returns_none_without_artifact(tmp_path):

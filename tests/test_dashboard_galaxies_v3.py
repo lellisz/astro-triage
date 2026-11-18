@@ -72,67 +72,13 @@ def test_extreme_bands_chosen_by_position_not_label():
     assert dict(HG.extreme_bands(by_g, shuffled, FLOOR))["As mais distantes"].name == "z ≥ 0,1"
 
 
-def test_title_rule_is_decided_by_the_data():
-    by_g, by_z = _tables(spike=True)
-    assert HG.TITLE_SPIKE in HG.simple_html(TOT, by_g, by_z, FLOOR)
-    by_g, by_z = _tables(spike=False)
-    out = HG.simple_html(TOT, by_g, by_z, FLOOR)
-    assert HG.TITLE_NEUTRAL in out and HG.TITLE_SPIKE not in out
-    assert "não é parelho" not in out
-
-
-def test_simple_mode_has_four_bars_and_no_technical_terms():
-    by_g, by_z = _tables()
-    out = HG.simple_html(TOT, by_g, by_z, FLOOR)
-    assert out.count("class='at-rowe'") == 4
-    assert "Como ler:" in out and "viraram quasar" in out and "viraram estrela" in out
-    assert not TECH_TERMS.search(out)
-    assert "\n\n" not in out
-    assert HG.ERROR_HIGH == 0.10
-    assert out.count(f"background:{HG.theme.ACCENT}") == 3  # three ends above 10%
-
-
-def test_title_neutral_when_extreme_below_floor():
-    by_g, by_z = _tables(spike=True)
-    out = HG.simple_html(TOT, by_g, by_z, FLOOR + 1)  # ends (n=100) fall under the floor
-    assert HG.TITLE_NEUTRAL in out and "não é parelho" not in out
-    assert out.count("class='at-rowe'") == 1
-    assert HG.TITLE_SPIKE in HG.simple_html(TOT, *_tables(spike=True), FLOOR)
-
-
-def test_title_neutral_when_wilson_lower_bound_does_not_pass_overall():
-    by_g, by_z = _tables(spike=True)
-    # 8 errors in 100: rate 8% > overall 5%, but the Wilson lower bound is below 5%
-    by_g.loc[0] = _band("< 18", -math.inf, 18.0, 100, 8)
-    by_z.loc[0] = _band("z ≤ 0,001", -math.inf, 0.001, 100, 8)
-    by_z.loc[2] = _band("≥ 0,1", 0.1, math.inf, 100, 8)
-    assert 0.08 > TOT.rate
-    out = HG.simple_html(TOT, by_g, by_z, FLOOR)
-    assert HG.TITLE_NEUTRAL in out and HG.TITLE_SPIKE not in out
-
-
 def test_bar_colour_threshold():
     assert HG.rate_color(HG.ERROR_HIGH + 1e-9) == HG.theme.ACCENT
     assert HG.rate_color(HG.ERROR_HIGH) == HG.theme.SOFT
 
 
-def test_technical_mode_has_both_log_tables():
-    by_g, by_z = _tables()
-    out = HT.tech_html(TOT, by_g, by_z, FLOOR)
-    assert "Por brilho" in out and "Por distância" in out
-    assert out.count("class='at-rowg'") == 2 + 3 + 4  # two headers, G rows, z rows (empty band kept)
-    assert "Wilson" in out and "logarítmica" in out
-    assert "7 galáxias sem magnitude" in out
-    assert ">sem medida<" not in out
-    assert "\n\n" not in out
-
-
 def test_escape_and_no_trace():
-    by_g, by_z = _tables()
-    by_g.loc[0, "label"] = "<b>&"
-    out = HT.tech_html(TOT, by_g, by_z, FLOOR)
-    assert "<b>&" not in out and "&lt;b&gt;&amp;" in out
-    both = out + HG.simple_html(TOT, by_g, by_z, FLOOR) + HM.simple_html() + HM.glossary_html()
+    both = HM.simple_html() + HM.glossary_html()
     assert not re.search(r"\btrace\b", both, re.IGNORECASE)
 
 

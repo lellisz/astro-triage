@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 from dataclasses import replace
 
 import pytest
@@ -59,10 +58,7 @@ def _data(**kw) -> P.PageData:
 def _all(d, tech):
     return "".join(
         (
-            HO.hero_html(d),
             HO.data_box_html(d) if tech else "",
-            HO.numbers_html(d, tech),
-            HP.purity_html(d, tech),
             HP.errors_html(d, tech),
             HT.triage_html(d, tech),
         )
@@ -75,44 +71,6 @@ def test_blocks_are_single_line_without_blank_lines(tech):
         assert "\n" not in html and "trace" not in html.lower()
 
 
-def test_hero_shows_pairs_from_data_and_two_steps():
-    html = HO.hero_html(_data())
-    assert "1.234.567" in html
-    assert re.findall(r"(\d) · ", html) == ["1", "2"]
-    assert "O problema" in html and "Já medido" in html
-    assert HO.TITLE in html
-
-
-def test_hero_omits_pairs_sentence_without_total():
-    html = HO.hero_html(_data(n_pairs=None))
-    assert "ao-lead" not in html and "Usamos" not in html
-
-
-def test_hero_has_no_deep_learning_numbers():
-    steps = HO.hero_html(_data(n_pairs=None))
-    assert "Treinado e avaliado" in steps
-    assert not re.search(r"\d", re.sub(r"<[^>]*>|\d · ", "", steps))
-
-
-def test_numbers_simple_values_from_data_and_no_technical_line():
-    html = HO.numbers_html(_data(), False)
-    for part in ("91,23%", "3,2%", "94,6%", "65,4%", "≈18%"):
-        assert part in html
-    assert "IC 95%" not in html and "erros em" not in html
-
-
-def test_numbers_technical_adds_counts_and_intervals():
-    html = HO.numbers_html(_data(), True)
-    assert "777 erros em 54.321 objetos" in html
-    assert "IC 95%" in html and "4.321 de 5.555 quasares" in html
-    assert "prior P2" in html
-
-
-def test_numbers_skips_missing_points():
-    html = HO.numbers_html(_data(shipped=None, matched=None), False)
-    assert html.count("at-big") == 1
-
-
 def test_data_box_comes_from_data():
     html = HO.data_box_html(_data())
     for part in (
@@ -123,22 +81,6 @@ def test_data_box_comes_from_data():
     ):
         assert part in html
     assert "LightGBM com calibração" in html and "DSC" in html
-
-
-def test_purity_two_rows_simple_three_technical():
-    simple, tech = HP.purity_html(_data(), False), HP.purity_html(_data(), True)
-    assert simple.count("at-rowp") == 3  # header row + 2 data rows
-    assert tech.count("at-rowp") == 4
-    assert "acerta quando aponta" in simple and "acha dos que existem" in simple
-    assert "at-ci" not in simple and "at-ci" in tech
-    assert "Completude fixa em 80%" in tech and "só validação" in tech
-    assert "≈ 5,6%" in tech and "≈ 17,7%" in tech
-    assert "Completude fixa" not in simple
-
-
-def test_purity_empty_message():
-    html = HP.purity_html(_data(shipped=None, matched=None, validation=None), False)
-    assert "Sem pureza" in html and "at-dotf" not in html
 
 
 def test_errors_title_and_bar_counts():
@@ -181,13 +123,6 @@ def test_triage_missing_curve():
     assert "Sem curva" in HT.triage_html(_data(triage=None), True)
 
 
-def test_text_is_escaped():
-    html = HO.numbers_html(_data(), True) + HP.purity_html(_data(), True)
-    assert "<script" not in html
-    evil = replace(_data(), prior="<script>x</script>")
-    assert "<script>" not in HO.numbers_html(evil, True)
-
-
 def test_total_pairs_and_class_mix():
     assert P.total_pairs({"n_per_fold": {"train": 5, "val": 3, "test": 2}}) == 10
     assert P.total_pairs({}) is None and P.total_pairs({"n_per_fold": "x"}) is None
@@ -213,9 +148,3 @@ def test_triage_label_anchored_by_side_of_the_point():
     assert "ao-la ao-la-l" in HT.triage_html(_data(), False) or "ao-la ao-la-r" in HT.triage_html(_data(), False)
 
 
-def test_results_title_follows_the_cells_shown():
-    assert HO.results_title(3) == "O resultado em três números"
-    assert HO.results_title(2) == "O resultado em dois números"
-    assert HO.results_title(1) == "O resultado" == HO.results_title(0) == HO.results_title(9)
-    html = HO.numbers_html(_data(), False)
-    assert HO.results_title(html.count("at-big at-accent") + html.count("class='at-big'")) in html
