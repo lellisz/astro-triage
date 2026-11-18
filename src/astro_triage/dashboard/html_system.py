@@ -12,8 +12,16 @@ import math
 from collections.abc import Mapping, Sequence
 from html import escape
 from itertools import pairwise
+from typing import Literal
 
 from astro_triage.dashboard import fmt, theme
+from astro_triage.dashboard.kit_types import (
+    BarRow,
+    Interval,
+    KitInputError,
+    Value,
+    Verdict,
+)
 
 NA = "n/a"
 MONO = "ui-monospace, Menlo, Consolas, monospace"
@@ -71,6 +79,16 @@ TICK_H_PX = 16
 STRIP_H_PX = 24
 DR_TRACK_PX = 36  # height of the track of an ``hs-dr`` row
 BIG_PX = 54
+HB_VALUE_PX = 72
+HB_GAP_PX = 12
+HB_TRACK_PX = 10
+HB_MARK_PX = 3
+HB_CI_PX = 3  # interval stroke on its own strip of the track, below the fill
+HB_STRIP_PX = 14
+DIFF_DIGITS = 3
+CHIP_KINDS = ("accepted", "proposed", "closed", "na")
+SEL_MARK = "▸"
+SEL_WORD = "selecionada"
 
 
 def _t(text: object) -> str:
@@ -514,6 +532,234 @@ def abs_bars(rows: Sequence[Mapping]) -> str:
     return f"<section class='hs-panel'>{''.join(out)}{axis}</section>"
 
 
+def _lang() -> str:
+    return f"lang='{PAGE_LANG}'"
+
+
+def between_text(ci: Interval | None, digits: int = ONE) -> str:
+    """Sentence "entre X e Y" with the interval label, built from the interval; n/a if none."""
+    if ci is None:
+        return NA
+    lo, hi = fmt.pt_pct(ci.lo, digits), fmt.pt_pct(ci.hi, digits)
+    return f"entre {lo} e {hi} · {fmt.pt_ci_label()}"
+
+
+def number_card(title: str, value: Value, definition: str, digits: int = ONE) -> str:
+    """Card with one number, its interval sentence and a definition; n/a draws neither."""
+    if value.point is None:
+        shown, between = NA, ""
+    else:
+        shown = fmt.pt_pct(value.point, digits)
+        between = f"<div class='hs2-between'>{_t(between_text(value.ci, digits))}</div>"
+    return (
+        f"<div class='hs2-card' {_lang()}><div class='hs2-ct'>{_t(title)}</div>"
+        f"<div class='hs2-cv'>{_t(shown)}</div>{between}"
+        f"<p class='hs2-cd'>{_t(definition)}</p></div>"
+    )
+
+
+def _unit(name: str, x: float) -> float:
+    if not 0.0 <= x <= ONE:
+        raise KitInputError(f"{name} fora da escala linear de zero a um")
+    return x
+
+
+def _label_html(row: BarRow) -> str:
+    mark = (
+        f"<span class='hs2-sel'>{SEL_MARK} {SEL_WORD}</span> " if row.selected else ""
+    )
+    note = f" <span class='hs2-rn'>{_t(row.note)}</span>" if row.note else ""
+    return f"<div class='hs2-lab'>{mark}{_t(row.label)}{note}</div>"
+
+
+def hbar(row: BarRow, digits: int = ONE) -> str:
+    """Bar on a linear 0 to 100% scale with its interval; a point without interval is an error."""
+    v = row.value
+    cls = "hs2-row hs2-on" if row.selected else "hs2-row"
+    if v.point is None:
+        return f"<div class='{cls}' {_lang()}>{_label_html(row)}{_na_block()}</div>"
+    if v.ci is None:
+        raise KitInputError(f"barra '{row.label}' sem IC: não renderiza")
+    point = _unit("point", v.point)
+    lo, hi = _unit("lo", v.ci.lo), _unit("hi", v.ci.hi)
+    fill = f"<span class='hs2-fill' style='width:{PERCENT * point:.2f}%'></span>"
+    ci = (
+        f"<span class='hs2-ci' style='left:{PERCENT * lo:.2f}%;"
+        f"width:{PERCENT * (hi - lo):.2f}%'></span>"
+    )
+    mark = f"<span class='hs2-mk' style='left:{PERCENT * point:.2f}%'></span>"
+    return (
+        f"<div class='{cls}' {_lang()}>{_label_html(row)}"
+        f"<div class='hs2-bar'><div class='hs2-trk' aria-hidden='true'>{fill}{ci}{mark}</div>"
+        f"<div class='hs2-val'>{_t(fmt.pt_pct(v.point, digits))}</div></div>"
+        f"<div class='hs2-between'>{_t(between_text(v.ci, digits))}</div></div>"
+    )
+
+
+def hbar_boxes(
+    viewport_px: float, label: str, value_text: str
+) -> dict[str, tuple[float, float, float]]:
+    """Estimated (line, start, end) of label, bar and value; the label has a line of its own."""
+    page = min(viewport_px, theme.WIDE_WIDTH_PX) - 2 * PAGE_PAD_PX
+    track = page - HB_VALUE_PX - HB_GAP_PX
+    start = track + HB_GAP_PX
+    return {
+        "label": (0, 0.0, min(len(label) * CHAR_PX, page)),
+        "bar": (ONE, 0.0, track),
+        "value": (ONE, start, start + len(value_text) * CHAR_PX),
+        "page": (ONE, 0.0, page),
+    }
+
+
+def hbar_group(title: str, rows: Sequence[BarRow], digits: int = ONE) -> str:
+    """Titled group of bars sharing one linear 0 to 100% axis with both ends labelled."""
+    body = "".join(hbar(r, digits) for r in rows)
+    axis = (
+        f"<div class='hs2-bar' aria-hidden='true'><div class='hs2-ax'>"
+        f"<span>{_t(fmt.pt_pct(0, 0))}</span><span>{_t(fmt.pt_pct(ONE, 0))}</span>"
+        f"</div><div></div></div>"
+    )
+    return (
+        f"<div class='hs2-group' role='group' aria-label='{_t(title)}' {_lang()}>"
+        f"<div class='hs2-gt'>{_t(title)}</div>{body}{axis}</div>"
+    )
+
+
+def _sym(x: float, half: float) -> float:
+    return PERCENT * (x + half) / (2 * half)
+
+
+def _verdict_strip(v: Verdict) -> str:
+    if v.ci is None or v.delta is None:
+        return ""
+    half = max(abs(v.ci.lo), abs(v.ci.hi), v.delta, abs(v.d or 0.0))
+    if half < EPS:
+        half = ONE
+    left, right = _sym(-v.delta, half), _sym(v.delta, half)
+    band = f"<span class='hs2-band' style='left:{left:.2f}%;width:{right - left:.2f}%'></span>"
+    zero = f"<span class='hs2-zero' style='left:{HALF}%'></span>"
+    lo, hi = _sym(v.ci.lo, half), _sym(v.ci.hi, half)
+    ci = f"<span class='hs2-ci' style='left:{lo:.2f}%;width:{hi - lo:.2f}%'></span>"
+    mark = (
+        ""
+        if v.d is None
+        else f"<span class='hs2-mk' style='left:{_sym(v.d, half):.2f}%'></span>"
+    )
+    return f"<div class='hs2-strip' aria-hidden='true'>{band}{zero}{ci}{mark}</div>"
+
+
+def verdict_card(title: str, v: Verdict) -> str:
+    """Caller's verdict word, the difference sentence and a mini strip of the +/- delta band."""
+    if v.ci is None or v.delta is None:
+        sentence = NA
+    else:
+        lo = fmt.pt_num(v.ci.lo, DIFF_DIGITS, signed=True)
+        hi = fmt.pt_num(v.ci.hi, DIFF_DIGITS, signed=True)
+        sentence = (
+            f"diferença entre {lo} e {hi}; {DELTA} = {fmt.pt_num(v.delta, DIFF_DIGITS)}"
+        )
+    return (
+        f"<div class='hs2-card' {_lang()}><div class='hs2-ct'>{_t(title)}</div>"
+        f"<div class='hs2-cv'>{_t(v.word)}</div>"
+        f"<div class='hs2-between'>{_t(sentence)}</div>{_verdict_strip(v)}</div>"
+    )
+
+
+def rule_prior_line(text: str) -> str:
+    """The "rule · prior" line; ``text`` comes from ``ui_state.rule_prior_line``."""
+    return f"<p class='hs2-rule' {_lang()}>{_t(text)}</p>"
+
+
+def method_note(text: str) -> str:
+    return f"<p class='hs2-mnote' {_lang()}>{_t(text)}</p>"
+
+
+def status_chip(
+    label: str, kind: Literal["accepted", "proposed", "closed", "na"]
+) -> str:
+    """Status chip; the textual label is always present, the border style only reinforces it."""
+    if kind not in CHIP_KINDS:
+        raise KitInputError(f"tipo de chip desconhecido: {kind}")
+    if not label.strip():
+        raise KitInputError("o chip exige rótulo textual")
+    return f"<span class='hs2-chip hs2-{kind}' {_lang()}>{_t(label)}</span>"
+
+
+def _kit_rules(small: str) -> list[str]:
+    t = theme
+    hair = f"{_px(ONE)} solid"
+    grid = f"{ONE}fr {_px(HB_VALUE_PX)}"
+    pos = {"position": "absolute", "top": _px(0), "bottom": _px(0)}
+    return [
+        _r(".hs2-card", border=f"{hair} {t.HAIRLINE}", padding=_px(t.SPACE_MD)),
+        _r(".hs2-ct,.hs2-gt", color=t.SOFT, font_weight=HEAD_WEIGHT),
+        _r(
+            ".hs2-cv", color=t.TEXT, font_size=_px(BIG_PX // 2), font_weight=HEAD_WEIGHT
+        ),
+        _r(
+            ".hs2-between,.hs2-cd,.hs2-rn,.hs2-mnote",
+            color=t.TEXT_SECONDARY,
+            font_size=_px(t.MIN_SECONDARY_PX),
+        ),
+        _r(".hs2-row", margin=f"{_px(t.SPACE_SM)} {_px(0)}"),
+        _r(".hs2-lab", color=t.SOFT, overflow_wrap="anywhere"),
+        _r(".hs2-on .hs2-lab,.hs2-on .hs2-val", color=t.TEXT, font_weight=HEAD_WEIGHT),
+        _r(".hs2-sel", color=t.ACCENT, font_size=_px(t.MIN_SECONDARY_PX)),
+        _r(
+            ".hs2-bar",
+            display="grid",
+            grid_template_columns=grid,
+            column_gap=_px(HB_GAP_PX),
+            align_items="center",
+        ),
+        _r(".hs2-val", color=t.TEXT, text_align="right"),
+        _r(
+            ".hs2-trk,.hs2-strip",
+            position="relative",
+            background=t.GRID,
+            height=_px(HB_TRACK_PX),
+        ),
+        _r(".hs2-strip", height=_px(HB_STRIP_PX), margin_top=_px(t.SPACE_SM)),
+        _r(".hs2-fill", **pos, left=_px(0), background=t.TEXT_SECONDARY),
+        _r(".hs2-on .hs2-fill", background=t.ACCENT),
+        _r(".hs2-trk .hs2-fill", bottom=_px(HB_CI_PX + ONE)),
+        _r(".hs2-trk .hs2-ci", top=_px(HB_TRACK_PX - HB_CI_PX), bottom=_px(0)),
+        _r(
+            ".hs2-ci", position="absolute", top=_px(2), bottom=_px(2), background=t.TEXT
+        ),
+        _r(
+            ".hs2-mk",
+            position="absolute",
+            top=_px(-2),
+            bottom=_px(-2),
+            width=_px(HB_MARK_PX),
+            background=t.TEXT,
+            box_shadow=f"{_px(0)} {_px(0)} {_px(0)} {_px(ONE)} {t.BG}",
+        ),
+        _r(".hs2-band", **pos, background=t.DASH),
+        _r(".hs2-zero", **pos, width=_px(ONE), background=t.TEXT_SECONDARY),
+        _r(
+            ".hs2-ax",
+            display="flex",
+            justify_content="space-between",
+            font=small,
+            color=t.TEXT_SECONDARY,
+        ),
+        _r(".hs2-rule", color=t.SOFT, font=small),
+        _r(
+            ".hs2-chip",
+            display="inline-block",
+            padding=f"{_px(2)} {_px(10)}",
+            font=small,
+            color=t.TEXT,
+            border=f"{hair} {t.TEXT_SECONDARY}",
+        ),
+        _r(".hs2-accepted", border_color=t.ACCENT),
+        _r(".hs2-proposed,.hs2-na", border_style="dashed"),
+        _r(".hs2-closed", border_color=t.DASH),
+    ]
+
+
 def system_css() -> str:
     t = theme
     hair = f"{_px(1)} solid"
@@ -877,6 +1123,7 @@ def system_css() -> str:
             color=t.TEXT_SECONDARY,
         ),
         _r(".hs-page", min_width=_px(0), overflow_wrap="anywhere"),
+        *_kit_rules(small),
         f"@media(max-width:{_px(MEDIA_PX)}){{{_r('.hs-panels,.hs-cards', grid_template_columns=f'{ONE}fr')}}}",
     ]
     return f"<style>{''.join(rules)}</style>"
