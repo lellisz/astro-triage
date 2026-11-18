@@ -29,7 +29,7 @@ HALF: Final = 50.0
 
 SKY_CSS: Final = (
     "<style>"
-    ".at-map{position:relative;width:100%;aspect-ratio:2/1;margin:8px 0 34px}"
+    ".at-map{position:relative;width:calc(100% - 48px);aspect-ratio:2/1;margin:8px 0 34px 48px}"
     ".at-map>*{position:absolute}"
     f".at-mo{{inset:0;border-radius:50%;border:1px solid {theme.DASH};background:{theme.SECONDARY_BG}}}"
     f".at-me{{top:0;bottom:0;border-radius:50%;border:1px solid {theme.HAIRLINE};box-sizing:border-box}}"

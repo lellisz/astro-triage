@@ -26,7 +26,7 @@ TITLE: Final = "Comparação: LightGBM × deep learning"
 UNAVAILABLE: Final = "não disponível"
 UNAVAILABLE_NOTE: Final = (
     "Esta versão dos dados não tem a avaliação do aprendizado profundo. Escolha outra "
-    "versão na barra lateral."
+    "versão em Ajustes."
 )
 NA: Final = hs.NA
 DESCRIPTIVE_TITLE: Final = "Descritivo: conjuntos de sementes e frentes de indicadores"

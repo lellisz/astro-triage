@@ -24,7 +24,7 @@ from astro_triage.dashboard.data_galaxy_prior import (
 from astro_triage.dashboard.kit_types import NA_WORD, BarRow, Value, Verdict
 from astro_triage.dashboard.kit_types import Interval as KitInterval
 from astro_triage.dashboard.limits_pt import translate
-from astro_triage.dashboard.ui_state import RULE_LABEL, Rule, UiState, rule_prior_line
+from astro_triage.dashboard.ui_state import RULE_LABEL, Rule, UiState
 
 CROSSMATCH_ADR: Final = 4
 VERDICT_SCOPE: Final = "Vale para a regra"
@@ -199,9 +199,7 @@ def page_html(
     if verdict is not VerdictKey.UNAVAILABLE:
         sentence = f"{sentence} {VERDICT_SCOPE} {RULE_LABEL[Rule.MATCHED]}."
     body = (
-        hs.seal(release)
-        + hs.rule_prior_line(rule_prior_line(state))
-        + hs.verdict_oneline(sentence)
+        hs.verdict_oneline(sentence)
         + cards_html(purity, completeness)
         + dependence_html(purity, completeness)
         + verdict_cards_html(cells, dl_error, fixed_point)

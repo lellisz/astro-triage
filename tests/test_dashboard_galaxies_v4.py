@@ -198,9 +198,12 @@ def test_tables_only_in_technical_mode(monkeypatch):
     assert hg.TECH_DETAILS in tech and "<details" in tech
 
 
-def test_page_has_rule_prior_line_and_unavailable_cards(monkeypatch):
+def test_page_leaves_seal_and_rule_line_to_the_shell_and_has_unavailable_cards(
+    monkeypatch,
+):
     out = _page(monkeypatch, STATE, None)
-    assert ui_state.rule_prior_line(STATE) in out
+    # app.shell_header already prints the seal and the rule/prior line on every tab
+    assert ui_state.rule_prior_line(STATE) not in out
     assert out.count("hs2-card") >= 4  # purity, completeness, two verdicts
 
 
@@ -329,7 +332,7 @@ def test_verdict_block_states_the_fixed_point_whatever_the_sidebar(monkeypatch, 
     out = _page(monkeypatch, state, results)
     model = CM.build(results)
     fixed = CT.fixed_point_line(ui_state.LINE_LABEL, model.prior, model.level)
-    assert ui_state.rule_prior_line(state) in out
+    assert ui_state.rule_prior_line(state) not in out  # printed once, by the shell
     verdict_block = out[out.index(hg.DELTA_TITLE) :].split(hg.ERRORS_TITLE)[0]
     assert hs.method_note(fixed) in verdict_block
 

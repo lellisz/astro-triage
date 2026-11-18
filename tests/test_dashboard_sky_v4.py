@@ -110,7 +110,8 @@ def test_map_has_no_fixed_width_wider_than_narrow_viewport():
     html = sky_map_html.build_map(_stats(), True, FLOOR)
     fixed = re.findall(r"(?<![-\w])(?:min-)?width:(\d+(?:\.\d+)?)px", html)
     assert all(float(w) <= 390 for w in fixed), fixed
-    assert "width:100%" in html
+    # the map itself stays fluid: all of the row, minus the margin reserved for latitude labels
+    assert re.search(r"\.at-map\{[^}]*width:(?:100%|calc\(100% - \d+px\))", html)
 
 
 def test_legend_has_linear_scale_and_na_outline_but_no_log():
