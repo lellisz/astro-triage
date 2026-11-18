@@ -1,8 +1,7 @@
 """Método page blocks as HTML (design kit). Pure: no streamlit; no number is written here.
 
 The decision rule is the one text of ``verdict_rule`` (the same as on the Comparação page).
-The ADR board shows the status read from each ADR header. Deep-learning numbers are not
-written here.
+Deep-learning numbers are not written here.
 """
 
 from __future__ import annotations
@@ -14,7 +13,6 @@ from typing import Final
 from astro_triage.dashboard import fmt
 from astro_triage.dashboard import method_notes as notes
 from astro_triage.dashboard import verdict_rule as VR
-from astro_triage.dashboard.adr_board import AdrEntry
 from astro_triage.dashboard.data_headline import PAIR_NAMES
 from astro_triage.dashboard.data_release import CLASSES
 from astro_triage.dashboard.html_system import (
@@ -23,9 +21,8 @@ from astro_triage.dashboard.html_system import (
     method_note,
     section,
     small_note,
-    status_chip,
 )
-from astro_triage.dashboard.limits_pt import translate
+from astro_triage.dashboard.limits_pt import omit_record_refs, translate
 
 LEAD: Final = (
     "Um modelo de árvores aprende com objetos cujo tipo já é conhecido pelo espectro "
@@ -65,20 +62,13 @@ GLOSSARY: Final[tuple[tuple[str, str | None], ...]] = (
 READING_TITLE: Final = "Como ler os números"
 GLOSSARY_TITLE: Final = "Glossário"
 LIMITS_TITLE: Final = "Limitações da avaliação"
-ORIGINAL_TITLE: Final = "Texto original (inglês)"
+ORIGINAL_TITLE: Final = "Texto original (inglês, sem as citações internas)"
 SOURCES_TITLE: Final = "Fontes"
 RULE_TITLE: Final = "Regra de decisão"
-BOARD_TITLE: Final = "Decisões registradas (ADRs)"
 THREE_LIMITS_TITLE: Final = "Três limitações"
 LINKS_TITLE: Final = "Links"
 UNTRANSLATED: Final = " (sem tradução)"
 CROSSMATCH_PREFIX: Final = "Selection by crossmatch"
-CHIP_LABEL: Final[dict[str, str]] = {
-    "accepted": "Aceita",
-    "proposed": "Proposta",
-    "closed": "Encerrada",
-    "na": NA,
-}
 
 
 def mix_sentence(mix: Mapping[str, float]) -> str:
@@ -110,29 +100,17 @@ def rule_html() -> str:
     return section(RULE_TITLE, "", method_note(VR.rule_text()))
 
 
-def adr_board_html(entries: Sequence[AdrEntry]) -> str:
-    """One line per ADR: number (from the file name), title and the chip read from its header."""
-    if not entries:
-        return section(BOARD_TITLE, "", small_note(NA))
-    items = "".join(
-        f"<li>ADR {escape(e.number)}: {escape(e.title)} "
-        f"{status_chip(CHIP_LABEL[e.chip], e.chip)}</li>"
-        for e in entries
-    )
-    return section(BOARD_TITLE, "", f"<ul>{items}</ul>")
-
-
 def crossmatch_limit(limitations: Sequence[str]) -> str:
     """Translated 'Selection by crossmatch' limitation from the artifact; n/a when absent."""
     for text in limitations:
         if text.startswith(CROSSMATCH_PREFIX):
             line, translated = translate(text)
-            return line if translated else line + UNTRANSLATED
+            return line if translated else omit_record_refs(line) + UNTRANSLATED
     return NA
 
 
 def three_limits_html(limitations: Sequence[str]) -> str:
-    """Catalogue intersection, neighbouring regions (ADR 0003) and the assumed prior."""
+    """Catalogue intersection, neighbouring regions and the assumed prior."""
     items = [crossmatch_limit(limitations), notes.NEIGHBOUR_NOTE, notes.PRIOR_NOTE]
     return section(THREE_LIMITS_TITLE, "", _list(items))
 
@@ -178,8 +156,8 @@ def limitations_html(originals: list[str]) -> str:
     shown = []
     for text in originals:
         line, translated = translate(text)
-        shown.append(line if translated else line + UNTRANSLATED)
-    nested = details(ORIGINAL_TITLE, _list(list(originals)))
+        shown.append(line if translated else omit_record_refs(line) + UNTRANSLATED)
+    nested = details(ORIGINAL_TITLE, _list([omit_record_refs(t) for t in originals]))
     return details(LIMITS_TITLE, _list(shown) + nested)
 
 

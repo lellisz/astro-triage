@@ -13,7 +13,6 @@ from typing import Final
 
 from astro_triage.dashboard import fmt
 from astro_triage.dashboard import html_system as hs
-from astro_triage.dashboard.constants import ADR_NUMBER
 from astro_triage.dashboard.data_dl import (
     ClassVerdict,
     PairCell,
@@ -21,6 +20,7 @@ from astro_triage.dashboard.data_dl import (
 )
 from astro_triage.dashboard.data_headline import PAIR_NAMES
 from astro_triage.dashboard.html_kit import box, section, table
+from astro_triage.dashboard.limits_pt import omit_record_refs
 
 TITLE: Final = "Comparação: LightGBM × deep learning"
 UNAVAILABLE: Final = "não disponível"
@@ -30,8 +30,11 @@ UNAVAILABLE_NOTE: Final = (
 )
 NA: Final = hs.NA
 DESCRIPTIVE_TITLE: Final = "Descritivo: conjuntos de sementes e frentes de indicadores"
-LIMITS_TITLE: Final = "Limitações registradas no results_dl (texto original, inglês)"
-_STATUS_PT: Final = {"Proposed": "Proposta", "Accepted": "Aceita"}
+LIMITS_TITLE: Final = (
+    "Limitações registradas no results_dl (texto original em inglês, sem as citações internas)"
+)
+PROTOCOL: Final = "protocolo da comparação"
+_STATUS_PT: Final = {"Proposed": "em proposta", "Accepted": "aceito"}
 _ACCEPTED: Final = "Accepted"
 _NET: Final = {"mlp": "MLP", "ftt": "FTT"}
 _FAMILY: Final = {"lgbm": "LightGBM", "mlp": "MLP", "ftt": "FT-Transformer"}
@@ -141,18 +144,18 @@ def reasons_html(
     floor_cells: int,
     limitations: bool,
 ) -> str:
-    """Reason line derived from the ADR header and the artifacts read.
+    """Reason line derived from the protocol record header and the artifacts read.
 
     The PROVISIONAL seal itself is printed once per tab by the shell header.
     """
     word = _STATUS_PT.get(status or "")
     if word is None:
-        adr = f"ADR {ADR_NUMBER:04d}: {NA}"
+        protocol = f"{PROTOCOL}: {NA}"
     else:
         extra = [] if status == _ACCEPTED else ["aceitação aberta"]
         extra.append("o freeze existe" if freeze else f"freeze {NA}")
-        adr = f"ADR {ADR_NUMBER:04d} {word} ({'; '.join(extra)})"
-    reasons = [adr]
+        protocol = f"{PROTOCOL} {word} ({'; '.join(extra)})"
+    reasons = [protocol]
     if floor_cells > 0:
         reasons.append("células do destaque abaixo do piso de relato")
     reasons.append(
@@ -196,5 +199,6 @@ def limitations_html(items: Sequence[str] | None) -> str:
     if not items:
         return hs.lang_root(_p(NA))
     return hs.lang_root(
-        "<ul>" + "".join(f"<li>{escape(t)}</li>" for t in items) + "</ul>"
+        "<ul>" + "".join(f"<li>{escape(omit_record_refs(t))}</li>" for t in items)
+        + "</ul>"
     )

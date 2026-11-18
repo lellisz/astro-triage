@@ -18,14 +18,13 @@ from astro_triage.dashboard import fmt
 from astro_triage.dashboard import html_dl as HD
 from astro_triage.dashboard import html_system as hs
 from astro_triage.dashboard import verdict_rule as VR
-from astro_triage.dashboard.constants import ADR_NUMBER
 from astro_triage.dashboard.ui_state import LINE_LABEL
 from astro_triage.evaluation import dl_compare
 
 GRID_LEAD = "Quatro células: classe por rede, cada uma contra o LightGBM."
 PURITY_LEAD = "Barras a partir de zero: a mediana das sementes e, na linha fina, o mínimo e o máximo."
 UNREADABLE = "O arquivo da avaliação do aprendizado profundo está ilegível."
-METHOD_TITLE = f"Nota de método (ADR {ADR_NUMBER:04d})"
+METHOD_TITLE = "Nota de método"
 
 
 def _md(html: str) -> None:

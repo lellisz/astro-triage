@@ -9,19 +9,23 @@ from __future__ import annotations
 
 import json
 import math
-from collections.abc import Mapping
+import re
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
 from pathlib import Path
+from typing import Final
 
 import pandas as pd
 
-from astro_triage.dashboard.adr_board import ADR_HEADER_LINES, parse_status
 from astro_triage.dashboard.constants import ADR_NUMBER
 from astro_triage.dashboard.data_release import REPO_ROOT, Release, strip_sha256
 from astro_triage.evaluation.dl_compare import TARGET_CLASSES
 
 _EVAL_DIR = ("dl", "eval")
+_HEADER_LINES: Final = 12
+_STATUS_LINE: Final = re.compile(r"^- Status:\s*(.*)$")
+_STATUS_WORD: Final = re.compile(r"^[*_\s]*([A-Za-z]+)")
 HEADLINE_ROLE = "headline"
 SENSITIVITY_ROLE = "sensitivity"
 DESCRIPTIVE_ROLE = "descriptive"
@@ -240,15 +244,25 @@ def below_floor(head: Headline) -> int:
     )
 
 
+def _status_word(lines: Sequence[str]) -> str | None:
+    """First word of the first ``- Status:`` line in the header; None when absent."""
+    for line in lines[:_HEADER_LINES]:
+        found = _STATUS_LINE.match(line)
+        if found:
+            word = _STATUS_WORD.match(found.group(1))
+            return word.group(1) if word else None
+    return None
+
+
 def adr_status(adr_dir: Path | None = None) -> str | None:
-    """Status word of the ADR header (e.g. 'Proposed'); None when it cannot be read."""
+    """Status word of the protocol record header (e.g. 'Proposed'); None when unreadable."""
     base = adr_dir or REPO_ROOT / "docs" / "adr"
     try:
         path = min(base.glob(f"{ADR_NUMBER:04d}-*.md"))
-        head = path.read_text(encoding="utf-8").splitlines()[:ADR_HEADER_LINES]
+        head = path.read_text(encoding="utf-8").splitlines()[:_HEADER_LINES]
     except (OSError, ValueError):
         return None
-    return parse_status(head)
+    return _status_word(head)
 
 
 def freeze_exists(rel: Release) -> bool:

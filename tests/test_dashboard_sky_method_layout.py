@@ -156,7 +156,7 @@ def _has_digits(text: str) -> bool:
     return bool(re.search(r"\d", text))
 
 
-@pytest.mark.parametrize("name", ["method_notes.py", "html_method.py", "adr_board.py"])
+@pytest.mark.parametrize("name", ["method_notes.py", "html_method.py"])
 def test_no_digit_in_string_literals(name):
     tree = ast.parse((DASH / name).read_text(encoding="utf-8"))
     docs = {

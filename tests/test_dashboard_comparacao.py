@@ -264,10 +264,10 @@ def test_a6_tiny_delta_draws_two_labelled_marks():
 def test_a7_seal_reason_is_derived():
     s = HD.reasons_html("Proposed", True, 0, True)
     assert "PROVISÓRIO" not in s  # the seal is printed once, by the shell header
-    assert "ADR 0006 Proposta (aceitação aberta; o freeze existe)" in s
+    assert "protocolo da comparação em proposta (aceitação aberta; o freeze existe)" in s
     assert "piso" not in s
     assert "abaixo do piso de relato" in HD.reasons_html("Proposed", True, 2, True)
-    assert "ADR 0006: n/a" in HD.reasons_html(None, True, 0, False)
+    assert "protocolo da comparação: n/a" in HD.reasons_html(None, True, 0, False)
     assert "limitações do results_dl: n/a" in HD.reasons_html(
         "Proposed", True, 0, False
     )
@@ -289,6 +289,16 @@ def test_a7_reads_fail_to_na(tmp_path):
     )
     assert DD.adr_status(tmp_path) == "Accepted"
     assert "aceitação aberta" not in HD.reasons_html("Accepted", True, 0, True)
+
+
+def test_a7_adr_status_first_word_and_file_choice(tmp_path):
+    (tmp_path / "0006-a.md").write_text(
+        "# t\n- Status: **Closed without x**\n", encoding="utf-8"
+    )
+    assert DD.adr_status(tmp_path) == "Closed"
+    (tmp_path / "0006-a.md").write_text("- Status: Accepted\n", encoding="utf-8")
+    (tmp_path / "0007-b.md").write_text("- Status: Proposed\n", encoding="utf-8")
+    assert DD.adr_status(tmp_path) == "Accepted"
 
 
 def test_a7_real_adr_status_and_lang():

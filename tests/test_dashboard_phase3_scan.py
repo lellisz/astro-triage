@@ -26,7 +26,6 @@ FILES = [
     "html_galaxies.py",
     "html_galaxies_tech.py",
     "html_method.py",
-    "adr_board.py",
     "method_notes.py",
     "html_kit.py",
 ]

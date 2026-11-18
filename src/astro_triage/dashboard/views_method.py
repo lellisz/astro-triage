@@ -11,7 +11,6 @@ from astro_triage.dashboard import fmt
 from astro_triage.dashboard import html_method as HM
 from astro_triage.dashboard import method_notes as N
 from astro_triage.dashboard import verdict_rule as VR
-from astro_triage.dashboard.adr_board import load_board
 from astro_triage.dashboard.html_system import lang_root, system_css
 from astro_triage.dashboard.views_common import tech_on
 
@@ -81,12 +80,7 @@ def method_page(rel: D.Release) -> None:
     st.markdown(system_css(), unsafe_allow_html=True)
     mix = rel.test["true"].value_counts(normalize=True).to_dict()
     limitations = list(rel.results["limitations"])
-    common = (
-        HM.method_html(mix)
-        + HM.rule_html()
-        + HM.adr_board_html(load_board())
-        + HM.three_limits_html(limitations)
-    )
+    common = HM.method_html(mix) + HM.rule_html() + HM.three_limits_html(limitations)
     if not tech_on():
         _html(
             HM.simple_html()
