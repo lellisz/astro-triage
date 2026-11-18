@@ -11,10 +11,10 @@ from types import SimpleNamespace
 
 import pytest
 
+from astro_triage.dashboard import compare_model, verdict_rule, views_dl
 from astro_triage.dashboard import data_dl as DD
 from astro_triage.dashboard import html_dl as HD
 from astro_triage.dashboard import html_system as hs
-from astro_triage.dashboard import views_dl
 from astro_triage.evaluation import dl_compare
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -262,9 +262,9 @@ def test_a4_mlp_quasar_worse_is_never_a_tie():
 
 def test_a4_no_banned_terms():
     pages = [_page(r) for r in _synthetic_variants()]
-    rule = views_dl.rule_facts()
     pages += [
-        HD.method_html(rule, 1000),
+        HD.hs.method_note(verdict_rule.rule_text()),
+        views_dl.page_html(compare_model.build(_results(ftt=(TIE, "win", "tie"))), "x"),
         HD.descriptive_html([], "P2", "0.80"),
         HD.error_html("x"),
     ]

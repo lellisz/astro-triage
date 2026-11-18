@@ -15,13 +15,20 @@ from astro_triage.dashboard import (
     html_dl,
     style_kit,
     theme,
-    views_dl,
+    verdict_rule,
 )
 from astro_triage.evaluation import dl_compare
 
 DASH = Path(__file__).resolve().parents[1] / "src" / "astro_triage" / "dashboard"
 TESTS = Path(__file__).resolve().parent
-TAB_FILES = ("views_dl.py", "html_dl.py", "data_dl.py")
+TAB_FILES = (
+    "views_dl.py",
+    "html_dl.py",
+    "data_dl.py",
+    "verdict_rule.py",
+    "compare_model.py",
+    "compare_text.py",
+)
 EVIL = "<script>alert(1)</script>"
 
 
@@ -97,11 +104,11 @@ def test_e_text_is_escaped():
 
 
 def test_f_rule_text_follows_dl_compare_constants(monkeypatch):
-    before = "".join(html_dl.method_lines(views_dl.rule_facts(), 1000))
+    before = verdict_rule.rule_text()
     assert "2 desvios-padrão (ddof = 1)" in before and "5 sementes" in before
     monkeypatch.setattr(dl_compare, "DELTA_SD_MULTIPLIER", 3.5)
     monkeypatch.setattr(dl_compare, "N_SEEDS", 7)
-    after = "".join(html_dl.method_lines(views_dl.rule_facts(), 1000))
+    after = verdict_rule.rule_text()
     assert "3,5 desvios-padrão" in after and "7 sementes" in after and after != before
 
 

@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from html import escape
-from typing import TYPE_CHECKING, Final
+from typing import Final
 
 from astro_triage.dashboard import fmt
 from astro_triage.dashboard import html_system as hs
@@ -25,9 +25,6 @@ from astro_triage.dashboard.data_dl import (
 )
 from astro_triage.dashboard.data_headline import PAIR_NAMES
 from astro_triage.dashboard.html_kit import box, section, table
-
-if TYPE_CHECKING:
-    from astro_triage.dashboard.views_dl import RuleFacts
 
 TITLE: Final = "Comparação: LightGBM × deep learning"
 UNAVAILABLE: Final = "não disponível"
@@ -421,40 +418,4 @@ def limitations_html(items: Sequence[str] | None) -> str:
         return hs.lang_root(_p(NA))
     return hs.lang_root(
         "<ul>" + "".join(f"<li>{escape(t)}</li>" for t in items) + "</ul>"
-    )
-
-
-def method_lines(rule: RuleFacts, n_boot: int | None) -> list[str]:
-    boot = NA if n_boot is None else fmt.pt_int(n_boot)
-    return [
-        (
-            "Vitória na classe: célula relatável, D maior que δ e limite inferior do "
-            "intervalo maior que zero. Pior na classe: D menor que −δ e limite superior "
-            "menor que zero; é descritivo e não decide o par."
-        ),
-        (
-            "O par vence só com vitória nas duas classes. Célula abaixo do piso de relato "
-            "conta como empate. Em empate, fica o LightGBM."
-        ),
-        "Sem correção de multiplicidade entre os dois pares.",
-        (
-            f"δ = {fmt.pt_g(rule.multiplier)} desvios-padrão (ddof = {rule.ddof}) das "
-            f"{fmt.pt_int(rule.n_seeds)} sementes do LightGBM, medido na validação."
-        ),
-        (
-            f"{fmt.pt_ci_label()} por bootstrap de blocos do céu (n_boot {boot}; bloco = "
-            f"pixel nível {rule.block_level} da divisão por "
-            f"{fmt.pt_int(rule.block_divisor)}, ao menos {fmt.pt_int(rule.min_blocks)} blocos)."
-        ),
-        (
-            f"Métrica: pureza à completude fixa C* = {fmt.pt_num(rule.primary_completeness, 2)}, "
-            f"prior {rule.primary_prior}; sensibilidade em {', '.join(rule.sensitivity_priors)}."
-        ),
-    ]
-
-
-def method_html(rule: RuleFacts, n_boot: int | None) -> str:
-    items = "".join(f"<li>{escape(t)}</li>" for t in method_lines(rule, n_boot))
-    return hs.lang_root(
-        box(f"Nota de método (ADR {ADR_NUMBER:04d})", f"<ul>{items}</ul>")
     )
