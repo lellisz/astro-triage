@@ -15,6 +15,7 @@ import pandas as pd
 
 from astro_triage.dashboard import fmt, theme
 from astro_triage.dashboard.data_sky import BAND_EDGES_DEG, mollweide
+from astro_triage.dashboard.sky_model import map_payload
 
 X_MAX: Final = 2 * math.sqrt(2)
 Y_MAX: Final = math.sqrt(2)
@@ -41,6 +42,8 @@ SKY_CSS: Final = (
     ".at-lon{top:50%;transform:translate(-50%,6px)}"
     ".at-lg{display:flex;align-items:center;gap:12px;max-width:420px;margin:0 auto}"
     ".at-lgb{flex:1;height:10px;border-radius:5px}"
+    ".at-lgn{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:8px}"
+    ".at-lr{display:inline-block;width:12px;height:12px;border-radius:50%;box-sizing:border-box}"
     "</style>"
 )
 
@@ -112,22 +115,27 @@ def color_cap(stats: pd.DataFrame, by_rate: bool, floor: int) -> float:
 
 
 def region_points(
-    stats: pd.DataFrame, by_rate: bool, floor: int, hide_below: bool, cap: float
+    payload: pd.DataFrame, by_rate: bool, floor: int, hide_below: bool, cap: float
 ) -> str:
-    """One dot per region at its projected position; hollow ring below the floor (rate mode)."""
+    """One dot per region at its projected position; hollow ring below the floor (rate mode).
+
+    ``payload`` is the output of ``sky_model.map_payload``: nothing per object reaches here.
+    """
     parts = []
-    for r in stats.itertuples(index=False):
-        if not (math.isfinite(r.x) and math.isfinite(r.y)):
+    layer = "rate" if by_rate else "n"
+    for r in payload.to_dict("records"):
+        if not (math.isfinite(r["x"]) and math.isfinite(r["y"])):
             continue
-        pos = f"left:{HALF + r.x / X_MAX * HALF:.2f}%;top:{HALF - r.y / Y_MAX * HALF:.2f}%"
-        tip = f"{fmt.pt_int(r.n)} objetos, {fmt.pt_int(r.errors)} erros"
-        if by_rate and r.n < floor:
+        pos = f"left:{HALF + r['x'] / X_MAX * HALF:.2f}%;top:{HALF - r['y'] / Y_MAX * HALF:.2f}%"
+        if by_rate and r["below_floor"]:
             if not hide_below:
+                tip = f"menos de {fmt.pt_int(floor)} objetos: n/a"
                 parts.append(
                     f"<i class='at-pt at-ring' style='{pos}' title='{_t(tip)}'></i>"
                 )
             continue
-        value = r.rate if by_rate else r.n
+        value = r[layer]
+        tip = fmt.pt_pct(value) if by_rate else f"{fmt.pt_int(value)} objetos"
         fill = theme.ramp(value / cap if cap > 0 else 0.0)
         parts.append(
             f"<i class='at-pt' style='{pos};background:{fill}' title='{_t(tip)}'></i>"
@@ -140,17 +148,27 @@ def lead_line(text: str) -> str:
     return f"<p style='margin:0 0 24px;font-size:19px'>{_t(text)}</p>"
 
 
-def legend(by_rate: bool, cap: float) -> str:
-    """Gradient bar from zero to the colour cap, both ends labelled with computed values."""
+def legend(by_rate: bool, cap: float, floor: int, rings: bool = False) -> str:
+    """Linear gradient bar from zero to the colour cap, both ends labelled with computed values.
+
+    In rate mode the hollow ring (regions below the floor) gets its own "n/a" entry.
+    """
     if by_rate:
         left, right = fmt.pt_pct(0, 0), f"{fmt.pt_pct(cap)} ou mais"
     else:
-        left, right = "0", f"{fmt.pt_int(round(cap))} objetos ou mais"
+        left, right = fmt.pt_int(0), f"{fmt.pt_int(round(cap))} objetos ou mais"
     grad = f"linear-gradient(90deg,{theme.ramp(0)},{theme.ramp(1)})"
-    return (
+    bar = (
         f"<div class='at-lg'><span class='at-cap'>{_t(left)}</span>"
         f"<div class='at-lgb' style='background:{grad}'></div>"
         f"<span class='at-cap'>{_t(right)}</span></div>"
+    )
+    if not (by_rate and rings):
+        return bar
+    na = f"n/a: menos de {fmt.pt_int(floor)} objetos"
+    return (
+        f"{bar}<div class='at-lgn'><i class='at-lr at-ring'></i>"
+        f"<span class='at-cap'>{_t(na)}</span></div>"
     )
 
 
@@ -159,13 +177,14 @@ def build_map(
 ) -> str:
     """CSS plus map plus legend as one single-line HTML string."""
     cap = color_cap(stats, by_rate, floor)
+    payload = map_payload(stats, floor, show_count=not by_rate)
     what = "a taxa de erro" if by_rate else "a quantidade de objetos"
     label = f"Mapa Mollweide com {what} de {fmt.pt_int(len(stats))} regiões do teste"
     caption = "l = 0° (centro da Via Láctea)"
     return (
         f"{SKY_CSS}<div style='max-width:{theme.WIDE_WIDTH_PX}px;margin:0 auto'>"
         f"<div class='at-map' role='img' aria-label='{_t(label)}'>"
-        f"{graticule()}{region_points(stats, by_rate, floor, hide_below, cap)}"
+        f"{graticule()}{region_points(payload, by_rate, floor, hide_below, cap)}"
         f"<span class='at-cap' style='left:50%;bottom:-28px;transform:translateX(-50%)'>{_t(caption)}</span>"
-        f"</div>{legend(by_rate, cap)}</div>"
+        f"</div>{legend(by_rate, cap, floor, rings=not hide_below)}</div>"
     )

@@ -12,11 +12,14 @@ from astro_triage.dashboard import (
     fmt,
     method_notes,
     sky_map_html,
+    sky_model,
     sky_text,
 )
 from astro_triage.dashboard.html_system import (
+    cards,
     details,
     lang_root,
+    number_card,
     small_note,
     system_css,
 )
@@ -54,17 +57,38 @@ def sky_page(rel: D.Release, px: pd.DataFrame) -> None:
                 value=False,
                 key=HIDE_KEY,
             )
-    n_hidden = int((stats["n"] < floor).sum())
+    sc = sky_model.cards(stats, rel.meta)
     st.markdown(system_css(), unsafe_allow_html=True)
     _md(
         sky_text.header_html(
             sky_text.TITLE,
-            sky_text.lead(len(stats)),
-            sky_text.how(by_rate, n_hidden, floor, hide),
+            sky_text.lead(sc.n_regions),
+            sky_text.how(by_rate, sc.n_below, floor, hide),
         )
     )
+    _md(
+        cards(
+            [
+                sky_text.count_card(
+                    sky_text.CARD_REGIONS,
+                    fmt.pt_int(sc.n_regions),
+                    sky_text.regions_def(sc.n_objects),
+                ),
+                sky_text.count_card(
+                    sky_text.CARD_BELOW,
+                    fmt.pt_int(sc.n_below),
+                    sky_text.below_def(floor),
+                ),
+                number_card(sky_text.CARD_MAX, sc.max_rate, sky_text.max_def(floor)),
+            ],
+            three_across=True,
+        )
+    )
+    if sc.diverges:
+        _md(small_note(sky_text.diverge_note(sc.meta_regions, sc.meta_objects)))
     _md(sky_map_html.lead_line(sky_text.map_lead(stats, floor)))
     _md(sky_map_html.build_map(stats, by_rate, floor, hide))
+    _md(small_note(sky_text.POSITION_NOTE))
     _md(small_note(method_notes.NEIGHBOUR_NOTE))
     if not tech:
         return

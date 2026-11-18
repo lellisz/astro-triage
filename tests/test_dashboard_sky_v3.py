@@ -26,7 +26,15 @@ def _stats() -> pd.DataFrame:
     k = np.array([100, 4, 60, 12, 5, 30])
     band = ["A", "C", "B", "C", "A", "A"]
     return pd.DataFrame(
-        {"n": n, "errors": k, "rate": k / n, "x": x, "y": y, "band": band}
+        {
+            "healpix_l5": np.arange(len(n)),
+            "n": n,
+            "errors": k,
+            "rate": k / n,
+            "x": x,
+            "y": y,
+            "band": band,
+        }
     )
 
 
@@ -198,7 +206,7 @@ def test_top_error_regions_order_floor_and_position():
 
 
 # sweeps
-@pytest.mark.parametrize("name", ["views_sky.py", "sky_text.py"])
+@pytest.mark.parametrize("name", ["views_sky.py", "sky_text.py", "sky_model.py"])
 def test_no_hand_written_digits_in_text_modules(name):
     bad = [
         (n.lineno, n.value[:60])

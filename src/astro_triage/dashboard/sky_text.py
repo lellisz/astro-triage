@@ -19,6 +19,53 @@ HOW_LABEL: Final = "Como ler:"
 BANDS_TITLE: Final = "Por faixa de latitude galáctica"
 
 
+CARD_REGIONS: Final = "Regiões de teste"
+CARD_BELOW: Final = "Regiões abaixo do piso"
+CARD_MAX: Final = "Maior erro numa região"
+POSITION_NOTE: Final = (
+    "A posição de cada ponto é a do centro da região (uma posição sintética), "
+    "não a de um objeto."
+)
+
+
+def count_card(title: str, shown: str, definition: str) -> str:
+    """Count card in the kit's card markup: a count is not an estimate, so it carries no interval."""
+    return (
+        f"<div class='hs2-card' lang='{hs.PAGE_LANG}'>"
+        f"<div class='hs2-ct'>{escape(title)}</div>"
+        f"<div class='hs2-cv'>{escape(shown)}</div>"
+        f"<p class='hs2-cd'>{escape(definition)}</p></div>"
+    )
+
+
+def regions_def(n_objects: int) -> str:
+    return f"Regiões do céu com objetos de teste; juntas reúnem {fmt.pt_int(n_objects)} objetos."
+
+
+def below_def(floor: int) -> str:
+    return (
+        f"Regiões com menos de {fmt.pt_int(floor)} objetos: aparecem só como contorno, "
+        "sem taxa de erro (n/a)."
+    )
+
+
+def max_def(floor: int) -> str:
+    return (
+        f"A maior taxa de uma região com ao menos {fmt.pt_int(floor)} objetos. "
+        "É o máximo de uma região, não o erro geral."
+    )
+
+
+def diverge_note(meta_regions: int | None, meta_objects: int | None) -> str:
+    """Shown only when the artifact header and the per-region aggregate disagree."""
+    na = "n/a"
+    shown = [na if v is None else fmt.pt_int(v) for v in (meta_regions, meta_objects)]
+    return (
+        f"O cabeçalho do artefato indica {shown[0]} regiões e {shown[1]} objetos; "
+        "os cartões mostram a soma das regiões."
+    )
+
+
 def lead(n_regions: int) -> str:
     return (
         f"{fmt.pt_int(n_regions)} regiões do céu do teste, em coordenadas galácticas."
