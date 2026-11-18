@@ -262,17 +262,23 @@ def test_a6_tiny_delta_draws_two_labelled_marks():
 
 # A7 -- seal
 def test_a7_seal_reason_is_derived():
-    s = HD.seal_html("full_v0", "Proposed", True, 0, True)
-    assert "PROVISÓRIO · full_v0" in s
+    s = HD.reasons_html("Proposed", True, 0, True)
+    assert "PROVISÓRIO" not in s  # the seal is printed once, by the shell header
     assert "ADR 0006 Proposta (aceitação aberta; o freeze existe)" in s
     assert "piso" not in s
-    assert "abaixo do piso de relato" in HD.seal_html(
-        "full_v0", "Proposed", True, 2, True
+    assert "abaixo do piso de relato" in HD.reasons_html("Proposed", True, 2, True)
+    assert "ADR 0006: n/a" in HD.reasons_html(None, True, 0, False)
+    assert "limitações do results_dl: n/a" in HD.reasons_html(
+        "Proposed", True, 0, False
     )
-    assert "ADR 0006: n/a" in HD.seal_html("full_v0", None, True, 0, False)
-    assert "limitações do results_dl: n/a" in HD.seal_html(
-        "full_v0", "Proposed", True, 0, False
+
+
+def test_comparison_page_does_not_repeat_the_shell_seal():
+    reasons = HD.reasons_html("Proposed", True, 0, True)
+    page = views_dl.page_html(
+        compare_model.build(_results(ftt=(TIE, "win", "tie"))), reasons
     )
+    assert hs.seal("full_v0") not in page and "PROVISÓRIO" not in page
 
 
 def test_a7_reads_fail_to_na(tmp_path):
@@ -282,7 +288,7 @@ def test_a7_reads_fail_to_na(tmp_path):
         "# t\n\n- Status: **Accepted** (x)\n", encoding="utf-8"
     )
     assert DD.adr_status(tmp_path) == "Accepted"
-    assert "aceitação aberta" not in HD.seal_html("r", "Accepted", True, 0, True)
+    assert "aceitação aberta" not in HD.reasons_html("Accepted", True, 0, True)
 
 
 def test_a7_real_adr_status_and_lang():

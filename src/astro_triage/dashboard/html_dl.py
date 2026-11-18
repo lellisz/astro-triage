@@ -135,14 +135,16 @@ def error_html(message: str) -> str:
     return hs.lang_root(box("Dados da comparação ilegíveis", body))
 
 
-def seal_html(
-    release: str,
+def reasons_html(
     status: str | None,
     freeze: bool,
     floor_cells: int,
     limitations: bool,
 ) -> str:
-    """Seal plus a reason line derived from the ADR header and the artifacts read."""
+    """Reason line derived from the ADR header and the artifacts read.
+
+    The PROVISIONAL seal itself is printed once per tab by the shell header.
+    """
     word = _STATUS_PT.get(status or "")
     if word is None:
         adr = f"ADR {ADR_NUMBER:04d}: {NA}"
@@ -158,7 +160,7 @@ def seal_html(
         if limitations
         else f"limitações do results_dl: {NA}"
     )
-    return hs.seal(release) + _p("Razões: " + "; ".join(reasons) + ".", "at-cap")
+    return _p("Razões: " + "; ".join(reasons) + ".", "at-cap")
 
 
 def _cell_rows(cells: Sequence[PairCell]) -> list[list[str]]:

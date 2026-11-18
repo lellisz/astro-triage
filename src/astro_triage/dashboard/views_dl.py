@@ -56,8 +56,11 @@ def _cell_html(g: CM.GridCell) -> str:
     return f"<div>{hs.verdict_card(title, g.verdict)}{note}</div>"
 
 
-def page_html(model: CM.CompareModel, seal: str) -> str:
-    """Seal, fixed-point line, answer, 2x2 grid, absolute purity and the method note."""
+def page_html(model: CM.CompareModel, reasons: str) -> str:
+    """Reasons, fixed-point line, answer, 2x2 grid, absolute purity and the method note.
+
+    The seal is not part of the page: the shell header prints it once for every tab.
+    """
     per_row = len(model.pairs)
     rows = [model.grid[i : i + per_row] for i in range(0, len(model.grid), per_row)]
     grid = "".join(hs.pair(*(_cell_html(g) for g in row)) for row in rows)
@@ -68,7 +71,7 @@ def page_html(model: CM.CompareModel, seal: str) -> str:
     )
     method = hs.section(METHOD_TITLE, "", hs.method_note(VR.rule_text()))
     parts = [
-        seal,
+        reasons,
         hs.rule_prior_line(CT.fixed_point_line(LINE_LABEL, model.prior, model.level)),
         hs.verdict_oneline(CT.answer(model)),
         hs.section("Veredito por classe e rede", GRID_LEAD, grid),
@@ -93,14 +96,13 @@ def dl_page(rel: D.Release) -> None:
         descriptive = DD.descriptive(results, head)
         limitations = DD.load_limitations(rel)
         below = sum(g.state is DD.ClassVerdict.NA for g in model.grid)
-        seal = HD.seal_html(
-            rel.name,
+        reasons = HD.reasons_html(
             DD.adr_status(),
             DD.freeze_exists(rel),
             below,
             limitations is not None,
         )
-        page = page_html(model, seal)
+        page = page_html(model, reasons)
     except DD.DlDataError as exc:
         _md(HD.error_html(str(exc)))
         return
