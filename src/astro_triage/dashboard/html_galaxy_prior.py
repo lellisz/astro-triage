@@ -26,7 +26,6 @@ from astro_triage.dashboard.kit_types import Interval as KitInterval
 from astro_triage.dashboard.limits_pt import translate
 from astro_triage.dashboard.ui_state import RULE_LABEL, Rule, UiState
 
-CROSSMATCH_ADR: Final = 4
 VERDICT_SCOPE: Final = "Vale para a regra"
 VERDICT_TEXT: Final[Mapping[VerdictKey, str]] = {
     VerdictKey.DEPENDS_WIDE: (
@@ -71,7 +70,7 @@ DELTA_SENTENCE: Final = (
 ERRORS_TITLE: Final = "Onde o modelo erra"
 ERRORS_SENTENCE: Final = "Taxa de erro entre as galáxias, com intervalo de Wilson; faixa abaixo do piso é n/a."
 CROSSMATCH_TITLE: Final = "Nota sobre o cruzamento"
-CROSSMATCH_ORIGIN: Final = "Origem:"
+CROSSMATCH_ORIGIN: Final = "Origem: a decisão documentada sobre o cruzamento Gaia–SDSS"
 CROSSMATCH_UNMEASURED: Final = "n/a"
 NOT_RECOMPUTED: Final = ("não recalculad", "not recomputed")  # translated and original
 TECH_DETAILS: Final = "Tabelas por brilho e por distância"
@@ -169,7 +168,6 @@ def crossmatch_html(note: str | None, release: str) -> str:
     not recomputed for it; otherwise the translated text stands alone.
     """
     text = translate(note)[0] if note else hs.NA
-    origin = f"{CROSSMATCH_ORIGIN} ADR {CROSSMATCH_ADR:04d}"
     unmeasured = any(m in text for m in NOT_RECOMPUTED)
     other = (
         f"<p class='hs-small'>{_t(f'{release}: {CROSSMATCH_UNMEASURED}')}</p>"
@@ -179,7 +177,7 @@ def crossmatch_html(note: str | None, release: str) -> str:
     return (
         f"<section class='hs-sec'><div class='hs-pt' role='heading' "
         f"aria-level='{hs.CARD_LEVEL}'>{_t(CROSSMATCH_TITLE)}</div>"
-        f"{hs.method_note(f'{origin}. {text}')}{other}</section>"
+        f"{hs.method_note(f'{CROSSMATCH_ORIGIN}. {text}')}{other}</section>"
     )
 
 

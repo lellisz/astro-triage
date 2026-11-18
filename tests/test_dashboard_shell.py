@@ -20,7 +20,6 @@ from test_dashboard_phase7_app import sidebar_rel
 from astro_triage.dashboard import data as D
 from astro_triage.dashboard import data_cached as DC
 from astro_triage.dashboard import (
-    html_overview,
     html_system,
     paths,
     sidebar,
@@ -89,7 +88,6 @@ def test_p3_is_partial_and_has_notice() -> None:
     assert notice is not None
     for band in P3_BANDS:
         assert f"{band}" in notice.replace(";", " ").replace(")", " ").split()
-    assert html_overview.adr_split_ref() in notice
     assert sidebar.partial_notice(ui_state.SHIPPED_PRIOR) is None
 
 
@@ -248,7 +246,7 @@ def test_p3_shows_a_single_partial_notice_in_content(shell) -> None:
     assert notice not in [c.value for c in at.caption]
     for band in P3_BANDS:
         assert band in notice
-    assert "ADR" in notice
+    assert "ADR" not in notice
 
 
 def test_empty_interim_does_not_break_the_selector(shell, tmp_path: Path) -> None:

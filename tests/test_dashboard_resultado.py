@@ -22,7 +22,7 @@ FULL_V0 = ROOT / "data" / "interim" / "full_v0"
 XSS = "<script>x</script>"
 PURITY = {"P1": 0.40, "P2": 0.70, "P3": 0.55}
 QSO = {"P1": 0.005, "P2": 0.0158, "P3": 0.05}
-WARN_P3 = "P3 vale só para parte do céu (bandas B e C; ADR 0003)"
+WARN_P3 = "P3 vale só para parte do céu (bandas B e C)"
 
 
 def _m(point, status="ok"):

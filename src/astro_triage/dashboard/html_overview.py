@@ -40,13 +40,5 @@ def data_box_html(d: PageData) -> str:
     return html_kit.box("Dados e treino", inner)
 
 
-_ADR_SPLIT = 3
-_ADR_WIDTH = 4
-
-
-def adr_split_ref() -> str:
-    return f"ADR {str(_ADR_SPLIT).zfill(_ADR_WIDTH)}"
-
-
 def partial_note(prior: str) -> str:
-    return f"{prior} vale só para parte do céu (bandas B e C; {adr_split_ref()})"
+    return f"{prior} vale só para parte do céu (bandas B e C)"

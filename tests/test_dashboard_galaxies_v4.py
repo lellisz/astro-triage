@@ -224,7 +224,8 @@ def test_no_comparison_with_other_classes(monkeypatch):
 
 def test_crossmatch_rates_come_from_the_artifact_not_the_module(monkeypatch):
     out = _page(monkeypatch, STATE, None)
-    assert "31,1" in out and "91,1" in out and "65,7" in out and "ADR 0004" in out
+    assert "31,1" in out and "91,1" in out and "65,7" in out and hg.CROSSMATCH_ORIGIN in out
+    assert "ADR" not in out
     for name in ("html_galaxy_prior.py", "data_galaxy_prior.py", "views_galaxies.py"):
         text = (DASH / name).read_text(encoding="utf-8")
         assert not re.search(r"\b(31|91|65)[.,]\d", text)
