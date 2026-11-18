@@ -24,6 +24,7 @@ from astro_triage.evaluation import dl_compare
 
 GRID_LEAD = "Quatro células: classe por rede, cada uma contra o LightGBM."
 PURITY_LEAD = "Barras a partir de zero: a mediana das sementes e, na linha fina, o mínimo e o máximo."
+UNREADABLE = "O arquivo da avaliação do aprendizado profundo está ilegível."
 METHOD_TITLE = f"Nota de método (ADR {ADR_NUMBER:04d})"
 
 
@@ -78,7 +79,11 @@ def page_html(model: CM.CompareModel, seal: str) -> str:
 
 
 def dl_page(rel: D.Release) -> None:
-    results = DC.load_results_dl(rel)
+    try:
+        results = DC.load_results_dl(rel)
+    except (ValueError, OSError):
+        _md(HD.error_html(UNREADABLE))
+        return
     if results is None:
         _md(HD.unavailable_html())
         return

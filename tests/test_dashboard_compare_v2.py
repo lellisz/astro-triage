@@ -81,7 +81,12 @@ def test_absolute_purity_labelled_not_ci_and_read_from_artifact():
 def test_no_verdict_text_typed_in_views():
     na_word = CT.STATE_WORD[CM.ClassVerdict.NA]
     words = [*CT.STATE_WORD.values(), *CT.PAIR_WORD.values(), CT.POWER_PHRASE]
-    for name in ("views_dl.py",):
+    for name in (
+        "views_dl.py",
+        "compare_model.py",
+        "views_galaxies.py",
+        "html_galaxy_prior.py",
+    ):
         text = (DASH / name).read_text(encoding="utf-8")
         for w in words:
             if w != na_word:

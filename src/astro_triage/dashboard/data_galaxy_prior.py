@@ -13,7 +13,8 @@ from enum import StrEnum
 
 import pandas as pd
 
-from astro_triage.dashboard.data_dl import ClassCell, headline
+from astro_triage.dashboard import verdict_rule as VR
+from astro_triage.dashboard.data_dl import ClassCell, DlDataError, headline
 from astro_triage.dashboard.data_eval import results_variant
 from astro_triage.dashboard.data_galaxies import wilson_interval
 from astro_triage.dashboard.data_galaxies_z import GalaxyTotals
@@ -24,6 +25,11 @@ from astro_triage.dashboard.data_headline import (
 )
 from astro_triage.dashboard.data_release import Release
 from astro_triage.dashboard.html_galaxies import extreme_bands
+from astro_triage.dashboard.kit_types import BarRow, Value
+from astro_triage.dashboard.kit_types import Interval as KitInterval
+from astro_triage.dashboard.overview_model import ROW_ORDER
+from astro_triage.dashboard.overview_text import PARTIAL_TAG
+from astro_triage.dashboard.ui_state import RULE_LABEL, Rule, UiState
 
 GALAXY = "GALAXY"
 VERDICT_PRIORS = ("P1", "P2")  # P3 is partial and stays out of the verdict
@@ -140,31 +146,31 @@ def load_galaxy_prior_block(
 def dl_galaxy_cells(results: Mapping) -> dict[str, ClassCell | None]:
     """GALAXY cell of each network against the reference, at the headline prior and C*.
 
-    Raises ``DlDataError`` (from ``headline``) when the artifact has no headline cell;
-    a network without a GALAXY cell maps to ``None``.
+    Raises ``DlDataError`` when the artifact has no headline cell or a stored verdict
+    differs from the shared rule; a network without a GALAXY cell maps to ``None``.
     """
     head = headline(results)
     by_pair = {c.pair: c for c in head.cells}
     out: dict[str, ClassCell | None] = {}
     for net in NETWORKS:
         cell = by_pair.get(f"{net}-{REFERENCE}")
+        if cell is not None:
+            VR.check(cell)
         out[net] = cell.classes.get(GALAXY) if cell else None
     return out
 
 
-def _half_width(cell: ClassCell | None) -> float | None:
-    if cell is None or cell.lo is None or cell.hi is None:
-        return None
-    return (cell.hi - cell.lo) / 2
-
-
 def needs_power_note(cell: ClassCell | None) -> bool:
-    """True when the half-width of the interval of ``cell`` exceeds its delta.
+    """True when the shared verdict rule calls ``cell`` underpowered (a tie wider than the band).
 
-    False when the cell, its interval or its delta is absent.
+    False when the cell is absent or cannot be judged (no verdict, interval or delta).
     """
-    half = _half_width(cell)
-    return half is not None and cell.delta is not None and half > cell.delta  # type: ignore[union-attr]
+    if cell is None:
+        return False
+    try:
+        return VR.underpowered(cell)
+    except DlDataError:
+        return False
 
 
 def _disjoint(a: Interval, b: Interval) -> bool:
@@ -240,3 +246,31 @@ def crossmatch_note(rel: Release) -> str | None:
         (s for s in items if isinstance(s, str) and s.startswith(_CROSSMATCH_PREFIX)),
         None,
     )
+
+
+def _value(iv: Interval | None) -> Value:
+    if iv is None:
+        return Value(None, None)
+    return Value(iv.point, KitInterval(iv.lo, iv.hi))
+
+
+def galaxy_rows(
+    shipped: GalaxyPriorBlock, matched: GalaxyPriorBlock, state: UiState
+) -> tuple[tuple[BarRow, ...], tuple[BarRow, ...]]:
+    """Purity and completeness bars, one per row of the overview (same order and labels).
+
+    ``shipped`` and ``matched`` are the blocks of the two rules; the shipped row exists only at the
+    shipped prior. A cell that is missing or below the floor is an n/a value.
+    """
+    purity: list[BarRow] = []
+    completeness: list[BarRow] = []
+    for rule, prior in ROW_ORDER:
+        pg = (shipped if rule is Rule.SHIPPED else matched).get(prior)
+        label = f"{RULE_LABEL[rule]} · {prior}"
+        chosen = (rule, prior) == (state.rule, state.prior)
+        note = PARTIAL_TAG if pg is not None and pg.partial else None
+        purity.append(BarRow(label, _value(pg.purity if pg else None), chosen, note))
+        completeness.append(
+            BarRow(label, _value(pg.completeness if pg else None), chosen, note)
+        )
+    return tuple(purity), tuple(completeness)

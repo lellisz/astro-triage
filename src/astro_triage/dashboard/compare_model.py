@@ -53,6 +53,12 @@ def _verdict(c: DD.ClassCell, state: ClassVerdict) -> Verdict:
         raise DlDataError(f"intervalo inválido na classe {c.cls}: {exc}") from exc
 
 
+def grid_cell(net: str, c: DD.ClassCell) -> GridCell:
+    """One class cell judged by the shared rule; the only place a cell becomes a verdict card."""
+    state = VR.class_state(c)
+    return GridCell(net, c.cls, state, _verdict(c, state), VR.underpowered(c))
+
+
 def _check_point(head: DD.Headline) -> None:
     try:
         level = float(head.level)
@@ -93,10 +99,7 @@ def build(results: Mapping) -> CompareModel:
         net = net_name(cell.pair)
         pairs.append((net, VR.pair_state(cell.classes)))
         for cls, c in cell.classes.items():
-            state = VR.class_state(c)
-            grid[(cls, net)] = GridCell(
-                net, cls, state, _verdict(c, state), VR.underpowered(c)
-            )
+            grid[(cls, net)] = grid_cell(net, c)
     ordered = tuple(
         grid[(cls, net)]
         for cls in dl_compare.TARGET_CLASSES

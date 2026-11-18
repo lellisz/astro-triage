@@ -10,21 +10,24 @@ from collections.abc import Mapping, Sequence
 from html import escape
 from typing import Final
 
+from astro_triage.dashboard import compare_model as CM
+from astro_triage.dashboard import compare_text as CT
 from astro_triage.dashboard import fmt
+from astro_triage.dashboard import html_dl as HD
 from astro_triage.dashboard import html_system as hs
 from astro_triage.dashboard.data_dl import ClassCell
 from astro_triage.dashboard.data_galaxy_prior import (
     NETWORKS,
     ErrorRate,
-    GalaxyPriorBlock,
-    PriorGalaxy,
     VerdictKey,
-    power_networks,
 )
-from astro_triage.dashboard.data_headline import SHIPPED_PRIOR
+from astro_triage.dashboard.kit_types import NA_WORD, BarRow, Value, Verdict
+from astro_triage.dashboard.kit_types import Interval as KitInterval
 from astro_triage.dashboard.limits_pt import translate
+from astro_triage.dashboard.ui_state import RULE_LABEL, Rule, UiState, rule_prior_line
 
 CROSSMATCH_ADR: Final = 4
+VERDICT_SCOPE: Final = "Vale para a regra"
 VERDICT_TEXT: Final[Mapping[VerdictKey, str]] = {
     VerdictKey.DEPENDS_WIDE: (
         "A pureza de galáxia depende do prior assumido; "
@@ -38,22 +41,20 @@ VERDICT_TEXT: Final[Mapping[VerdictKey, str]] = {
     VerdictKey.NO_DIFFERENCE: "Sem diferença detectável entre P1 e P2.",
     VerdictKey.UNAVAILABLE: hs.NA,
 }
-VARIANT_TEXT: Final[Mapping[str, str]] = {
-    "as_shipped": "como entregue",
-    "prior_matched": "ajustada ao prior",
-}
 NETWORK_NAME: Final[Mapping[str, str]] = {
     "mlp_full": "MLP",
     "ftt_full": "FT-Transformer",
 }
 PURITY: Final = "Pureza"
 COMPLETENESS: Final = "Completude"
-PARTIAL: Final = "parcial"
-GALAXY_ROW: Final = "Galáxia"
 OBJECTS: Final = "galáxias"
-POWER_NOTE: Final = "Falta de poder na comparação com {}, não igualdade."
-JOIN_AND: Final = " e "
-HERO_TITLE: Final = "Galáxias no prior assumido"
+PURITY_DEF: Final = (
+    "Entre os objetos que o modelo chama de galáxia, a fração que é galáxia."
+)
+COMPLETENESS_DEF: Final = (
+    "Entre as galáxias do teste, a fração que o modelo chama de galáxia."
+)
+HERO_TITLE: Final = "Galáxias no prior de quasar assumido"
 HERO_SENTENCE: Final = (
     "Das galáxias apontadas, a pureza é a fração certa; das galáxias reais, "
     "a completude é a fração encontrada."
@@ -64,8 +65,8 @@ DEPEND_SENTENCE: Final = (
 )
 DELTA_TITLE: Final = "Redes contra o LightGBM"
 DELTA_SENTENCE: Final = (
-    "Diferença na linha da galáxia; a faixa é a margem δ: duas vezes o desvio "
-    "entre sementes do LightGBM, na validação."
+    "Veredito na classe galáxia, pela mesma regra da aba de comparação; a faixa é a "
+    "margem δ: duas vezes o desvio entre sementes do LightGBM, na validação."
 )
 ERRORS_TITLE: Final = "Onde o modelo erra"
 ERRORS_SENTENCE: Final = "Taxa de erro entre as galáxias, com intervalo de Wilson; faixa abaixo do piso é n/a."
@@ -93,94 +94,72 @@ def section(title: str, sentence: str, body_html: str) -> str:
     )
 
 
-def _point(iv: object) -> dict:
-    if iv is None:
-        return {}
-    return {"point": iv.point, "lo": iv.lo, "hi": iv.hi}  # type: ignore[attr-defined]
+def _value(r: ErrorRate | None) -> Value:
+    if r is None:
+        return Value(None, None)
+    # Wilson at the edges can differ from the point by float noise; the kit wants point inside.
+    lo, hi = min(r.ci_lo, r.rate), max(r.ci_hi, r.rate)
+    return Value(r.rate, KitInterval(lo, hi))
 
 
-def hero_html(block: GalaxyPriorBlock, prior: str = SHIPPED_PRIOR) -> str:
-    """Purity and completeness side by side, with the assumed prior and the rule named."""
-    pg = block.get(prior)
-    rule = VARIANT_TEXT.get(block.variant, block.variant)
-    tag = f"prior de quasar assumido: {prior} · regra: {rule}"
-    pair = hs.big_pair(
-        [
-            {"name": PURITY, **_point(pg.purity if pg else None)},
-            {"name": COMPLETENESS, **_point(pg.completeness if pg else None)},
-        ]
-    )
-    return section(
-        HERO_TITLE, HERO_SENTENCE, f"<p class='hs-small'>{_t(tag)}</p>{pair}"
-    )
+def purity_card(rows: Sequence[BarRow]) -> str:
+    return hs.number_card(PURITY, _selected(rows), PURITY_DEF)
 
 
-def _prior_label(pg: PriorGalaxy) -> str:
-    return f"{pg.prior} ({PARTIAL})" if pg.partial else pg.prior
+def completeness_card(rows: Sequence[BarRow]) -> str:
+    return hs.number_card(COMPLETENESS, _selected(rows), COMPLETENESS_DEF)
 
 
-def _metric_panel(title: str, block: GalaxyPriorBlock, field: str) -> str:
-    rows = []
-    for pg in block.priors:
-        iv = getattr(pg, field)
-        args = (iv.point, iv.lo, iv.hi) if iv is not None else (None, None, None)
-        rows.append(hs.interval_strip(*args, label=_prior_label(pg)))
-    return (
-        f"<div class='hs-panel'><div class='hs-pt' role='heading' "
-        f"aria-level='{hs.CARD_LEVEL}'>{_t(title)}</div>{''.join(rows)}</div>"
-    )
+def _selected(rows: Sequence[BarRow]) -> Value:
+    return next((r.value for r in rows if r.selected), Value(None, None))
 
 
-def dependence_html(block: GalaxyPriorBlock) -> str:
-    body = (
-        "<div class='hs-panels'>"
-        f"{_metric_panel(PURITY, block, 'purity')}"
-        f"{_metric_panel(COMPLETENESS, block, 'completeness')}</div>"
+def cards_html(purity: Sequence[BarRow], completeness: Sequence[BarRow]) -> str:
+    cards = hs.cards([purity_card(purity), completeness_card(completeness)])
+    return section(HERO_TITLE, HERO_SENTENCE, cards)
+
+
+def dependence_html(purity: Sequence[BarRow], completeness: Sequence[BarRow]) -> str:
+    body = hs.pair(
+        hs.hbar_group(PURITY, purity), hs.hbar_group(COMPLETENESS, completeness)
     )
     return section(DEPEND_TITLE, DEPEND_SENTENCE, body)
 
 
-def _delta_panel(net: str, cell: ClassCell | None) -> dict:
-    name = NETWORK_NAME.get(net, net)
-    if cell is None or cell.d is None:
-        return {"title": name, "delta": None, "rows": []}
-    detail = (
-        fmt.pt_interval(cell.d, cell.lo, cell.hi, "", True)
-        if cell.lo is not None and cell.hi is not None
-        else fmt.pt_num(cell.d, 3, True)
-    )
-    row = {
-        "name": GALAXY_ROW,
-        "d": cell.d,
-        "lo": cell.lo,
-        "hi": cell.hi,
-        "detail": detail,
-    }
-    return {"title": name, "delta": cell.delta, "rows": [row]}
+def verdict_cards_html(
+    cells: Mapping[str, ClassCell | None],
+    error: str | None = None,
+    fixed_point: str | None = None,
+) -> str:
+    """Two GALAXY verdict cards, one per network, built by the Comparação rule (one source).
 
-
-def delta_html(cells: Mapping[str, ClassCell | None]) -> str:
-    """Two ±delta rulers (tick for the point) and, only when the data needs it, the power note."""
-    panels = "".join(
-        hs.delta_ruler(_delta_panel(net, cells.get(net)), tick=True) for net in NETWORKS
-    )
-    body = f"<div class='hs-panels'>{panels}</div>"
-    names = [NETWORK_NAME.get(n, n) for n in power_networks(cells)]
-    if names:
-        body += f"<p class='hs-sen'>{_t(POWER_NOTE.format(JOIN_AND.join(names)))}</p>"
+    ``fixed_point`` labels the block with the protocol point (same text as the Comparação).
+    """
+    items = []
+    for net in NETWORKS:
+        title = f"{NETWORK_NAME.get(net, net)} × {CT.REFERENCE_NAME}"
+        cell = cells.get(net)
+        if cell is None:
+            card = hs.verdict_card(title, Verdict(NA_WORD, None, None, None))
+        else:
+            grid = CM.grid_cell(NETWORK_NAME.get(net, net), cell)
+            warn = hs.method_note(CT.POWER_PHRASE) if grid.underpowered else ""
+            card = hs.verdict_card(title, grid.verdict) + warn
+        items.append(f"<div>{card}</div>")
+    body = (hs.method_note(fixed_point) if fixed_point else "") + hs.pair(*items)
+    if error:
+        body += hs.method_note(error)
+    elif all(cells.get(n) is None for n in NETWORKS):
+        body += hs.method_note(HD.UNAVAILABLE_NOTE)
     return section(DELTA_TITLE, DELTA_SENTENCE, body)
 
 
 def errors_html(rows: Sequence[tuple[str, ErrorRate | None]]) -> str:
-    body = "".join(
-        hs.interval_strip(
-            *((r.rate, r.ci_lo, r.ci_hi) if r else (None, None, None)),
-            label=label,
-            extra=f"{fmt.pt_int(r.n)} {OBJECTS}" if r else "",
-        )
+    bars = [
+        BarRow(label, _value(r), note=f"{fmt.pt_int(r.n)} {OBJECTS}" if r else None)
         for label, r in rows
-    )
-    return section(ERRORS_TITLE, ERRORS_SENTENCE, body)
+    ]
+    return section(ERRORS_TITLE, ERRORS_SENTENCE, hs.hbar_group(ERRORS_TITLE, bars))
 
 
 def crossmatch_html(note: str | None, release: str) -> str:
@@ -200,24 +179,32 @@ def crossmatch_html(note: str | None, release: str) -> str:
     return (
         f"<section class='hs-sec'><div class='hs-pt' role='heading' "
         f"aria-level='{hs.CARD_LEVEL}'>{_t(CROSSMATCH_TITLE)}</div>"
-        f"<p class='hs-small'>{_t(origin)}. {_t(text)}</p>{other}</section>"
+        f"{hs.method_note(f'{origin}. {text}')}{other}</section>"
     )
 
 
 def page_html(
     release: str,
+    state: UiState,
     verdict: VerdictKey,
-    block: GalaxyPriorBlock,
+    rows: tuple[Sequence[BarRow], Sequence[BarRow]],
     cells: Mapping[str, ClassCell | None],
     error_rows: Sequence[tuple[str, ErrorRate | None]],
     note: str | None,
+    dl_error: str | None = None,
+    fixed_point: str | None = None,
 ) -> str:
+    purity, completeness = rows
+    sentence = verdict_text(verdict)
+    if verdict is not VerdictKey.UNAVAILABLE:
+        sentence = f"{sentence} {VERDICT_SCOPE} {RULE_LABEL[Rule.MATCHED]}."
     body = (
         hs.seal(release)
-        + hs.verdict_oneline(verdict_text(verdict))
-        + hero_html(block)
-        + dependence_html(block)
-        + delta_html(cells)
+        + hs.rule_prior_line(rule_prior_line(state))
+        + hs.verdict_oneline(sentence)
+        + cards_html(purity, completeness)
+        + dependence_html(purity, completeness)
+        + verdict_cards_html(cells, dl_error, fixed_point)
         + errors_html(error_rows)
         + crossmatch_html(note, release)
     )

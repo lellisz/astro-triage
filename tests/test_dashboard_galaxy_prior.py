@@ -10,7 +10,8 @@ import pytest
 from test_dashboard_dl import _digit_literals
 
 from astro_triage.dashboard import data_galaxy_prior as gp
-from astro_triage.dashboard.data_dl import ClassCell
+from astro_triage.dashboard import verdict_rule as VR
+from astro_triage.dashboard.data_dl import ClassCell, ClassVerdict
 from astro_triage.dashboard.data_galaxies import (
     GALAXY_G_EDGES,
     GALAXY_Z_EDGES,
@@ -24,13 +25,19 @@ from astro_triage.dashboard.data_galaxy_prior import (
     VerdictKey,
 )
 from astro_triage.dashboard.html_galaxies import extreme_bands
+from astro_triage.evaluation import dl_compare
 
 MODULE = Path(gp.__file__)
 V = VerdictKey
 
 
-def cell(lo=0.0, hi=0.2, delta=0.05):
-    return ClassCell("GALAXY", 0.1, lo, hi, delta, None, None, {})
+def cell(lo=0.0, hi=0.2, delta=0.05, d=0.1):
+    """Cell as the loader would give it: the verdict token comes from the producer's function."""
+    if None in (lo, hi, delta):
+        verdict = ClassVerdict.NA if lo is None and hi is None else None
+    else:
+        verdict = ClassVerdict(dl_compare.class_verdict(d, lo, hi, delta, True))
+    return ClassCell("GALAXY", d, lo, hi, delta, verdict, None, {})
 
 
 def pg(prior, lo, hi, partial=False):
@@ -113,9 +120,32 @@ def test_power_note_true_when_half_width_exceeds_delta():
     assert gp.needs_power_note(cell(0.0, 0.2, 0.05)) is True
 
 
-def test_power_note_false_for_narrow_interval_and_equal_boundary():
+def test_power_note_false_for_narrow_interval_and_exact_fit():
     assert gp.needs_power_note(cell(0.0, 0.02, 0.05)) is False
-    assert gp.needs_power_note(cell(0.0, 0.1, 0.05)) is False  # half == delta
+    assert (
+        gp.needs_power_note(cell(-0.05, 0.05, 0.05)) is False
+    )  # fits the band exactly
+
+
+def test_power_note_is_the_phase4_rule_not_the_half_width():
+    """Half-width equal to delta but shifted out of the band: the old criterion said no."""
+    c = cell(0.0, 0.1, 0.05)
+    assert (c.hi - c.lo) / 2 <= c.delta
+    assert gp.needs_power_note(c) is VR.underpowered(c) is True
+
+
+def test_power_note_agrees_with_verdict_rule_on_a_grid():
+    for lo in (-0.2, -0.05, 0.0, 0.03):
+        for hi in (0.02, 0.05, 0.1, 0.3):
+            for d in (-0.1, 0.0, 0.1):
+                if lo <= d <= hi:
+                    c = cell(lo, hi, 0.05, d)
+                    assert gp.needs_power_note(c) is VR.underpowered(c)
+
+
+def test_power_note_false_for_a_win_and_for_below_the_floor():
+    assert gp.needs_power_note(cell(0.01, 0.3, 0.05)) is False  # win, not a tie
+    assert gp.needs_power_note(cell(None, None, None)) is False  # NA
 
 
 @pytest.mark.parametrize(
@@ -338,15 +368,15 @@ def test_crossmatch_without_note_shows_na_text_and_no_extra_line():
     assert "full_v0: n/a" not in out
 
 
-def test_power_sentence_names_only_the_networks_that_need_it():
-    both = hg.delta_html(nets(WIDE_CELL, WIDE_CELL))
-    assert (
-        "Falta de poder na comparação com MLP e FT-Transformer, não igualdade." in both
-    )
-    only = hg.delta_html(nets(NARROW_CELL, WIDE_CELL))
-    assert "comparação com FT-Transformer, não" in only and "MLP e" not in only
-    assert "Falta de poder" not in hg.delta_html(nets())
-    assert "Falta de poder" not in hg.delta_html(nets(NA_CELL, None))
+def test_power_phrase_comes_from_compare_text_and_only_for_wide_cells():
+    from astro_triage.dashboard import compare_text as CT
+
+    both = hg.verdict_cards_html(nets(WIDE_CELL, WIDE_CELL))
+    assert both.count(CT.POWER_PHRASE) == 2
+    one = hg.verdict_cards_html(nets(NARROW_CELL, WIDE_CELL))
+    assert one.count(CT.POWER_PHRASE) == 1
+    assert CT.POWER_PHRASE not in hg.verdict_cards_html(nets())
+    assert CT.POWER_PHRASE not in hg.verdict_cards_html(nets(NA_CELL, None))
 
 
 def test_verdict_texts_use_the_agreed_wording():
@@ -367,12 +397,9 @@ def test_delta_sentence_explains_the_band():
 
 
 def test_panel_and_crossmatch_titles_are_headings():
-    for out in (
-        hg.dependence_html(block()),
-        hg.crossmatch_html(NOTE_100K, "r"),
-    ):
-        assert "class='hs-pt'>" not in out
-    assert "class='hs-pt' role='heading'" in hg.dependence_html(block())
+    out = hg.crossmatch_html(NOTE_100K, "r")
+    assert "class='hs-pt'>" not in out
+    assert "class='hs-pt' role='heading'" in out
 
 
 def test_no_digit_literals_in_html_module():
