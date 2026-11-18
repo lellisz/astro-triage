@@ -378,8 +378,17 @@ def pair_card(title: str, verdict: str, rows: Sequence[Mapping], warn: str = "")
     )
 
 
-def cards(items_html: Sequence[str]) -> str:
-    return f"<div class='hs-cards'>{''.join(items_html)}</div>"
+_WIDE_CARDS = (ONE, ONE, ONE)
+
+
+def cards(items_html: Sequence[str], three_across: bool = False) -> str:
+    cls = "hs-cards hs-cards-wide" if three_across else "hs-cards"
+    return f"<div class='{cls}'>{''.join(items_html)}</div>"
+
+
+def pair(first_html: str, second_html: str) -> str:
+    """Two blocks side by side on a wide screen, stacked on a narrow one."""
+    return f"<div class='hs2-pair'>{first_html}{second_html}</div>"
 
 
 def _delta_row(row: Mapping, half: float, delta: float, two_marks: bool) -> str:
@@ -1101,6 +1110,18 @@ def system_css() -> str:
             gap=_px(PANEL_GAP_PX),
         ),
         _r(
+            ".hs-cards-wide",
+            grid_template_columns=" ".join(
+                [f"minmax({_px(0)},{ONE}fr)"] * len(_WIDE_CARDS)
+            ),
+        ),
+        _r(
+            ".hs2-pair",
+            display="grid",
+            grid_template_columns=f"minmax({_px(0)},{ONE}fr) minmax({_px(0)},{ONE}fr)",
+            gap=_px(PANEL_GAP_PX),
+        ),
+        _r(
             ".hs-card",
             border_top=f"{hair} {t.HAIRLINE}",
             padding_top=_px(16),
@@ -1129,6 +1150,6 @@ def system_css() -> str:
         ),
         _r(".hs-page", min_width=_px(0), overflow_wrap="anywhere"),
         *_kit_rules(small),
-        f"@media(max-width:{_px(MEDIA_PX)}){{{_r('.hs-panels,.hs-cards', grid_template_columns=f'{ONE}fr')}}}",
+        f"@media(max-width:{_px(MEDIA_PX)}){{{_r('.hs-panels,.hs-cards,.hs-cards-wide,.hs2-pair', grid_template_columns=f'{ONE}fr')}}}",
     ]
     return f"<style>{''.join(rules)}</style>"

@@ -66,14 +66,14 @@ def page_html(model: OverviewModel, state: ui_state.UiState) -> str:
                 titles["completeness"], sel.completeness, defs["completeness"]
             ),
             hs.number_card(titles["accuracy"], model.accuracy, defs["accuracy"]),
-        ]
+        ],
+        three_across=True,
     )
     notice = hs.method_note(model.partial_notice) if model.partial_notice else ""
     return (
         f"{hs.verdict_oneline(overview_text.answer(model, state))}"
         f"{cards}{notice}"
-        f"{_bars(PURITY_TITLE, model.rows, 'purity')}"
-        f"{_bars(COMPLETENESS_TITLE, model.rows, 'completeness')}"
+        f"{hs.pair(_bars(PURITY_TITLE, model.rows, 'purity'), _bars(COMPLETENESS_TITLE, model.rows, 'completeness'))}"
         f"{hs.method_note(overview_text.ACCURACY_NOTE)}"
     )
 

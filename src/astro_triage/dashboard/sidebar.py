@@ -1,4 +1,4 @@
-"""Sidebar controls of the shell: decision rule, prior, technical mode and data version.
+"""Controls (in the header popover) of the shell: decision rule, prior, technical mode and data version.
 
 Every widget has its own key (``_w_*``); an ``on_change`` copies it to the keys of
 ``ui_state``, which the views read. The widget keys are re-seeded from the normalized state on
@@ -11,8 +11,9 @@ from collections.abc import Sequence
 from typing import Final
 
 import streamlit as st
+from streamlit.delta_generator import DeltaGenerator
 
-from astro_triage.dashboard import html_system, ui_state
+from astro_triage.dashboard import ui_state
 from astro_triage.dashboard.html_overview import partial_note
 from astro_triage.dashboard.ui_state import Rule, UiState
 
@@ -39,14 +40,15 @@ def _rule_label(value: str) -> str:
     return ui_state.RULE_LABEL[Rule(value)]
 
 
-def controls(releases: Sequence[str], default_release: str) -> tuple[str, UiState]:
-    """Render the controls inside the sidebar; ``releases`` must not be empty."""
+def controls(
+    releases: Sequence[str], default_release: str, container: DeltaGenerator
+) -> tuple[str, UiState]:
+    """Render the controls inside ``container``; ``releases`` must not be empty."""
     state = current()
     st.session_state[W_RULE] = state.rule.value
     st.session_state[W_PRIOR] = state.prior
     st.session_state[W_TECH] = state.tech
-    with st.sidebar:
-        st.markdown("### astro-triage")
+    with container:
         st.radio(
             "Regra de decisão",
             [r.value for r in Rule],
@@ -72,9 +74,6 @@ def controls(releases: Sequence[str], default_release: str) -> tuple[str, UiStat
         ]
         if notes:
             st.caption(" · ".join(notes))
-        notice = partial_notice(state.prior)
-        if notice:
-            st.caption(notice)
         st.toggle(
             "Modo técnico",
             key=W_TECH,
@@ -85,5 +84,4 @@ def controls(releases: Sequence[str], default_release: str) -> tuple[str, UiStat
         name = st.selectbox("Versão dos dados", releases, index=default)
         if default_release not in releases:
             st.warning(f"A versão {default_release} não foi encontrada; usando {name}.")
-        st.markdown(html_system.seal(name), unsafe_allow_html=True)
     return name, state

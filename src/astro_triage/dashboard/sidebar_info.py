@@ -1,4 +1,4 @@
-"""Sidebar notes about the loaded release: test size, discarded rows and count mismatches."""
+"""Notes about the loaded release: test size, discarded rows and count mismatches."""
 
 from __future__ import annotations
 
@@ -24,6 +24,6 @@ def sidebar_notes(rel: Release) -> list[str]:
 
 
 def sidebar_counts(rel: Release) -> None:
+    """Render the notes in the current container (the settings popover)."""
     html = "".join(f"<span class='small'>{n}</span><br>" for n in sidebar_notes(rel))
-    with st.sidebar:
-        st.markdown(html, unsafe_allow_html=True)
+    st.markdown(html, unsafe_allow_html=True)

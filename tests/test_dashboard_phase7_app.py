@@ -21,7 +21,7 @@ M = ("lgbm_full", "lgbm_noind")
 
 
 # --------------------------------------------------------------------------- (a) app.py
-def test_app_uses_sidebar_navigation_and_bounded_release_cache() -> None:
+def test_app_uses_top_navigation_and_bounded_release_cache() -> None:
     tree = ast.parse(APP.read_text(encoding="utf-8"))
     attrs = {n.attr for n in ast.walk(tree) if isinstance(n, ast.Attribute)}
     assert "tabs" not in attrs
@@ -32,7 +32,7 @@ def test_app_uses_sidebar_navigation_and_bounded_release_cache() -> None:
     ]
     assert len(nav) == 1
     assert {k.arg: ast.literal_eval(k.value) for k in nav[0].keywords} == {
-        "position": "sidebar"
+        "position": "top"
     }
     fn = next(
         n

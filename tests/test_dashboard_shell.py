@@ -157,12 +157,12 @@ def main_text(at) -> str:
 
 
 def prior_widget(at):
-    (widget,) = [w for w in at.sidebar.button_group if w.key == sidebar.W_PRIOR]
+    (widget,) = [w for w in at.button_group if w.key == sidebar.W_PRIOR]
     return widget
 
 
 def choose_rule(at, rule: Rule):
-    at.sidebar.radio(sidebar.W_RULE).set_value(rule.value).run()
+    at.radio(sidebar.W_RULE).set_value(rule.value).run()
 
 
 def test_navigation_has_five_pages_in_order(shell) -> None:
@@ -186,14 +186,14 @@ def test_rule_prior_survive_page_switch(shell) -> None:
     assert at.session_state[ui_state.KEY_RULE] == Rule.MATCHED.value
     assert at.session_state[ui_state.KEY_PRIOR] == "P3"
     assert line in main_text(at)
-    assert at.sidebar.radio(sidebar.W_RULE).value == Rule.MATCHED.value
+    assert at.radio(sidebar.W_RULE).value == Rule.MATCHED.value
     assert prior_widget(at).value == "P3"
 
 
 def test_technical_mode_survives_page_switch_and_reaches_views(shell) -> None:
     at = shell()
     assert "tech=False" in main_text(at)
-    at.sidebar.toggle(sidebar.W_TECH).set_value(True).run()
+    at.toggle(sidebar.W_TECH).set_value(True).run()
     assert "tech=True" in main_text(at)
     at = open_page(at, OTHER_PAGE)
     assert "tech=True" in main_text(at)
@@ -206,7 +206,8 @@ def test_seal_on_every_page(shell, title: str) -> None:
     at = open_page(at, title)
     assert not at.exception
     assert html_system.SEAL_PREFIX in main_text(at)
-    assert any(html_system.SEAL_PREFIX in m.value for m in at.sidebar.markdown)
+    assert not at.sidebar.children
+    assert ui_state.LINE_LABEL in main_text(at)
 
 
 def test_shipped_rule_disables_other_priors_with_note(shell) -> None:
@@ -214,11 +215,11 @@ def test_shipped_rule_disables_other_priors_with_note(shell) -> None:
     widget = prior_widget(at)
     assert widget.disabled and widget.value == ui_state.SHIPPED_PRIOR
     note = f"só existe em {ui_state.SHIPPED_PRIOR}"
-    captions = [c.value for c in at.sidebar.caption]
+    captions = [c.value for c in at.caption]
     assert any(note in c for c in captions), captions
     choose_rule(at, Rule.MATCHED)
     assert not prior_widget(at).disabled
-    assert not any(note in c.value for c in at.sidebar.caption)
+    assert not any(note in c.value for c in at.caption)
     choose_rule(at, Rule.SHIPPED)
     assert (
         prior_widget(at).disabled and prior_widget(at).value == ui_state.SHIPPED_PRIOR
@@ -234,15 +235,17 @@ def test_leaving_p3_for_shipped_rule_corrects_the_prior(shell) -> None:
     assert ui_state.rule_prior_line(ui_state.DEFAULT) in main_text(at)
 
 
-def test_p3_shows_partial_notice_in_content_and_sidebar(shell) -> None:
+def test_p3_shows_a_single_partial_notice_in_content(shell) -> None:
     at = shell()
     notice = sidebar.partial_notice("P3")
     assert notice
     assert notice not in main_text(at)
     choose_rule(at, Rule.MATCHED)
     prior_widget(at).set_value("P3").run()
-    assert notice in main_text(at)
-    assert notice in [c.value for c in at.sidebar.caption]
+    assert notice not in main_text(at)  # the overview body (stubbed here) owns it
+    at = open_page(at, OTHER_PAGE)
+    assert main_text(at).count(notice) == 1
+    assert notice not in [c.value for c in at.caption]
     for band in P3_BANDS:
         assert band in notice
     assert "ADR" in notice
@@ -252,7 +255,7 @@ def test_empty_interim_does_not_break_the_selector(shell, tmp_path: Path) -> Non
     (tmp_path / "interim" / "rel" / "eval" / "results.json").unlink()
     at = shell()
     assert not at.exception
-    assert at.sidebar.selectbox[0].options == [D.DEFAULT_RELEASE]
+    assert at.selectbox[0].options == [D.DEFAULT_RELEASE]
 
 
 # --------------------------------------------------------------------------- sources

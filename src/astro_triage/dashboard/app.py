@@ -3,7 +3,7 @@
     .venv\\Scripts\\python.exe -m streamlit run src/astro_triage/dashboard/app.py
 
 Every number and sentence below is computed from one release in ``data/interim/<name>/``.
-Only the page picked in the sidebar navigation is rendered, so the other pages cost nothing.
+Only the page picked in the top navigation is rendered, so the other pages cost nothing.
 """
 
 from __future__ import annotations
@@ -70,10 +70,12 @@ def available_releases() -> list[str]:
     return found or [D.DEFAULT_RELEASE]
 
 
-def shell_header(release: str, state: ui_state.UiState) -> None:
-    """Seal and 'Regra · prior' line above every page; the sidebar is collapsed on a phone."""
+def shell_header(
+    release: str, state: ui_state.UiState, show_partial_notice: bool = True
+) -> None:
+    """Seal and 'Regra · prior' line above every page; the partial notice is shown once in the content."""
     lines = [escape(ui_state.rule_prior_line(state))]
-    notice = sidebar.partial_notice(state.prior)
+    notice = sidebar.partial_notice(state.prior) if show_partial_notice else None
     if notice:
         lines.append(escape(notice))
     body = "".join(f"<p class='hs-small'>{line}</p>" for line in lines)
@@ -86,7 +88,7 @@ def main() -> None:
         page_title="astro-triage",
         page_icon="✦",
         layout="wide",
-        initial_sidebar_state="auto",
+        initial_sidebar_state="collapsed",
     )
     try:
         paths.require_dir(D.INTERIM_DIR)
@@ -102,7 +104,8 @@ def main() -> None:
     ):  # the guard above makes this unreachable; the selector never gets []
         st.error(NO_DATA_MESSAGE)
         st.stop()
-    name, state = sidebar.controls(releases, DEFAULT_RELEASE_NAME)
+    settings = st.popover("Ajustes")
+    name, state = sidebar.controls(releases, DEFAULT_RELEASE_NAME, settings)
     stamp = DC.root_stamp(D.INTERIM_DIR / name)
     loaded = st.session_state.get("_loaded_release")
     if loaded is not None and loaded != name:
@@ -114,7 +117,8 @@ def main() -> None:
     except (OSError, ValueError, KeyError) as exc:
         st.error(f"Não foi possível ler a versão dos dados: {describe_error(exc)}.")
         st.stop()
-    sidebar_counts(rel)
+    with settings:
+        sidebar_counts(rel)
     renderers: tuple[Callable[[], None], ...] = (
         lambda: overview(rel, pages),
         lambda: sky_page(rel, get_pixels(rel.name, stamp)),
@@ -131,11 +135,12 @@ def main() -> None:
         )
         for render, title, url_path in zip(renderers, PAGES, PAGE_PATHS, strict=True)
     ]
-    current = st.navigation(pages, position="sidebar")
+    current = st.navigation(pages, position="top")
     st.markdown(
         theme.css(wide=current.title not in NARROW_PAGES), unsafe_allow_html=True
     )
-    shell_header(rel.name, state)
+    # The overview body carries the partial notice itself; the other pages rely on the header.
+    shell_header(rel.name, state, show_partial_notice=current.title != PAGES[0])
     try:
         current.run()
     except Exception as exc:  # noqa: BLE001 - one broken page must not take the app down
