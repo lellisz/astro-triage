@@ -21,7 +21,7 @@ import streamlit as st
 from astro_triage.dashboard import data as D
 from astro_triage.dashboard import data_cached as DC
 from astro_triage.dashboard import html_dl as HD
-from astro_triage.dashboard import theme
+from astro_triage.dashboard import paths, theme
 from astro_triage.dashboard.constants import DEFAULT_RELEASE_NAME
 from astro_triage.dashboard.page_errors import describe_error, page_error
 from astro_triage.dashboard.sidebar_info import sidebar_counts
@@ -58,7 +58,15 @@ def get_pixels(name: str, stamp: int) -> pd.DataFrame:
     return D.pixel_table(get_release(name, stamp))
 
 
+NO_DATA_MESSAGE = (
+    "Não encontrei a pasta de dados. Defina a variável de ambiente "
+    f"{paths.ENV_VAR} com a pasta que contém interim/ e reinicie o painel."
+)
+
+
 def available_releases() -> list[str]:
+    if not D.INTERIM_DIR.is_dir():
+        return []
     found = sorted(
         p.parent.parent.name for p in D.INTERIM_DIR.glob("*/eval/results.json")
     )
@@ -67,6 +75,11 @@ def available_releases() -> list[str]:
 
 def main() -> None:
     st.set_page_config(page_title="astro-triage", page_icon="✦", layout="wide")
+    try:
+        paths.require_dir(D.INTERIM_DIR)
+    except paths.DataRootMissing:
+        st.error(NO_DATA_MESSAGE)
+        st.stop()
     for key in PERSISTED_KEYS:
         if key in st.session_state:
             st.session_state[key] = st.session_state[key]

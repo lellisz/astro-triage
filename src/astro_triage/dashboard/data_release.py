@@ -9,8 +9,10 @@ from typing import Final
 
 import pandas as pd
 
+from astro_triage.dashboard import paths
+
 REPO_ROOT: Final = Path(__file__).resolve().parents[3]
-INTERIM_DIR: Final = REPO_ROOT / "data" / "interim"
+INTERIM_DIR: Final = paths.interim_dir()
 DEFAULT_RELEASE: Final = "dataset_100k_v0"
 
 CLASSES: Final[tuple[str, ...]] = ("STAR", "GALAXY", "QSO")
