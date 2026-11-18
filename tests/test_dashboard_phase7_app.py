@@ -21,20 +21,19 @@ M = ("lgbm_full", "lgbm_noind")
 
 
 # --------------------------------------------------------------------------- (a) app.py
-def test_app_uses_segmented_control_and_bounded_release_cache() -> None:
+def test_app_uses_sidebar_navigation_and_bounded_release_cache() -> None:
     tree = ast.parse(APP.read_text(encoding="utf-8"))
     attrs = {n.attr for n in ast.walk(tree) if isinstance(n, ast.Attribute)}
     assert "tabs" not in attrs
-    seg = [
+    nav = [
         n
         for n in ast.walk(tree)
-        if isinstance(n, ast.Call)
-        and getattr(n.func, "attr", "") == "segmented_control"
+        if isinstance(n, ast.Call) and getattr(n.func, "attr", "") == "navigation"
     ]
-    assert len(seg) == 1
-    assert any(
-        isinstance(a, ast.Constant) and a.value == "page" for a in ast.walk(tree)
-    )
+    assert len(nav) == 1
+    assert {k.arg: ast.literal_eval(k.value) for k in nav[0].keywords} == {
+        "position": "sidebar"
+    }
     fn = next(
         n
         for n in ast.walk(tree)
@@ -43,9 +42,6 @@ def test_app_uses_segmented_control_and_bounded_release_cache() -> None:
     (dec,) = fn.decorator_list
     assert ast.unparse(dec.func) == "st.cache_resource"
     assert {k.arg: ast.literal_eval(k.value) for k in dec.keywords}["max_entries"] == 1
-    assert 'key="page"' in ast.unparse(tree).replace("'", '"') or '"key": "page"' in (
-        ast.unparse(tree).replace("'", '"')
-    )
 
 
 # ----------------------------------------------------------------------- (d) cache

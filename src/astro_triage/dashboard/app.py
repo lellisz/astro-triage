@@ -3,7 +3,7 @@
     .venv\\Scripts\\python.exe -m streamlit run src/astro_triage/dashboard/app.py
 
 Every number and sentence below is computed from one release in ``data/interim/<name>/``.
-Only the page picked in the selector is rendered, so the other pages cost nothing.
+Only the page picked in the sidebar navigation is rendered, so the other pages cost nothing.
 """
 
 from __future__ import annotations
@@ -11,6 +11,7 @@ from __future__ import annotations
 import logging
 import sys
 from collections.abc import Callable
+from html import escape
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
@@ -20,30 +21,26 @@ import streamlit as st
 
 from astro_triage.dashboard import data as D
 from astro_triage.dashboard import data_cached as DC
-from astro_triage.dashboard import html_dl as HD
-from astro_triage.dashboard import paths, theme
+from astro_triage.dashboard import paths, sidebar, theme, ui_state
 from astro_triage.dashboard.constants import DEFAULT_RELEASE_NAME
+from astro_triage.dashboard.html_system import lang_root, seal, system_css
 from astro_triage.dashboard.page_errors import describe_error, page_error
 from astro_triage.dashboard.sidebar_info import sidebar_counts
-from astro_triage.dashboard.views_common import tech_toggle
 from astro_triage.dashboard.views_dl import dl_page
 from astro_triage.dashboard.views_galaxies import galaxies_page
-from astro_triage.dashboard.views_layer2 import layer2_page
 from astro_triage.dashboard.views_method import method_page
 from astro_triage.dashboard.views_overview import overview
 from astro_triage.dashboard.views_sky import sky_page
 
 _LOG = logging.getLogger(__name__)
-PAGES = ("Visão geral", "Mapa do céu", "Galáxias", "Método")
-DL_PAGE = HD.TITLE
-LAYER2_PAGE = "Camada 2"
+PAGES = ("Visão geral", "Mapa do céu", "Galáxias", "Comparação com DL", "Método")
+PAGE_PATHS = ("", "ceu", "galaxias", "comparacao-dl", "metodo")  # "" = default page
 NARROW_PAGES = frozenset({"Método"})
 # Widgets on pages that are not rendered lose their state; re-assigning keeps it across pages.
 PERSISTED_KEYS = (
     "galaxy_scatter_on",
     "sky_mode",
     "sky_hide_below",
-    "tech",
 )
 
 
@@ -73,8 +70,24 @@ def available_releases() -> list[str]:
     return found or [D.DEFAULT_RELEASE]
 
 
+def shell_header(release: str, state: ui_state.UiState) -> None:
+    """Seal and 'Regra · prior' line above every page; the sidebar is collapsed on a phone."""
+    lines = [escape(ui_state.rule_prior_line(state))]
+    notice = sidebar.partial_notice(state.prior)
+    if notice:
+        lines.append(escape(notice))
+    body = "".join(f"<p class='hs-small'>{line}</p>" for line in lines)
+    st.markdown(system_css(), unsafe_allow_html=True)
+    st.markdown(lang_root(seal(release) + body), unsafe_allow_html=True)
+
+
 def main() -> None:
-    st.set_page_config(page_title="astro-triage", page_icon="✦", layout="wide")
+    st.set_page_config(
+        page_title="astro-triage",
+        page_icon="✦",
+        layout="wide",
+        initial_sidebar_state="auto",
+    )
     try:
         paths.require_dir(D.INTERIM_DIR)
     except paths.DataRootMissing:
@@ -83,21 +96,13 @@ def main() -> None:
     for key in PERSISTED_KEYS:
         if key in st.session_state:
             st.session_state[key] = st.session_state[key]
-    wide = st.session_state.get("page") not in NARROW_PAGES
-    st.markdown(theme.css(wide=wide), unsafe_allow_html=True)
-    with st.sidebar:
-        st.markdown("### astro-triage")
-        releases = available_releases()
-        default = (
-            releases.index(DEFAULT_RELEASE_NAME)
-            if DEFAULT_RELEASE_NAME in releases
-            else 0
-        )
-        name = st.selectbox("Versão dos dados", releases, index=default)
-        if DEFAULT_RELEASE_NAME not in releases:
-            st.warning(
-                f"A versão {DEFAULT_RELEASE_NAME} não foi encontrada; usando {name}."
-            )
+    releases = available_releases()
+    if (
+        not releases
+    ):  # the guard above makes this unreachable; the selector never gets []
+        st.error(NO_DATA_MESSAGE)
+        st.stop()
+    name, state = sidebar.controls(releases, DEFAULT_RELEASE_NAME)
     stamp = DC.root_stamp(D.INTERIM_DIR / name)
     loaded = st.session_state.get("_loaded_release")
     if loaded is not None and loaded != name:
@@ -110,32 +115,31 @@ def main() -> None:
         st.error(f"Não foi possível ler a versão dos dados: {describe_error(exc)}.")
         st.stop()
     sidebar_counts(rel)
+    renderers: tuple[Callable[[], None], ...] = (
+        lambda: overview(rel),
+        lambda: sky_page(rel, get_pixels(rel.name, stamp)),
+        lambda: galaxies_page(rel),
+        lambda: dl_page(rel),
+        lambda: method_page(rel),
+    )
+    pages = [
+        st.Page(
+            render,
+            title=title,
+            url_path=url_path or None,
+            default=not url_path,
+        )
+        for render, title, url_path in zip(renderers, PAGES, PAGE_PATHS, strict=True)
+    ]
+    current = st.navigation(pages, position="sidebar")
+    st.markdown(
+        theme.css(wide=current.title not in NARROW_PAGES), unsafe_allow_html=True
+    )
+    shell_header(rel.name, state)
     try:
-        layer2 = DC.load_layer2(rel)
-    except (OSError, ValueError, KeyError) as exc:
-        layer2 = None
-        st.sidebar.error(f"Avaliação da Camada 2 ilegível: {describe_error(exc)}.")
-    renderers: dict[str, Callable[[], None]] = {
-        PAGES[0]: lambda: overview(rel),
-        PAGES[1]: lambda: sky_page(rel, get_pixels(rel.name, stamp)),
-        PAGES[2]: lambda: galaxies_page(rel),
-        PAGES[3]: lambda: method_page(rel),
-    }
-    renderers[DL_PAGE] = lambda: dl_page(rel)
-    if layer2 is not None:
-        renderers[LAYER2_PAGE] = lambda: layer2_page(layer2)
-    if st.session_state.get("page") not in renderers:
-        st.session_state["page"] = PAGES[0]
-    kw = {"key": "page", "required": True, "label_visibility": "collapsed"}
-    nav_col, tech_col = st.columns([5, 1.4], vertical_alignment="center")
-    with nav_col:
-        page = st.segmented_control("Página", list(renderers), **kw)
-    with tech_col:
-        tech_toggle()
-    try:
-        renderers[page or PAGES[0]]()
+        current.run()
     except Exception as exc:  # noqa: BLE001 - one broken page must not take the app down
-        _LOG.exception("page %r failed", page)
+        _LOG.exception("page %r failed", current.title)
         st.error(page_error(exc))
 
 

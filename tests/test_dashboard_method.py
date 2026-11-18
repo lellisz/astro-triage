@@ -33,12 +33,13 @@ def facts(monkeypatch):
     return VM.method_facts(_rel())
 
 
-def test_page_is_registered_fourth():
+def test_page_is_registered_last():
     src = APP.read_text(encoding="utf-8")
     assert re.search(
-        r'PAGES = \("Visão geral", "Mapa do céu", "Galáxias", "Método"\)', src
+        r'PAGES = \("Visão geral", "Mapa do céu", "Galáxias", "Comparação com DL", "Método"\)',
+        src,
     )
-    assert "PAGES[3]: lambda: method_page(rel)" in src
+    assert "lambda: method_page(rel)" in src
 
 
 def test_facts_come_from_the_artifact(facts):

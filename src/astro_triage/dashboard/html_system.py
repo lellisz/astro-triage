@@ -802,9 +802,16 @@ def system_css() -> str:
             color=t.SOFT,
         ),
         _r(
-            ".hs-det summary:focus-visible",
+            ".hs-page a:focus-visible,.hs-page button:focus-visible,"
+            ".hs-page summary:focus-visible,.hs-det summary:focus-visible",
             outline=f"{_px(2)} solid {t.ACCENT}",
             outline_offset=_px(2),
+        ),
+        _r(
+            ".hs-page a",
+            display="inline-flex",
+            align_items="center",
+            min_height=_px(t.MIN_TARGET_PX),
         ),
         _r(".hs-sec", margin_top=_px(48), min_width=_px(0)),
         _r(".hs-sen", color=t.TEXT_SECONDARY, margin=f"{_px(4)} {_px(0)}"),
