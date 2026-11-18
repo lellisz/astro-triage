@@ -5,6 +5,8 @@ from __future__ import annotations
 import math
 from dataclasses import dataclass
 
+NA_WORD = "n/a"
+
 
 class KitInputError(ValueError):
     """An input the kit refuses to draw (missing interval, non-finite number)."""
@@ -38,6 +40,12 @@ class Value:
         _finite("point", self.point)
         if self.point is None and self.ci is not None:
             raise KitInputError("valor n/a não pode trazer intervalo")
+        if (
+            self.point is not None
+            and self.ci is not None
+            and not self.ci.lo <= self.point <= self.ci.hi
+        ):
+            raise KitInputError("o ponto deve ficar dentro do intervalo")
 
 
 @dataclass(frozen=True)
@@ -62,3 +70,5 @@ class Verdict:
         _finite("delta", self.delta)
         if self.delta is not None and self.delta < 0:
             raise KitInputError("delta deve ser não negativo")
+        if self.word != NA_WORD and (self.ci is None or self.delta is None):
+            raise KitInputError("veredito exige intervalo e delta")

@@ -550,7 +550,12 @@ def number_card(title: str, value: Value, definition: str, digits: int = ONE) ->
         shown, between = NA, ""
     else:
         shown = fmt.pt_pct(value.point, digits)
-        between = f"<div class='hs2-between'>{_t(between_text(value.ci, digits))}</div>"
+        text = (
+            between_text(value.ci, digits)
+            if value.ci
+            else f"{NA} · {fmt.pt_ci_label()}"
+        )
+        between = f"<div class='hs2-between'>{_t(text)}</div>"
     return (
         f"<div class='hs2-card' {_lang()}><div class='hs2-ct'>{_t(title)}</div>"
         f"<div class='hs2-cv'>{_t(shown)}</div>{between}"

@@ -116,7 +116,7 @@ def main() -> None:
         st.stop()
     sidebar_counts(rel)
     renderers: tuple[Callable[[], None], ...] = (
-        lambda: overview(rel),
+        lambda: overview(rel, pages),
         lambda: sky_page(rel, get_pixels(rel.name, stamp)),
         lambda: galaxies_page(rel),
         lambda: dl_page(rel),

@@ -204,7 +204,7 @@ def test_verdict_card_word_from_caller():
 
 
 def test_verdict_card_without_interval_is_na_without_strip():
-    out = hs.verdict_card("t", kt.Verdict("w", None, None, None))
+    out = hs.verdict_card("t", kt.Verdict(kt.NA_WORD, None, None, None))
     assert hs.NA in out and "hs2-strip" not in out
 
 

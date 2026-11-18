@@ -2,29 +2,29 @@
 
 from __future__ import annotations
 
+from collections.abc import Sequence
+
 import streamlit as st
 
 from astro_triage.dashboard import charts as C
 from astro_triage.dashboard import data as D
 from astro_triage.dashboard import data_cached as DC
-from astro_triage.dashboard import fmt
+from astro_triage.dashboard import fmt, overview_model, overview_text, ui_state
+from astro_triage.dashboard import html_system as hs
 from astro_triage.dashboard.constants import NO_BAR
-from astro_triage.dashboard.data_headline import SHIPPED_PRIOR, SKY_PRIORS
 from astro_triage.dashboard.data_overview_page import PRIOR, load_page
-from astro_triage.dashboard.html_overview import (
-    accuracy_html,
-    data_box_html,
-    inscription_html,
-    ruler_html,
-    states_html,
-)
+from astro_triage.dashboard.html_overview import data_box_html
 from astro_triage.dashboard.html_overview_plots import errors_html
 from astro_triage.dashboard.html_overview_triage import triage_html
-from astro_triage.dashboard.html_system import lang_root, seal, system_css
+from astro_triage.dashboard.html_system import lang_root, system_css
+from astro_triage.dashboard.kit_types import BarRow
+from astro_triage.dashboard.overview_model import OverviewModel, QsoRow
 from astro_triage.dashboard.style_overview import overview_css
-from astro_triage.dashboard.views_common import MODEL, tech_on
+from astro_triage.dashboard.views_common import MODEL
 
-PRIOR_KEY = "overview_prior"
+SHORTCUT_TITLES = ("Mapa do céu", "Galáxias", "Comparação com DL", "Método")
+PURITY_TITLE = "Pureza de quasar nas quatro linhas"
+COMPLETENESS_TITLE = "Completude de quasar nas quatro linhas"
 
 
 def _css(css: str) -> None:
@@ -35,42 +35,81 @@ def _md(html: str) -> None:
     st.markdown(lang_root(html), unsafe_allow_html=True)
 
 
-def _pick_prior() -> str:
-    """Native selector of the sky prior; a stale saved value falls back to the shipped prior."""
-    if st.session_state.get(PRIOR_KEY) not in SKY_PRIORS:
-        st.session_state[PRIOR_KEY] = SHIPPED_PRIOR
-    chosen = st.segmented_control(
-        "Prior de quasar da coluna “Ajustada ao prior”",
-        SKY_PRIORS,
-        key=PRIOR_KEY,
-        required=True,
-    )
-    return chosen if chosen in SKY_PRIORS else SHIPPED_PRIOR
+def _label(row: QsoRow) -> str:
+    return f"{ui_state.RULE_LABEL[row.rule]} · {row.prior}"
 
 
-def overview(rel: D.Release) -> None:
-    """Visão geral: prior-ruler result screen; the technical switch adds details."""
-    tech = tech_on()
-    d = load_page(
-        rel,
-        DC.headline(rel, MODEL),
-        DC.purity_points(rel, MODEL, PRIOR),
-        DC.abstention_curve(rel, MODEL),
-        MODEL,
+def _bars(title: str, rows: tuple[QsoRow, ...], field: str) -> str:
+    bars = [
+        BarRow(
+            _label(r),
+            getattr(r, field),
+            r.selected,
+            overview_text.PARTIAL_TAG if r.partial else None,
+        )
+        for r in rows
+    ]
+    return hs.hbar_group(title, bars)
+
+
+def page_html(model: OverviewModel, state: ui_state.UiState) -> str:
+    """Answer, three cards, two bar groups, partial notice and method note, in reading order."""
+    sel, titles, defs = (
+        model.selected,
+        overview_text.CARD_TITLES,
+        overview_text.CARD_DEFS,
     )
-    states = DC.prior_states(rel, MODEL)
+    cards = hs.cards(
+        [
+            hs.number_card(titles["purity"], sel.purity, defs["purity"]),
+            hs.number_card(
+                titles["completeness"], sel.completeness, defs["completeness"]
+            ),
+            hs.number_card(titles["accuracy"], model.accuracy, defs["accuracy"]),
+        ]
+    )
+    notice = hs.method_note(model.partial_notice) if model.partial_notice else ""
+    return (
+        f"{hs.verdict_oneline(overview_text.answer(model, state))}"
+        f"{cards}{notice}"
+        f"{_bars(PURITY_TITLE, model.rows, 'purity')}"
+        f"{_bars(COMPLETENESS_TITLE, model.rows, 'completeness')}"
+        f"{hs.method_note(overview_text.ACCURACY_NOTE)}"
+    )
+
+
+def _shortcuts(pages: Sequence[object] | None) -> None:
+    by_title = {getattr(p, "title", None): p for p in pages or ()}
+    cols = st.columns(len(SHORTCUT_TITLES))
+    for col, title in zip(cols, SHORTCUT_TITLES, strict=True):
+        if title in by_title:
+            with col:
+                st.page_link(by_title[title], label=title)
+
+
+def overview(rel: D.Release, pages: Sequence[object] | None = None) -> None:
+    """Visão geral: answer, three cards, bars of the four QSO rows; details under the technical switch."""
+    state = ui_state.normalize(st.session_state)
+    model = overview_model.build(
+        DC.shipped_state(rel, MODEL),
+        DC.prior_states(rel, MODEL),
+        DC.accuracy_defs(rel, MODEL),
+        state,
+    )
     _css(system_css() + overview_css())
-    _md(seal(rel.name))
-    _md(inscription_html())
-    selected = _pick_prior()
-    _md(states_html(DC.shipped_state(rel, MODEL), states, selected))
-    _md(ruler_html(states, selected))
-    _md(accuracy_html(DC.accuracy_defs(rel, MODEL)))
-    if tech:
+    _md(page_html(model, state))
+    _shortcuts(pages)
+    if state.tech:
+        d = load_page(
+            rel,
+            DC.headline(rel, MODEL),
+            DC.purity_points(rel, MODEL, PRIOR),
+            DC.abstention_curve(rel, MODEL),
+            MODEL,
+        )
         _md(data_box_html(d))
-    _md(errors_html(d, tech))
-    _md(triage_html(d, tech))
-    if tech:
+        _md(errors_html(d, True))
+        _md(triage_html(d, True))
         st.markdown("<div class='at-sec'></div>", unsafe_allow_html=True)
         technical(rel)
 

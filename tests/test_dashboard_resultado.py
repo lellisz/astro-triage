@@ -124,7 +124,9 @@ def test_accuracy_defs_reads_seeds(tmp_path):
     dl = {
         "descriptive": {
             "regime": "BALANCED unweighted macro",
-            "families": {"lgbm_full": {"accuracy": {"mean": 0.9, "min": 0.88, "max": 0.92}}},
+            "families": {
+                "lgbm_full": {"accuracy": {"mean": 0.9, "min": 0.88, "max": 0.92}}
+            },
             "systems": {f"lgbm_full_s{i}": {} for i in range(5)} | {"dl_x_s0": {}},
         }
     }
@@ -214,7 +216,9 @@ def test_injected_text_is_escaped():
         HO.state_html(XSS, XSS, XSS, states["P2"]),
         HO.states_html(states["P2"], states, XSS),
         HO.ruler_html(states, XSS),
-        HO.accuracy_html({"shipped": XSS, "n_seeds": XSS, "regime": XSS, "balanced": XSS}),
+        HO.accuracy_html(
+            {"shipped": XSS, "n_seeds": XSS, "regime": XSS, "balanced": XSS}
+        ),
         HO.state_html("t", "s", "P2", {"qso_prior": XSS}),
     ]
     for out in outs:
@@ -263,10 +267,7 @@ def test_overview_css_only_theme_hex():
 
 def test_builders_are_single_line():
     states = _states()
-    for out in (
-        _all_html().split("\n")
-        + [HO.state_html("t", "s", "P3", states["P3"])]
-    ):
+    for out in _all_html().split("\n") + [HO.state_html("t", "s", "P3", states["P3"])]:
         assert "\n" not in out and "\r" not in out
     # each builder emits one line (the joined helper above uses '\n' only as separator)
     assert len(HO.states_html(states["P2"], states, "P3").splitlines()) == 1
@@ -298,17 +299,15 @@ def test_real_release_renders_and_p3_warning():
     assert not at.exception, at.exception
     assert not at.error
     md = _md(at)
-    for s in ("PROVISÓRIO · full_v0", "72,5%", "17,3%", "1,6%", "95,8%", "96,39%", "96,33%"):
+    for s in ("72,5%", "17,3%", "1,6%", "95,8%"):
         assert s in md, s
-    assert WARN_P3 not in md.split("Ajustada ao prior")[1].split("</section>")[0]
     assert "Próximo passo" not in md and "at-rowp" not in md
-    sel = [w for w in at.button_group if w.key == "overview_prior"]
-    assert len(sel) == 1
-    sel[0].set_value("P3")
+    assert WARN_P3 not in md
+    at.session_state["ui_rule"] = "prior_matched"
+    at.session_state["ui_prior"] = "P3"
     at = at.run()
     assert not at.exception, at.exception
     assert not at.error
     md3 = _md(at)
-    assert WARN_P3 in md3 and "1,6%" in md3
+    assert WARN_P3 in md3
     assert "Próximo passo" not in md3 and "at-rowp" not in md3
-
