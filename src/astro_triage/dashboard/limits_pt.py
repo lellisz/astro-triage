@@ -84,7 +84,7 @@ def omit_record_refs(text: str) -> str:
     if cleaned == text:
         return text
     cleaned = _DOUBLE_SPACE.sub(" ", cleaned)
-    return _SPACE_BEFORE_PUNCT.sub(r"", cleaned).strip()
+    return _SPACE_BEFORE_PUNCT.sub(r"\1", cleaned).strip()
 
 
 def limitation_lines(originals: list[str]) -> list[str]:

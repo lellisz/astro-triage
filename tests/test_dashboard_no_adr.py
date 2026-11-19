@@ -261,6 +261,21 @@ def test_omit_record_refs_removes_only_the_citation() -> None:
     assert LP.omit_record_refs("ADRX stays") == "ADRX stays"
 
 
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("defined ADRs: it is never shifted", "defined: it is never shifted"),
+        ("foo ADR 0004 . bar", "foo. bar"),
+        ("x (per ADR 0003) , y", "x, y"),
+    ],
+)
+def test_omit_record_refs_closes_the_space_before_punctuation(text: str, expected: str) -> None:
+    """The normalisation keeps the punctuation mark (a broken backreference replaced it)."""
+    out = LP.omit_record_refs(text)
+    assert out == expected
+    assert not any(ord(c) < 32 for c in out if c not in "\n\t")
+
+
 def test_omit_record_refs_never_raises_on_the_producer_texts() -> None:
     for original in R.LIMITATIONS:
         assert not ADR.search(LP.omit_record_refs(original))
