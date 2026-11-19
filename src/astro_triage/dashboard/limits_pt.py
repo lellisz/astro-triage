@@ -22,6 +22,8 @@ DROP: Final[str] = "{-}"
 _REF_PAREN = re.compile(r"\s*\((?:per\s+)?ADR\s+\d{4}[^)]*\)")
 _REF_PER = re.compile(r",?\s*per\s+ADR\s+\d{4}")
 _REF_IN_THE = re.compile(r"\s+in\s+the\s+ADRs\b")
+_REF_TITLED = re.compile(r",?\s*ADR\s+\d{4}\s+'[^']*'\s+item\s+\d+")
+_REF_SENTENCE_START = re.compile(r"(\. )ADR\s+\d{4}\s+(\w)")
 _REF_ANY = re.compile(r"\bADRs?\b(?:\s+\d{4})?\s*")
 _DOUBLE_SPACE = re.compile(r" {2,}")
 _SPACE_BEFORE_PUNCT = re.compile(r" ([.,:])")
@@ -76,10 +78,13 @@ def translate(text: str) -> tuple[str, bool]:
 
 def omit_record_refs(text: str) -> str:
     """``text`` without citations of decision records; only the citation is removed."""
-    for rule in (_REF_PAREN, _REF_PER, _REF_IN_THE, _REF_ANY):
-        text = rule.sub("", text)
-    text = _DOUBLE_SPACE.sub(" ", text)
-    return _SPACE_BEFORE_PUNCT.sub(r"\1", text).strip()
+    cleaned = _REF_SENTENCE_START.sub(lambda m: m.group(1) + m.group(2).upper(), text)
+    for rule in (_REF_TITLED, _REF_PAREN, _REF_PER, _REF_IN_THE, _REF_ANY):
+        cleaned = rule.sub("", cleaned)
+    if cleaned == text:
+        return text
+    cleaned = _DOUBLE_SPACE.sub(" ", cleaned)
+    return _SPACE_BEFORE_PUNCT.sub(r"", cleaned).strip()
 
 
 def limitation_lines(originals: list[str]) -> list[str]:

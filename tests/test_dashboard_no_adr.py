@@ -264,3 +264,36 @@ def test_omit_record_refs_removes_only_the_citation() -> None:
 def test_omit_record_refs_never_raises_on_the_producer_texts() -> None:
     for original in R.LIMITATIONS:
         assert not ADR.search(LP.omit_record_refs(original))
+
+
+def test_omit_record_refs_drops_the_whole_titled_citation() -> None:
+    en = (
+        "its star score is 1 - p_quasar - p_galaxy (absorbs WD and binary), ADR 0003 "
+        "'Effect of the combmod embedded prior' item 3. The delivered "
+        "classprob_dsc_combmod_star column is not used."
+    )
+    assert LP.omit_record_refs(en) == (
+        "its star score is 1 - p_quasar - p_galaxy (absorbs WD and binary). The delivered "
+        "classprob_dsc_combmod_star column is not used."
+    )
+
+
+def test_omit_record_refs_capitalizes_the_sentence_a_citation_opened() -> None:
+    en = (
+        "partial circularity. ADR 0002 cut (b) (outside DSC training): not available: "
+        "DR14Q/DR15 not ingested."
+    )
+    assert LP.omit_record_refs(en) == (
+        "partial circularity. Cut (b) (outside DSC training): not available: "
+        "DR14Q/DR15 not ingested."
+    )
+
+
+def test_omit_record_refs_leaves_text_without_citation_byte_identical() -> None:
+    for text in ("p < .05  and  double  spaces .", "  lead and trail  ", "a ,b . c"):
+        assert LP.omit_record_refs(text) == text
+
+
+def test_omit_record_refs_leaves_no_dangling_item_on_the_producer_texts() -> None:
+    for original in R.LIMITATIONS:
+        assert not re.search(r"\bitem \d+", LP.omit_record_refs(original)), original
