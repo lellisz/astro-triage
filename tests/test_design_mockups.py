@@ -172,6 +172,7 @@ def test_resultado_prior_is_assumed_and_p3_is_partial(html):
     assert "P3 vale só para parte do céu (bandas B e C; ADR 0003)" in doc
 
 
+@needs_release
 def test_comparacao_d_ci_delta_match_results_dl(html):
     dl = _jload("dl", "eval", "results_dl.json")
     panels = html["comparacao"].split("<section class='panel'>")[1:3]

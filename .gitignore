@@ -53,3 +53,6 @@ NUL
 
 # Playwright MCP session snapshots
 .playwright-mcp/
+
+# Agent specs for the dashboard redesign (working notes, not part of the repo)
+.claude/state/redesign-specs/
