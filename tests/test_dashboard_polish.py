@@ -28,13 +28,15 @@ def test_v5_fragments_of_every_tab_carry_the_page_language(monkeypatch):
     assert all(f"lang='{PAGE_LANG}'" in html for html in sent)
 
 
-def test_v6_header_gets_a_solid_background_on_narrow_screens():
+def test_v6_header_has_a_solid_background_at_every_width():
+    """A transparent fixed header lets the menu overlap the text when the page scrolls."""
     from astro_triage.dashboard import theme
 
     css = theme.css()
-    assert f"max-width: {theme.NARROW_SCREEN_PX}px" in css
-    rule = css.split(f"max-width: {theme.NARROW_SCREEN_PX}px", 1)[1].split("}}", 1)[0]
-    assert "stHeader" in rule and theme.BG in rule
+    selector = '[data-testid="stHeader"]'
+    assert css.count(selector) == 1  # no narrow-screen override hiding a transparent default
+    rule = css.split(selector, 1)[1].split("}", 1)[0]
+    assert theme.BG in rule and "transparent" not in rule
 
 
 def test_v1_data_dl_does_not_depend_on_data_headline():
