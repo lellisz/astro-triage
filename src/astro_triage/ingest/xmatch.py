@@ -60,6 +60,7 @@ _CHUNK_BYTES: Final = 1024 * 1024
 _MAX_DELAY_S: Final = 120.0
 _MAX_ARROW_BLOCK: Final = 2**31 - 1
 _WINDOWS_PATH: Final = re.compile(r"[A-Za-z]:[\\/][^\s'\"<>|]*")
+_POSIX_PATH: Final = re.compile(r"(?<![\w:/.\-])/(?:[\w.\-]+/)+[\w.\-]*")
 _ID_COLUMN_TYPES: Final[dict[str, pa.DataType]] = {
     "Source": pa.int64(),
     "sid": pa.string(),
@@ -88,11 +89,11 @@ def _validate(catalog: str, radius_arcsec: float, selection: str) -> None:
 
 
 def _mask_paths(text: str) -> str:
-    """Replace the home directory and Windows absolute paths with ``<path>``."""
+    """Replace the home directory and Windows and POSIX absolute paths with ``<path>``."""
     home = str(Path.home())
     if home:
         text = text.replace(home, "<path>")
-    return _WINDOWS_PATH.sub("<path>", text)
+    return _POSIX_PATH.sub("<path>", _WINDOWS_PATH.sub("<path>", text))
 
 
 def _safe_detail(text: str) -> str:

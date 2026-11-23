@@ -473,6 +473,11 @@ def test_mask_paths_windows_and_home(
     )
 
 
+def test_mask_paths_posix() -> None:
+    text = "using /tmp/pytest-of-runner/t0/cert.pem (HTTP 503)"
+    assert xmatch._mask_paths(text) == "using <path> (HTTP 503)"
+
+
 def test_safe_detail_redacts_secrets_and_masks_paths() -> None:
     out = xmatch._safe_detail("token=abc123 failed at C:\\Users\\x\\y.csv")
     assert "abc123" not in out and "Users" not in out

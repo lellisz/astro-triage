@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-from pathlib import Path
 
 _PATH = re.compile(r"(?:[A-Za-z]:)?[\\/][\w.\-]+(?:[\\/][\w.\-]+)+")
 _MAX_CHARS = 120
@@ -12,7 +11,8 @@ _MAX_CHARS = 120
 def describe_error(exc: BaseException) -> str:
     """What went wrong, without file paths or tracebacks (type and a short message only)."""
     if isinstance(exc, OSError) and exc.filename:
-        return f"faltou o artefato {Path(str(exc.filename)).name}"
+        name = str(exc.filename).replace("\\", "/").rsplit("/", 1)[-1]
+        return f"faltou o artefato {name}"
     if isinstance(exc, KeyError) and exc.args:
         return f"faltou o campo {exc.args[0]!r} em um artefato"
     message = _PATH.sub("…", str(exc)).strip()[:_MAX_CHARS]
