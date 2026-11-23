@@ -1,0 +1,44 @@
+{
+  "pipeline": "dashboard-redesign-regua-do-prior",
+  "scope": "Fases 1 e 2 apenas (plano aprovado pelo owner em 2026-11-17, repassado pela sessao principal). Fases seguintes exigem novo OK.",
+  "updated": "2026-11-17",
+  "status": "DONE",
+  "tasks": [
+    {"id": "T3", "agent": "coder", "phase": 1, "status": "DONE", "verdict": null, "depends_on": []},
+    {"id": "T4", "agent": "tester", "phase": 1, "status": "DONE", "verdict": "FAIL", "depends_on": ["T3"], "note": "TST-01"},
+    {"id": "F1", "agent": "fixer", "phase": 1, "status": "DONE", "verdict": null, "depends_on": ["T4"], "loop_iteration": 1},
+    {"id": "R1", "agent": "reviewer", "phase": 1, "status": "DONE", "verdict": "FAIL", "depends_on": ["F1"], "note": "REV-01..03 MAJOR"},
+    {"id": "S1", "agent": "security", "phase": 1, "status": "DONE", "verdict": "PASS", "depends_on": ["F1"]},
+    {"id": "F2", "agent": "fixer", "phase": 1, "status": "DONE", "verdict": null, "depends_on": ["R1"], "loop_iteration": 1},
+    {"id": "T4b", "agent": "tester", "phase": 1, "status": "DONE", "verdict": "PASS", "depends_on": ["F2"]},
+    {"id": "R1b", "agent": "reviewer", "phase": 1, "status": "DONE", "verdict": "PASS", "depends_on": ["T4b"]},
+    {"id": "T5", "agent": "coder", "phase": 2, "status": "DONE", "verdict": null, "depends_on": []},
+    {"id": "T6", "agent": "coder", "phase": 2, "status": "DONE", "verdict": null, "depends_on": ["T3", "T5"], "note": "inclui T7"},
+    {"id": "T8", "agent": "tester", "phase": 2, "status": "DONE", "verdict": "PASS", "depends_on": ["T6"]},
+    {"id": "R2", "agent": "reviewer", "phase": 2, "status": "DONE", "verdict": "PASS", "depends_on": ["T8"]},
+    {"id": "S2", "agent": "security", "phase": 2, "status": "DONE", "verdict": "PASS", "depends_on": ["T8"]},
+    {"id": "T9", "agent": "tester", "phase": 0, "status": "DONE", "verdict": "PASS", "depends_on": ["R1b", "R2", "S2"], "note": "verificacao final"}
+  ],
+  "findings_open": [],
+  "findings_closed": [
+    {"id": "TST-01", "severity": "MAJOR", "proof": "test_dashboard_system.py::test_diff_ruler_never_raises[panels2]"},
+    {"id": "REV-01", "severity": "MAJOR", "proof": "test_verdict_real_* (R1b)"},
+    {"id": "REV-02", "severity": "MAJOR", "proof": "test_verdict_tie_all_worse_has_no_only_and_no_pair_needs (R1b)"},
+    {"id": "REV-03", "severity": "MAJOR", "proof": "test_verdict_html_escapes_family_and_class_names (R1b)"}
+  ],
+  "deferred": [
+    "SEC-01 MINOR (fechado de fato via REV-03)",
+    "REV-04 rotulos de escala muito pequena / largura negativa em diff_ruler",
+    "REV-05 _scale ignora lo/hi parcial",
+    "REV-06 constantes-apelido para driblar detector de digitos; HALF compartilhado",
+    "REV-10 citacao Delchambre+2023, bandas B e C e PARTIAL_PRIORS digitados; results.json tem prior_source",
+    "REV-11 'ADR 0003' montado com zfill",
+    "REV-12 rotulo 'regime balanceado' x acuracia raw unweighted (decisao do owner)",
+    "REV-13 ciclo data_headline <-> data_dl via import tardio",
+    "REV-14 hero_html/numbers_html/purity_html sem chamador",
+    "results_dl.json invalido derruba a pagina Resultado (app.py captura por pagina)",
+    "html_dl.pair_verdict e mockup comparacao usam chave 'win' vs produtor 'X wins' (mesma raiz do REV-01, fase Comparacao)",
+    "rotulos de marcas de prior proximas podem se sobrepor na regua",
+    "graphify-out desatualizado: precisa graphify update ."
+  ]
+}
