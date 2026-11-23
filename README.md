@@ -1,19 +1,25 @@
 # astro-triage
 
+[![CI](https://github.com/lellisz/astro-triage/actions/workflows/ci.yml/badge.svg)](https://github.com/lellisz/astro-triage/actions/workflows/ci.yml) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 [English](#english) | [Português](#português)
 
 ## English
 
-astro-triage classifies Gaia DR3 sources as STAR, GALAXY or QSO. Labels come from SDSS spectroscopy; the model is LightGBM with calibration, compared against the Gaia DSC classifier as baseline.
+### What it is
+astro-triage classifies Gaia DR3 sources as STAR, GALAXY or QSO, using SDSS spectroscopic labels.
+The main model is LightGBM with calibration, evaluated against the Gaia DSC classifier as baseline.
+It also compares LightGBM with two deep-learning models, an MLP and an FT-Transformer.
+A Streamlit dashboard presents the results.
 
-> **WARNING: all results are PROVISIONAL.**
-> - The reporting floor is not met in some cells.
-> - ADR 0006 (deep-learning comparison protocol) is still Proposed: the validation freeze exists, acceptance is open.
-> - The population has no magnitude cut (see the ADR 0001 amendment).
->
-> Do not cite any number as final.
+### Status and limitations
+**All metrics are PROVISIONAL.**
+- Some cells are below the reporting floor (at least 100 objects in at least 20 sky pixels per class) and are marked n/a.
+- The labels come from SDSS and carry the selection bias of the crossmatch with Gaia: the match rate is 91.1% for STAR, 65.7% for QSO and 31.1% for GALAXY.
+- Part of Gaia DSC was trained on SDSS objects, so scoring it on SDSS labels is partly circular (ADR 0002).
+- The population has no magnitude cut (see the ADR 0001 amendment).
 
-### Status
+### Project status
 - Phase 1 (LightGBM on the `full_v0` dataset, evaluation vs Gaia DSC): done, provisional.
 - Layer 2 (Nemotron via NVIDIA API): closed without test evaluation (ADR 0005, Amendment 2).
 - Deep-learning comparison (MLP and FT-Transformer vs LightGBM): executed once on the test set under the ADR 0006 protocol; results are aggregates only, provisional, and the test must not be opened again without a new ADR.
@@ -124,20 +130,24 @@ bash:
 - No raw data in the repository; terms are in `manifests/README.md`.
 - Gaia data licence: CC BY-NC 3.0 IGO.
 - Citations are pending verification (see `manifests/README.md`).
-- The repository is private.
+- The repository is public and holds code, tests and documentation only; the data are not redistributed here.
 
 ## Português
 
-O astro-triage classifica fontes do Gaia DR3 como STAR, GALAXY ou QSO. Os rótulos vêm da espectroscopia do SDSS; o modelo é LightGBM com calibração, comparado ao classificador Gaia DSC como baseline.
+### O que é
+O astro-triage classifica fontes do Gaia DR3 como STAR, GALAXY ou QSO, usando rótulos espectroscópicos do SDSS.
+O modelo principal é o LightGBM com calibração, avaliado contra o classificador Gaia DSC como baseline.
+Também compara o LightGBM com dois modelos de deep learning, um MLP e um FT-Transformer.
+Um dashboard em Streamlit apresenta os resultados.
 
-> **AVISO: todos os resultados são PROVISÓRIOS.**
-> - O piso de reporte não é atingido em algumas células.
-> - A ADR 0006 (protocolo da comparação com deep learning) segue Proposed: o freeze da validação existe, a aceitação está aberta.
-> - A população não tem corte de magnitude (ver a emenda da ADR 0001).
->
-> Não cite nenhum número como final.
+### Status e limitações
+**Todas as métricas são PROVISÓRIAS.**
+- Algumas células ficam abaixo do piso de reporte (mínimo de 100 objetos em 20 pixels do céu por classe) e aparecem marcadas como n/a.
+- Os rótulos vêm do SDSS e carregam o viés de seleção do cruzamento com o Gaia: a taxa de match é 91,1% para STAR, 65,7% para QSO e 31,1% para GALAXY.
+- Parte do Gaia DSC foi treinada com objetos do SDSS, então avaliá-lo com rótulos do SDSS é parcialmente circular (ADR 0002).
+- A população não tem corte de magnitude (ver a emenda da ADR 0001).
 
-### Status
+### Estado do projeto
 - Fase 1 (LightGBM no dataset `full_v0`, avaliação vs Gaia DSC): concluída, provisória.
 - Camada 2 (Nemotron via API NVIDIA): encerrada sem avaliação em teste (ADR 0005, Emenda 2).
 - Comparação com deep learning (MLP e FT-Transformer vs LightGBM): executada uma vez no teste pelo protocolo da ADR 0006; resultados só em agregados, provisórios, e o teste não pode ser aberto de novo sem uma nova ADR.
@@ -248,4 +258,4 @@ bash:
 - Nenhum dado bruto no repositório; os termos estão em `manifests/README.md`.
 - Licença dos dados Gaia: CC BY-NC 3.0 IGO.
 - Citações pendentes de verificação (ver `manifests/README.md`).
-- O repositório é privado.
+- O repositório é público e contém só código, testes e documentação; os dados não são redistribuídos aqui.
