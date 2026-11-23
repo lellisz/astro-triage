@@ -1,0 +1,44 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-dl.txt
+
+      # requirements-dl.txt = requirements.txt + torch (pin 2.11.0). The tests import torch;
+      # the CPU index avoids the multi-GB CUDA wheel that PyPI serves on Linux.
+      - name: Install dependencies
+        run: >
+          python -m pip install -r requirements-dl.txt
+          --extra-index-url https://download.pytorch.org/whl/cpu
+
+      # The repo has no ruff config (no pyproject.toml/ruff.toml): ruff defaults apply.
+      - name: Lint (ruff)
+        run: python -m ruff check .
+
+      # data/ is gitignored and absent in CI; tests must not depend on it.
+      - name: Test (pytest)
+        run: python -m pytest -q
