@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -67,11 +68,14 @@ def test_three_limitations_present():
     assert f"<li>{NA}</li>" in HM.three_limits_html([])
 
 
-def test_page_shows_the_three_limitations_and_links_as_na(monkeypatch):
+def test_page_shows_the_three_limitations_and_the_links(monkeypatch):
+    refs = json.loads(HM.REFERENCES_PATH.read_text(encoding="utf-8"))
     for tech in (False, True):
         html = _method_html(monkeypatch, tech)
         assert HM.THREE_LIMITS_TITLE in html and notes.PRIOR_NOTE in html
         assert HM.LINKS_TITLE in html and HM.GLOSSARY_TITLE in html
+        assert len(refs) == 7
+        assert all(r["url"] in html for r in refs)
 
 
 def test_glossary_missing_term_is_na():

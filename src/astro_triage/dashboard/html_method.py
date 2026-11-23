@@ -6,8 +6,10 @@ Deep-learning numbers are not written here.
 
 from __future__ import annotations
 
+import json
 from collections.abc import Mapping, Sequence
 from html import escape
+from pathlib import Path
 from typing import Final
 
 from astro_triage.dashboard import fmt
@@ -67,6 +69,8 @@ SOURCES_TITLE: Final = "Fontes"
 RULE_TITLE: Final = "Regra de decisão"
 THREE_LIMITS_TITLE: Final = "Três limitações"
 LINKS_TITLE: Final = "Links"
+REFERENCES_PATH: Final = Path(__file__).with_name("references.json")
+HTTPS_PREFIX: Final = "https://"
 UNTRANSLATED: Final = " (sem tradução)"
 CROSSMATCH_PREFIX: Final = "Selection by crossmatch"
 
@@ -146,9 +150,43 @@ def glossary_details() -> str:
     return details(GLOSSARY_TITLE, glossary_html())
 
 
+def _references() -> list[tuple[str, str, str]]:
+    """(label, note, url) read from the data file; invalid entries are dropped, never raised."""
+    try:
+        data = json.loads(REFERENCES_PATH.read_bytes())
+    except (OSError, ValueError):
+        return []
+    if not isinstance(data, list):
+        return []
+    refs = []
+    for entry in data:
+        if not isinstance(entry, dict):
+            continue
+        label, note, url = (entry.get(k) for k in ("label", "note", "url"))
+        if not (isinstance(label, str) and label.strip()):
+            continue
+        if not (isinstance(url, str) and url.startswith(HTTPS_PREFIX)):
+            continue
+        refs.append((label.strip(), note.strip() if isinstance(note, str) else "", url))
+    return refs
+
+
+def _link_item(label: str, note: str, url: str) -> str:
+    anchor = (
+        f'<a href="{escape(url, quote=True)}" target="_blank" '
+        f'rel="noopener noreferrer">{escape(label)}</a>'
+    )
+    return f"<li>{anchor}{' — ' + escape(note) if note else ''}</li>"
+
+
 def links_html() -> str:
-    """External links are undecided: n/a until the owner chooses them."""
-    return section(LINKS_TITLE, "", small_note(NA))
+    """References and links from ``references.json``; n/a when there is no valid entry."""
+    refs = _references()
+    if not refs:
+        return section(LINKS_TITLE, "", small_note(NA))
+    return section(
+        LINKS_TITLE, "", "<ul>" + "".join(_link_item(*r) for r in refs) + "</ul>"
+    )
 
 
 def limitations_html(originals: list[str]) -> str:

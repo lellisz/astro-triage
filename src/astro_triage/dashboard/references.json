@@ -1,0 +1,37 @@
+[
+  {
+    "label": "Gaia DR3: resumo do release",
+    "note": "Gaia Collaboration, Vallenari+2023, A&A",
+    "url": "https://doi.org/10.1051/0004-6361/202243940"
+  },
+  {
+    "label": "Gaia DSC: classificação de fontes",
+    "note": "Delchambre+2023, A&A (Apsis III)",
+    "url": "https://doi.org/10.1051/0004-6361/202243423"
+  },
+  {
+    "label": "Classificação de quasares e galáxias no Gaia DR2",
+    "note": "Bailer-Jones+2019, MNRAS (origem do prior P1)",
+    "url": "https://doi.org/10.1093/mnras/stz2947"
+  },
+  {
+    "label": "Gaia DR3 (ESA): página do release",
+    "note": "documentação e acesso aos dados",
+    "url": "https://www.cosmos.esa.int/web/gaia/dr3"
+  },
+  {
+    "label": "SDSS",
+    "note": "espectros que fornecem os rótulos de classe",
+    "url": "https://www.sdss.org/"
+  },
+  {
+    "label": "LightGBM: artigo",
+    "note": "Ke+2017, NeurIPS",
+    "url": "https://proceedings.neurips.cc/paper/2017/hash/6449f44a102fde848669bdd9eb6b76fa-Abstract.html"
+  },
+  {
+    "label": "LightGBM: código",
+    "note": "repositório oficial",
+    "url": "https://github.com/lightgbm-org/LightGBM"
+  }
+]
