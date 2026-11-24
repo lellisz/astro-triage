@@ -187,9 +187,11 @@ Head  = { schema_version: 1, release: string, provisional: true, generated_at: s
 - `cards {n_regions, n_objects, n_below: Num, max_rate: Est, diverges: bool, diverge_note | null}`.
 - `texts {title, lead, how_rate, how_rate_hidden, how_count, map_lead, position_note,
   neighbour_note, spread_note}`.
+- Emenda fase 2a (para revisão do owner): how_rate, how_rate_hidden e how_count são gerados pelo web_export em texto neutro, sem nome de cor; o texto do Streamlit (sky_text.how) não muda.
 - `color_cap {rate: number | null, count: number}`.
 - `graticule {meridians: [[x, y], ...][], parallels: [[x, y], ...][], labels[] {x, y, text}}`
   (map units of `data_sky.mollweide`).
+  Emenda fase 2a (para revisão do owner): graticule.labels[] ganha kind 'lat'|'lon' para posicionar o rótulo; nenhuma coordenada muda.
 - `regions[]` (one per test pixel): `{hp: int, x, y, band: "A"|"B"|"C", n: int, below_floor: bool,
   errors: int | null, rate: number | null}`. `errors` and `rate` are `null` below the floor, so the
   client cannot derive a withheld rate.
@@ -233,6 +235,8 @@ Head  = { schema_version: 1, release: string, provisional: true, generated_at: s
   `glossary[] {term, definition | null}`, `links[] {label, note, url}` (https only), `sources[]`.
 
 `fmt_samples.json`: `[{fn, args, text}]` for every `fmt.pt_*` used in ticks.
+
+Emenda fase 2a (para revisão do owner): web/lib/fmt.ts também formata mínimo/máximo da legenda e valores do tooltip do mapa, só a partir de valores já exportados e com paridade obrigatória contra fmt_samples.json; nada é derivado no front.
 
 ## Appendix B. File plan
 
