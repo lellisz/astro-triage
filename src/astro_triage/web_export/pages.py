@@ -43,6 +43,7 @@ from astro_triage.dashboard.html_galaxy_prior import VERDICT_SCOPE, verdict_text
 from astro_triage.dashboard.html_system import SEAL_PREFIX
 from astro_triage.dashboard.limits_pt import omit_record_refs, translate
 from astro_triage.dashboard.ui_state import LINE_LABEL, UiState
+from astro_triage.web_export import web_text
 from astro_triage.web_export.types import est, from_value, head, num
 
 MODEL: Final = "lgbm_full"
@@ -366,10 +367,14 @@ def _graticule() -> dict:
     labels = []
     for lat in sky_map_html.LABELLED_LATS_DEG:
         ((x, y),) = _curve([EDGE_LON_DEG], [lat])
-        labels.append({"x": x, "y": y, "text": sky_map_html._lat_text(lat)})
+        labels.append(
+            {"x": x, "y": y, "text": sky_map_html._lat_text(lat), "kind": "lat"}
+        )
     for lon, _ in sky_map_html.lon_label_positions():
         ((x, y),) = _curve([lon], [0.0])
-        labels.append({"x": x, "y": y, "text": f"{fmt.pt_int(lon)}°"})
+        labels.append(
+            {"x": x, "y": y, "text": f"{fmt.pt_int(lon)}°", "kind": "lon"}
+        )
     return {
         "meridians": [_curve([lon] * CURVE_POINTS, steps) for lon in sorted(meridians)],
         "parallels": [
@@ -463,9 +468,9 @@ def sky(rel: D.Release, pixels: pd.DataFrame) -> dict:
         "texts": {
             "title": sky_text.TITLE,
             "lead": sky_text.lead(sc.n_regions),
-            "how_rate": sky_text.how(True, sc.n_below, floor, False),
-            "how_rate_hidden": sky_text.how(True, sc.n_below, floor, True),
-            "how_count": sky_text.how(False, sc.n_below, floor, False),
+            "how_rate": web_text.how(True, sc.n_below, floor, False),
+            "how_rate_hidden": web_text.how(True, sc.n_below, floor, True),
+            "how_count": web_text.how(False, sc.n_below, floor, False),
             "map_lead": sky_text.map_lead(stats, floor),
             "position_note": sky_text.POSITION_NOTE,
             "neighbour_note": method_notes.NEIGHBOUR_NOTE,
