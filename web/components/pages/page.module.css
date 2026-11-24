@@ -1,0 +1,109 @@
+.stack {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-3);
+}
+
+.kpi,
+.panel {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--space-4);
+}
+
+.kpiLabel {
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
+.kpiValue {
+  margin-top: var(--space-1);
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+}
+
+.kpiCi {
+  margin-top: var(--space-1);
+  color: var(--text-3);
+  font-size: var(--text-sm);
+}
+
+.answer {
+  color: var(--text);
+  font-size: var(--text-md);
+  max-width: 72ch;
+}
+
+.callout {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  padding: var(--space-3) var(--space-4);
+}
+
+.split {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: var(--space-4);
+}
+
+.panelTitle {
+  font-size: var(--text-lg);
+}
+
+.panelSub {
+  margin-top: var(--space-1);
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
+.placeholder {
+  display: grid;
+  place-items: center;
+  min-height: 12rem;
+  margin-top: var(--space-3);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text-3);
+  font-size: var(--text-sm);
+  text-align: center;
+  padding: var(--space-3);
+}
+
+.mapPlaceholder {
+  min-height: 24rem;
+}
+
+.dl {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) 0 0;
+}
+
+.dl dt {
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
+.dl dd {
+  margin: 0;
+  color: var(--text-strong);
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
