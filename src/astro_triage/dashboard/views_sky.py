@@ -97,14 +97,4 @@ def sky_page(rel: D.Release, px: pd.DataFrame) -> None:
         details(sky_text.BANDS_TITLE, sky_text.bands_body(D.lat_band_table(stats)))
         + details(sky_text.top_title(floor), sky_text.top_body(top, floor))
     )
-    chance = D.chance_share_of_pixels_with_error(
-        stats, float(stats["errors"].sum()) / float(stats["n"].sum())
-    )
-    with_error = int((stats["errors"] > 0).sum())
-    _md(
-        small_note(
-            f"{fmt.pt_int(with_error)} regiões têm ao menos um erro "
-            f"({fmt.pt_pct(with_error / len(stats), 0)}); ao acaso, "
-            f"seriam ≈{fmt.pt_pct(chance, 0)}."
-        )
-    )
+    _md(small_note(sky_text.spread_note(stats)))

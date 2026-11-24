@@ -83,7 +83,8 @@ def band_table(title: str, table: pd.DataFrame) -> str:
     )
 
 
-def missing_note(by_g: pd.DataFrame) -> str:
+def missing_note_text(by_g: pd.DataFrame) -> str:
+    """Colour key and, when there are galaxies without a measured magnitude, how many."""
     gone = by_g[by_g["lo"].isna()]
     n = int(gone["n"].sum()) if len(gone) else 0
     note = f"Azul = taxa acima de {fmt.pt_pct(ERROR_HIGH, 0)}."
@@ -92,4 +93,9 @@ def missing_note(by_g: pd.DataFrame) -> str:
             f" Faltam {fmt.pt_int(n)} galáxias sem magnitude medida, "
             "que não entram na parte de brilho."
         )
+    return note
+
+
+def missing_note(by_g: pd.DataFrame) -> str:
+    note = missing_note_text(by_g)
     return f"<p class='at-cap' style='margin:14px 0 0'>{escape(note)}</p>"

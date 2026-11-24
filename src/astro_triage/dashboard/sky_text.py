@@ -10,7 +10,11 @@ import pandas as pd
 from astro_triage.dashboard import fmt, html_kit
 from astro_triage.dashboard import html_system as hs
 from astro_triage.dashboard.constants import ERROR_HIGH
-from astro_triage.dashboard.data_sky import BAND_EDGES_DEG, HEALPIX_NSIDE
+from astro_triage.dashboard.data_sky import (
+    BAND_EDGES_DEG,
+    HEALPIX_NSIDE,
+    chance_share_of_pixels_with_error,
+)
 
 MODE_RATE: Final = "Taxa de erro"
 MODE_COUNT: Final = "Quantidade de objetos"
@@ -103,6 +107,19 @@ def map_lead(stats: pd.DataFrame, floor: int) -> str:
         f"A taxa geral é {fmt.pt_pct(overall)}. Em {fmt.pt_int(over)} das "
         f"{fmt.pt_int(len(reliable))} regiões com dados confiáveis, "
         f"ela passa de {fmt.pt_pct(ERROR_HIGH, 0)}."
+    )
+
+
+def spread_note(stats: pd.DataFrame) -> str:
+    """Regions with at least one error, against the share expected if errors were spread at random."""
+    chance = chance_share_of_pixels_with_error(
+        stats, float(stats["errors"].sum()) / float(stats["n"].sum())
+    )
+    with_error = int((stats["errors"] > 0).sum())
+    return (
+        f"{fmt.pt_int(with_error)} regiões têm ao menos um erro "
+        f"({fmt.pt_pct(with_error / len(stats), 0)}); ao acaso, "
+        f"seriam ≈{fmt.pt_pct(chance, 0)}."
     )
 
 

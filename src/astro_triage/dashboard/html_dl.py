@@ -138,16 +138,8 @@ def error_html(message: str) -> str:
     return hs.lang_root(box("Dados da comparação ilegíveis", body))
 
 
-def reasons_html(
-    status: str | None,
-    freeze: bool,
-    floor_cells: int,
-    limitations: bool,
-) -> str:
-    """Reason line derived from the protocol record header and the artifacts read.
-
-    The PROVISIONAL seal itself is printed once per tab by the shell header.
-    """
+def reasons_text(status: str | None, freeze: bool, below: int, has_limits: bool) -> str:
+    """Reason sentence derived from the protocol record header and the artifacts read."""
     word = _STATUS_PT.get(status or "")
     if word is None:
         protocol = f"{PROTOCOL}: {NA}"
@@ -156,14 +148,24 @@ def reasons_html(
         extra.append("o freeze existe" if freeze else f"freeze {NA}")
         protocol = f"{PROTOCOL} {word} ({'; '.join(extra)})"
     reasons = [protocol]
-    if floor_cells > 0:
+    if below > 0:
         reasons.append("células do destaque abaixo do piso de relato")
     reasons.append(
         "limitações do results_dl listadas abaixo"
-        if limitations
+        if has_limits
         else f"limitações do results_dl: {NA}"
     )
-    return _p("Razões: " + "; ".join(reasons) + ".", "at-cap")
+    return "Razões: " + "; ".join(reasons) + "."
+
+
+def reasons_html(
+    status: str | None,
+    freeze: bool,
+    floor_cells: int,
+    limitations: bool,
+) -> str:
+    """Reason line as HTML. The PROVISIONAL seal itself is printed once per tab by the shell."""
+    return _p(reasons_text(status, freeze, floor_cells, limitations), "at-cap")
 
 
 def _cell_rows(cells: Sequence[PairCell]) -> list[list[str]]:

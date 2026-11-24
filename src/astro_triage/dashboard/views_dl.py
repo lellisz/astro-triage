@@ -14,12 +14,10 @@ from astro_triage.dashboard import compare_text as CT
 from astro_triage.dashboard import data as D
 from astro_triage.dashboard import data_cached as DC
 from astro_triage.dashboard import data_dl as DD
-from astro_triage.dashboard import fmt
 from astro_triage.dashboard import html_dl as HD
 from astro_triage.dashboard import html_system as hs
 from astro_triage.dashboard import verdict_rule as VR
 from astro_triage.dashboard.ui_state import LINE_LABEL
-from astro_triage.evaluation import dl_compare
 
 GRID_LEAD = "Quatro células: classe por rede, cada uma contra o LightGBM."
 PURITY_LEAD = "Barras a partir de zero: a mediana das sementes e, na linha fina, o mínimo e o máximo."
@@ -40,10 +38,7 @@ def _purity_rows(model: CM.CompareModel) -> list[dict]:
             "low": lo,
             "median": mid,
             "high": hi,
-            "detail": (
-                f"mediana de {fmt.pt_int(dl_compare.N_SEEDS)} sementes {fmt.pt_pct(mid, 2)}; "
-                f"mínimo a máximo {fmt.pt_pct(lo, 2)} a {fmt.pt_pct(hi, 2)} ({CT.NOT_CI_LABEL})"
-            ),
+            "detail": CT.purity_detail(mid, lo, hi),
         }
         for s, lo, mid, hi in model.purity
     ]
