@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { acessibilidade, footer, siteName, siteTagline } from "@/content/labels";
 import type { Meta } from "@/lib/schema";
-import { ProvisionalSeal } from "./ProvisionalSeal";
 import { StateControls } from "./StateControls";
 import { TopNav } from "./TopNav";
 import styles from "./Shell.module.css";
@@ -20,7 +19,6 @@ export function Shell({ meta, children, hideRuleAndPrior }: Props) {
           <span className={styles.tagline}>{siteTagline}</span>
         </div>
         <TopNav meta={meta} />
-        <ProvisionalSeal text={meta.seal_text} />
       </header>
       <StateControls meta={meta} hideRuleAndPrior={hideRuleAndPrior} />
       <main id="conteudo" className={styles.main}>

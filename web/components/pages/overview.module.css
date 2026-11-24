@@ -1,0 +1,129 @@
+.context {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.answer {
+  color: var(--text);
+  font-size: var(--text-md);
+  max-width: 72ch;
+}
+
+.note {
+  color: var(--text-2);
+  font-size: var(--text-sm);
+  max-width: 72ch;
+}
+
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 0.9fr);
+  gap: var(--space-4);
+  align-items: start;
+}
+
+.main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+.charts {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.scroll {
+  overflow-x: auto;
+}
+
+.scroll svg {
+  min-width: 560px;
+  max-width: 640px;
+}
+
+.scroll figcaption {
+  overflow-wrap: anywhere;
+}
+
+.partialNote {
+  margin-top: var(--space-3);
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
+.side {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.shortcuts {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.shortcut {
+  display: flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-strong);
+  text-decoration: none;
+}
+
+.shortcut:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+
+@media (max-width: 960px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .kpis {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+.tech {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+}
+
+.techBlock {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.techBlock h3 {
+  margin: 0;
+  color: var(--text-strong);
+  font-size: var(--text-base);
+}
+
+.techBlock a:focus-visible,
+.techBlock [tabindex]:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}

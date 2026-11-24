@@ -14,7 +14,7 @@ export default function OverviewPage() {
         meta={meta}
         rows={overview.rows}
         accuracyNote={overview.accuracy_note}
-        dataBox={overview.technical.data_box}
+        technical={overview.technical}
       />
     </>
   );

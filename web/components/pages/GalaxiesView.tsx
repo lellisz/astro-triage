@@ -3,6 +3,7 @@
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import type { Galaxies, Meta } from "@/lib/schema";
+import { galaxiesLabels as L } from "@/content/labels";
 import { readState } from "@/lib/ui-state";
 import styles from "./page.module.css";
 
@@ -12,19 +13,6 @@ type Props = {
   fixedPointText: string;
   crossmatchNote: string | null;
   missingNote: string;
-};
-
-const L = {
-  purityTitle: "Pureza por prior",
-  puritySub: "Entre as fontes classificadas como galáxia, quantas são galáxias",
-  completenessTitle: "Completude por prior",
-  completenessSub: "Entre as galáxias de referência, quantas o modelo encontra",
-  networksTitle: "Redes neurais",
-  networksSub: "Diferença de pureza em relação ao modelo de árvores",
-  errorsTitle: "Onde os erros se concentram",
-  errorsSub: "Taxa de erro por magnitude G e por redshift",
-  chartPlaceholder: "Gráfico: será desenhado na próxima fase.",
-  techTitle: "Notas técnicas",
 };
 
 function Panel({ id, title, sub }: { id: string; title: string; sub: string }) {

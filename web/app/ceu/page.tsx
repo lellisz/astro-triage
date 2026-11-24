@@ -15,7 +15,7 @@ export default function SkyPage() {
         showStateChip
         meta={meta}
       />
-      <SkyView meta={meta} cards={sky.cards} texts={sky.texts} />
+      <SkyView meta={meta} sky={sky} />
     </>
   );
 }

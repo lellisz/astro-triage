@@ -205,3 +205,116 @@ describe("saida estatica (web/out)", () => {
     expect(css).not.toMatch(/url\(\s*["']?https?:/);
   });
 });
+
+// ---- P2-T9: invariantes estaticos adicionais (A8, A9, A11) ----
+
+const rel = (f: string) => path.relative(WEB, f).split(path.sep).join("/");
+const COMPONENT_DIRS = ["charts", "sky", "kit", "media", "pages"];
+const componentTsx = COMPONENT_DIRS.flatMap((d) => walk(path.join(WEB, "components", d), [".tsx"]));
+
+describe("A11 varredura de cor literal cobre os diretorios novos", () => {
+  it("charts, sky, kit, media e pages entram na lista de tsx e css varridos", () => {
+    const tsx = walk(path.join(WEB, "components"), [".tsx"]).map(rel);
+    const css = walk(path.join(WEB, "components"), [".css"]).map(rel);
+    for (const d of COMPONENT_DIRS) {
+      expect(tsx.some((f) => f.startsWith(`components/${d}/`)), `tsx em ${d}`).toBe(true);
+    }
+    for (const d of ["charts", "sky", "kit", "media"]) {
+      expect(css.some((f) => f.startsWith(`components/${d}/`)), `css em ${d}`).toBe(true);
+    }
+  });
+
+  it("cor literal e detectada se aparecesse (a varredura nao e cega)", () => {
+    const re = /#[0-9a-fA-F]{3,8}\b|\brgba?\(|\bhsla?\(/g;
+    expect(`fill="#fff"`.match(re)).not.toBeNull();
+    expect(`color: rgb(0,0,0)`.match(re)).not.toBeNull();
+    expect(`fill="var(--ink)"`.match(re)).toBeNull();
+  });
+});
+
+describe("A8 nenhum algarismo de dado escrito a mao em componentes", () => {
+  const PCT = /["'`>][^"'`<\n]*\d+[,.]?\d*\s*%/;
+  const NA_LIT = /["'`>][^"'`<\n]*n\/a/;
+
+  it("ha componentes para varrer", () => {
+    expect(componentTsx.length).toBeGreaterThan(10);
+  });
+
+  it("nenhum literal com 'n/a' ou com numero seguido de %", () => {
+    const bad: string[] = [];
+    for (const f of componentTsx) {
+      const src = stripTsComments(fs.readFileSync(f, "utf8"));
+      src.split("\n").forEach((line, i) => {
+        if (PCT.test(line) || NA_LIT.test(line)) bad.push(`${rel(f)}:${i + 1}: ${line.trim()}`);
+      });
+    }
+    expect(bad).toEqual([]);
+  });
+
+  it("os padroes pegariam os casos reais (teste do teste)", () => {
+    expect(PCT.test(`<span>{x}</span><p>12,5%</p>`)).toBe(true);
+    expect(PCT.test(`const t = "85%";`)).toBe(true);
+    expect(PCT.test(`const t = \`taxa 7 %\`;`)).toBe(true);
+    expect(NA_LIT.test(`const t = "n/a";`)).toBe(true);
+    expect(NA_LIT.test(`<span>n/a</span>`)).toBe(true);
+    expect(PCT.test(`viewBox="0 0 640 208" r={6}`)).toBe(false);
+    expect(PCT.test(`{ptPct(f * axisMax, 0)}`)).toBe(false);
+  });
+});
+
+describe("A9 TST-01 invariantes de repositorio", () => {
+  const sourceFiles = ["app", "components", "content"].flatMap((d) => walk(path.join(WEB, d), [".ts", ".tsx"]));
+
+  it("nenhum <img com src http em web/out/**/*.html", () => {
+    const htmls = walk(OUT, [".html"]);
+    if (htmls.length === 0) {
+      console.warn("static.test: web/out sem html, verificacao de <img ignorada");
+      return;
+    }
+    const bad = htmls.filter((f) => /<img\b[^>]*\bsrc\s*=\s*["']?https?:/i.test(fs.readFileSync(f, "utf8"))).map(rel);
+    expect(bad).toEqual([]);
+  });
+
+  it("nenhum <img src=http nem src: http em app, components e content", () => {
+    expect(sourceFiles.length).toBeGreaterThan(10);
+    const bad = sourceFiles
+      .filter((f) => {
+        const s = stripTsComments(fs.readFileSync(f, "utf8"));
+        return /<img\b[^>]*\bsrc\s*=\s*\{?\s*["'`]https?:/i.test(s) || /\bsrc\s*:\s*["'`]https?:/i.test(s);
+      })
+      .map(rel);
+    expect(bad).toEqual([]);
+  });
+
+  it("web/public contem so gaia/gaia-skymap-monochrome.png e gaia/CREDITS.md", () => {
+    const files = walk(path.join(WEB, "public"), [""]).map((f) => path.relative(path.join(WEB, "public"), f).split(path.sep).join("/"));
+    expect(files.sort()).toEqual(["gaia/CREDITS.md", "gaia/gaia-skymap-monochrome.png"]);
+  });
+
+  it("nenhum arquivo por objeto em web/data e web/test/fixtures", () => {
+    const MAX_JSON_PER_RELEASE = 20;
+    for (const root of [path.join(WEB, "data"), path.join(WEB, "test", "fixtures")]) {
+      const all = walk(root, [""]);
+      for (const f of all) expect(path.basename(f), rel(f)).not.toMatch(/source_?id/i);
+      const perDir = new Map<string, number>();
+      for (const f of all.filter((x) => x.endsWith(".json"))) {
+        const d = path.dirname(f);
+        perDir.set(d, (perDir.get(d) ?? 0) + 1);
+        expect(fs.readFileSync(f, "utf8"), `${rel(f)} contem a chave source_id`).not.toMatch(/"source_id"\s*:/);
+      }
+      for (const [d, n] of perDir) expect(n, `${rel(d)}: ${n} .json`).toBeLessThanOrEqual(MAX_JSON_PER_RELEASE);
+    }
+  });
+
+  it("a deteccao de source_id funcionaria (teste do teste)", () => {
+    expect(/"source_id"\s*:/.test('{"source_id": 1}')).toBe(true);
+    expect(/"source_id"\s*:/.test('{"n_sources": 1}')).toBe(false);
+  });
+
+  it("web/components/sky nao usa Math.sin/cos/asin/acos/atan/sqrt", () => {
+    const files = walk(path.join(WEB, "components", "sky"), [".ts", ".tsx"]);
+    expect(files.length).toBeGreaterThan(0);
+    const bad = files.filter((f) => /\bMath\.(sin|cos|asin|acos|atan2?|sqrt)\b/.test(stripTsComments(fs.readFileSync(f, "utf8")))).map(rel);
+    expect(bad).toEqual([]);
+  });
+});

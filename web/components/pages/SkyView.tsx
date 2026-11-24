@@ -1,67 +1,140 @@
 "use client";
 
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { Kpi } from "@/components/kit/Kpi";
+import { Panel } from "@/components/kit/Panel";
+import { DataTable, type DataColumn } from "@/components/kit/DataTable";
+import { GaiaFigure } from "@/components/media/GaiaFigure";
+import { MapLegend } from "@/components/sky/MapLegend";
+import { MollweideMap, isSaturated, type MapMode } from "@/components/sky/MollweideMap";
+import { skyLabels as L, skyMapLabels } from "@/content/labels";
 import type { Meta, Sky } from "@/lib/schema";
+import { ptInt } from "@/lib/fmt";
 import { readState } from "@/lib/ui-state";
+import skyStyles from "./sky.module.css";
 import styles from "./page.module.css";
 
-type Props = {
-  meta: Meta;
-  cards: Sky["cards"];
-  texts: Pick<Sky["texts"], "map_lead" | "position_note" | "neighbour_note" | "spread_note">;
-};
+type Props = { meta: Meta; sky: Sky };
 
-const L = {
-  regions: "Regiões com dados",
-  objects: "Objetos no teste",
-  below: "Regiões abaixo do piso",
-  maxRate: "Maior taxa de erro",
-  mapTitle: "Mapa Mollweide do céu",
-  mapPlaceholder: "Mapa interativo: será desenhado na próxima fase.",
-  techTitle: "Notas técnicas do mapa",
-  techPlaceholder: "Tabela de regiões e faixas de latitude: será montada na próxima fase.",
-};
+const topColumns: readonly DataColumn[] = [
+  { key: "position", label: L.colPosition },
+  { key: "n", label: L.colObjects, numeric: true },
+  { key: "errors", label: L.colErrors, numeric: true },
+  { key: "rate", label: L.colRate, numeric: true },
+  { key: "ci", label: L.colRateCi },
+];
 
-function Card({ label, text, ci }: { label: string; text: string; ci?: string }) {
-  return (
-    <div className={styles.kpi}>
-      <div className={styles.kpiLabel}>{label}</div>
-      <div className={styles.kpiValue}>{text}</div>
-      {ci ? <div className={styles.kpiCi}>{ci}</div> : null}
-    </div>
-  );
-}
+const bandColumns: readonly DataColumn[] = [
+  { key: "band", label: L.colBand },
+  { key: "pixels", label: L.colPixels, numeric: true },
+  { key: "n", label: L.colObjects, numeric: true },
+  { key: "errors", label: L.colErrors, numeric: true },
+  { key: "rate", label: L.colRate, numeric: true },
+];
 
 function Body({ props, tech }: { props: Props; tech: boolean }) {
-  const { cards, texts } = props;
+  const { cards, texts, regions, graticule, color_cap: colorCap, bands, top_regions: top } = props.sky;
+  const [mode, setMode] = useState<MapMode>("rate");
+  const [hide, setHide] = useState(false);
+  const hideBelow = tech && hide;
+  const cap = mode === "rate" ? colorCap.rate : colorCap.count;
+  const howText = mode === "count" ? texts.how_count : hideBelow ? texts.how_rate_hidden : texts.how_rate;
+  const summary = `${texts.lead} ${L.below}: ${cards.n_below.text}. ${L.maxRate}: ${cards.max_rate.text}.`;
+
+  const topRows = top.map((r) => ({
+    position: r.position_text,
+    n: ptInt(r.n),
+    errors: ptInt(r.errors),
+    rate: r.rate.text,
+    ci: r.rate.ci_text,
+  }));
+  const bandRows = bands.map((b) => ({
+    band: b.label,
+    pixels: ptInt(b.n_pixels),
+    n: ptInt(b.n),
+    errors: ptInt(b.errors),
+    rate: b.rate.text,
+  }));
+
   return (
     <div className={styles.stack}>
-      <div className={styles.kpis}>
-        <Card label={L.regions} text={cards.n_regions.text} />
-        <Card label={L.objects} text={cards.n_objects.text} />
-        <Card label={L.below} text={cards.n_below.text} />
-        <Card label={L.maxRate} text={cards.max_rate.text} ci={cards.max_rate.ci_text || undefined} />
+      <div className={skyStyles.context}>
+        <p className={skyStyles.note}>{texts.map_lead}</p>
+      </div>
+      <div className={skyStyles.kpis}>
+        <Kpi label={L.regions} text={cards.n_regions.text} />
+        <Kpi label={L.objects} text={cards.n_objects.text} />
+        <Kpi label={L.below} text={cards.n_below.text} />
+        <Kpi label={L.maxRate} text={cards.max_rate.text} ci={cards.max_rate.ci_text || undefined} />
       </div>
       {cards.diverge_note ? <p className={styles.callout}>{cards.diverge_note}</p> : null}
 
-      <section className={styles.panel} aria-labelledby="sky-map">
-        <h2 id="sky-map" className={styles.panelTitle}>{L.mapTitle}</h2>
-        <p className={styles.panelSub}>{texts.map_lead}</p>
-        <div className={`${styles.placeholder} ${styles.mapPlaceholder}`}>{L.mapPlaceholder}</div>
-      </section>
+      <Panel id="sky-map" title={L.mapTitle}>
+        <div className={skyStyles.toolbar} role="group" aria-label={L.toolbarAria}>
+          <div className={skyStyles.modes} role="group" aria-label={L.modeGroupAria}>
+            <button
+              type="button"
+              className={skyStyles.mode}
+              aria-pressed={mode === "rate"}
+              onClick={() => setMode("rate")}
+            >
+              {L.modeRateBtn}
+            </button>
+            <button
+              type="button"
+              className={skyStyles.mode}
+              aria-pressed={mode === "count"}
+              onClick={() => setMode("count")}
+            >
+              {L.modeCountBtn}
+            </button>
+          </div>
+          {tech ? (
+            <label className={skyStyles.check}>
+              <input type="checkbox" checked={hide} onChange={(e) => setHide(e.target.checked)} />
+              {L.hideBelow}
+            </label>
+          ) : null}
+        </div>
+        <MollweideMap
+          regions={regions}
+          graticule={graticule}
+          colorCap={colorCap}
+          bands={bands}
+          mode={mode}
+          hideBelow={hideBelow}
+          labels={skyMapLabels}
+          summary={summary}
+        />
+        <MapLegend
+          mode={mode}
+          colorCap={colorCap}
+          saturated={isSaturated(regions, mode, cap, hideBelow)}
+          howText={howText}
+          hideBelowCount={hideBelow && mode === "count"}
+          labels={skyMapLabels}
+        />
+        <div className={skyStyles.notes}>
+          <p>{texts.position_note}</p>
+          <p>{texts.neighbour_note}</p>
+          <p>{texts.spread_note}</p>
+        </div>
+      </Panel>
 
-      <div className={styles.stack}>
-        <p className={styles.muted}>{texts.position_note}</p>
-        <p className={styles.muted}>{texts.neighbour_note}</p>
-        <p className={styles.muted}>{texts.spread_note}</p>
-      </div>
+      <Panel id="sky-context" title={L.contextTitle} subtitle={L.contextSub}>
+        <GaiaFigure variant="split" />
+      </Panel>
 
       {tech ? (
-        <section className={styles.panel} aria-labelledby="sky-tech">
-          <h2 id="sky-tech" className={styles.panelTitle}>{L.techTitle}</h2>
-          <div className={styles.placeholder}>{L.techPlaceholder}</div>
-        </section>
+        <div className={skyStyles.tables}>
+          <Panel id="sky-top" title={L.topTitle}>
+            <DataTable caption={L.topTitle} labelledBy="sky-top" columns={topColumns} rows={topRows} />
+          </Panel>
+          <Panel id="sky-bands" title={L.bandsTitle}>
+            <DataTable caption={L.bandsTitle} labelledBy="sky-bands" columns={bandColumns} rows={bandRows} />
+          </Panel>
+        </div>
       ) : null}
     </div>
   );

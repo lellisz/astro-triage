@@ -2,21 +2,14 @@
 
 import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import styles from "@/app/metodo/page.module.css";
+import { methodLabels as text } from "@/content/labels";
 import type { Meta, Method } from "@/lib/schema";
 import { readState } from "@/lib/ui-state";
+import styles from "./method.module.css";
 
 export type TechnicalMethod = Pick<Method, "reading" | "usage" | "rule_lines" | "three_limits">;
 
 type Props = { meta: Meta; technical: TechnicalMethod };
-
-// Rotulos sem algarismos de proposito: o numero vem sempre do JSON.
-const text = {
-  reading: "Como ler os resultados",
-  usage: "Uso do painel",
-  rules: "Regras de decisão",
-  limits: "Os três limites",
-};
 
 function Block({ title, items }: { title: string; items: string[] }) {
   if (items.length === 0) return null;

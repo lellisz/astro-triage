@@ -1,0 +1,129 @@
+.panel,
+.kpi {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius);
+  background: var(--surface);
+  padding: var(--space-4);
+}
+
+.eyebrow {
+  color: var(--text-3);
+  font-size: var(--text-sm);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.panelTitle {
+  font-size: var(--text-lg);
+}
+
+.panelSub {
+  margin-top: var(--space-1);
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
+.kpiLabel {
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
+.kpiValue {
+  margin-top: var(--space-1);
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiCi {
+  margin-top: var(--space-1);
+  color: var(--text-3);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.kpiNote {
+  margin-top: var(--space-2);
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
+.na {
+  color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.chip {
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+.chipLabel {
+  color: var(--text-2);
+}
+
+.chipText {
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.tableBlock {
+  margin-top: var(--space-3);
+}
+
+.tableWrap {
+  overflow-x: auto;
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.caption {
+  padding: var(--space-2) 0;
+  color: var(--text-2);
+  font-size: var(--text-sm);
+  overflow-wrap: anywhere;
+}
+
+.table th,
+.table td {
+  padding: var(--space-2) var(--space-3);
+  border-top: 1px solid var(--border-soft);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table th {
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+.table td {
+  color: var(--text);
+}
+
+.table .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}

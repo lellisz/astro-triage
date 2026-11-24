@@ -132,7 +132,7 @@ export type Sky = Head & {
   graticule: {
     meridians: [number, number][][];
     parallels: [number, number][][];
-    labels: { x: number; y: number; text: string }[];
+    labels: { x: number; y: number; text: string; kind: "lat" | "lon" }[];
   };
   regions: SkyRegion[];
   bands: {

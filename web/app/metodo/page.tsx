@@ -1,16 +1,8 @@
 import { PageHeader } from "@/components/shell/PageHeader";
 import { MethodView } from "@/components/pages/MethodView";
-import { pages } from "@/content/labels";
+import { methodLabels as text, pages } from "@/content/labels";
 import { loadPage } from "@/lib/data";
-import styles from "./page.module.css";
-
-// Rotulos que o labels.ts ainda nao tem; sem algarismos de proposito.
-const text = {
-  how: "Como o experimento foi feito",
-  glossary: "Glossário",
-  links: "Referências",
-  sources: "Fontes dos dados",
-};
+import styles from "@/components/pages/method.module.css";
 
 function isHttps(url: string): boolean {
   try {

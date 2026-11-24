@@ -1,0 +1,120 @@
+.figure {
+  margin: 0;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.caption {
+  margin-bottom: var(--space-2);
+  color: var(--text-2);
+  font-size: var(--text-base);
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.label,
+.value,
+.tick {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.label {
+  fill: var(--text-2);
+  font-weight: 400;
+}
+
+.selected .label {
+  fill: var(--text-strong);
+  font-weight: 700;
+}
+
+.value {
+  fill: var(--text);
+}
+
+.tick {
+  fill: var(--axis);
+}
+
+.grid {
+  stroke: var(--gridline);
+  stroke-width: 1;
+}
+
+.axis {
+  stroke: var(--axis);
+  stroke-width: 1;
+}
+
+.bar {
+  fill: var(--chart-3);
+  stroke: none;
+}
+
+.partial .bar {
+  fill: none;
+  stroke: var(--chart-3);
+  stroke-width: 2;
+  stroke-dasharray: 6 4;
+}
+
+.ci {
+  stroke: var(--chart-1);
+  stroke-width: 2;
+  fill: none;
+}
+
+.marker {
+  fill: var(--text-strong);
+  stroke: var(--text-strong);
+  stroke-width: 2;
+}
+
+.partial .marker {
+  fill: var(--surface);
+}
+
+.na {
+  display: flex;
+  align-items: center;
+  height: 100%;
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
+.zero {
+  stroke: var(--text-2);
+  stroke-width: 1;
+  stroke-dasharray: 4 3;
+}
+
+.diamond {
+  fill: var(--text-strong);
+  stroke: var(--text-strong);
+  stroke-width: 2;
+}
+
+.mark {
+  fill: var(--text-strong);
+  stroke: var(--text-strong);
+  stroke-width: 1;
+}
+
+.barRight {
+  fill: var(--chart-3);
+  stroke: none;
+}
+
+.barWrong {
+  fill: none;
+  stroke: var(--chart-1);
+  stroke-width: 2;
+  stroke-dasharray: 4 3;
+}

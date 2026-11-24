@@ -1,25 +1,8 @@
 import { PageHeader } from "@/components/shell/PageHeader";
-import { pages } from "@/content/labels";
+import { compareLabels as text, pages } from "@/content/labels";
 import { loadPage } from "@/lib/data";
 import type { Compare } from "@/lib/schema";
-import styles from "./page.module.css";
-
-// Rotulos que o labels.ts ainda nao tem; sem algarismos de proposito.
-const text = {
-  unavailable: "Comparação não disponível.",
-  unavailableHint: "Não há resultado de aprendizado profundo para esta versão dos dados.",
-  result: "Resultado",
-  pairs: "Veredito por par",
-  verdictGrid: "Grade de veredito",
-  verdictGridSoon: "Em construção: a grade com o veredito por classe e por rede aparecerá aqui.",
-  absolutePurity: "Pureza absoluta",
-  absolutePuritySoon:
-    "Em construção: a pureza de cada sistema aparecerá aqui. O intervalo de mínimo a máximo entre sementes não é IC.",
-  notCi: "não é IC",
-  rules: "Regra de decisão",
-  descriptive: "Diferenças descritivas",
-  limitations: "Limitações",
-};
+import styles from "@/components/pages/compare.module.css";
 
 function Unavailable({ compare }: { compare: Exclude<Compare, { status: "ok" }> }) {
   return (

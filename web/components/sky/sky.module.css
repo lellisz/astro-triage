@@ -1,0 +1,150 @@
+.scroll {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.scroll:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-offset);
+}
+
+.wrap {
+  position: relative;
+  width: 100%;
+  min-width: 600px;
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.line {
+  fill: none;
+  stroke: var(--border-strong);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+.gratLat,
+.gratLon {
+  fill: var(--text-3);
+  font-family: var(--font-sans);
+  font-size: 0.13px;
+  dominant-baseline: middle;
+  font-variant-numeric: tabular-nums;
+}
+
+.gratLat {
+  text-anchor: end;
+}
+
+.gratLon {
+  text-anchor: middle;
+}
+
+/* O contorno cinza garante 3:1 contra o fundo mesmo com preenchimento a 15%. */
+.dotFilled {
+  fill: var(--chart-1);
+  stroke: var(--text-3);
+  stroke-width: 0.75;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+}
+
+.dotRing {
+  fill: none;
+  pointer-events: all;
+  stroke: var(--chart-1);
+  stroke-width: 2;
+  vector-effect: non-scaling-stroke;
+  cursor: pointer;
+}
+
+.dotFilled:focus-visible,
+.dotRing:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-offset);
+}
+
+.tooltip {
+  position: absolute;
+  z-index: 2;
+  min-width: 180px;
+  padding: var(--space-3);
+  background: var(--surface-3);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  color: var(--text);
+  font-size: var(--text-sm);
+  line-height: var(--leading-base);
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - var(--space-3)));
+}
+
+.tooltipRow {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.tooltipKey {
+  color: var(--text-2);
+}
+
+.legend {
+  display: grid;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  color: var(--text-2);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.legendTitle {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.legendBar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.gradient {
+  display: block;
+  width: 100%;
+  height: 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.stop {
+  stop-color: var(--chart-1);
+}
+
+.legendRing {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.legendRingIcon {
+  flex: none;
+}
+
+.ringIcon {
+  fill: none;
+  stroke: var(--chart-1);
+  stroke-width: 2;
+}
+
+.howText {
+  margin: 0;
+}
