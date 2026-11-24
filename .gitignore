@@ -56,3 +56,12 @@ NUL
 
 # Agent specs for the dashboard redesign (working notes, not part of the repo)
 .claude/state/redesign-specs/
+
+# Web front end: exported data and build output are never versioned
+web/data/
+web/out/
+web/.next/
+web/.vercel/
+web/node_modules/
+web/next-env.d.ts
+web/*.tsbuildinfo
