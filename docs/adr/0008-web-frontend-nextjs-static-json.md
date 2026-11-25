@@ -474,3 +474,219 @@ Pages (each a server component reading its JSON, client islands only for control
 
 W4 to W8 can run in parallel, each in its own worktree. No worktree may link `data/`; the export is
 read through `ASTRO_DATA_ROOT` pointing at the main checkout, read only.
+
+---
+
+## Amendment 1 (2026-11-25): the Gráficos page (`/graficos/`) and `graficos.json`
+
+- Status: **Proposed.** Owner approval of this amendment is required before any code (T3 plan).
+  Nothing here changes training, evaluation, priors, split, labels, thresholds, calibration, verdict
+  rules or any number already published. ADR 0001 to 0007 are unchanged. The test fold is **not**
+  reopened: no task below reads deep-learning (DL) predictions of any fold.
+- Per-file plan: `docs/specs/web-graficos.md` (one block per file, tasks G0 to G8).
+- Owner decisions taken before this text (not reopened): a sixth page `/graficos/`, pt-BR only;
+  charts (1) reliability by bins for LightGBM, MLP and FT-Transformer, (2) error rate by magnitude G
+  and (3) by redshift z for every class, (4) confusion matrix, (5) a 2D colour-magnitude map in cells,
+  last, with a `security` review; reporting floor: a cell with fewer than `floor.min_objects` objects
+  shows no value (n/a); no per-object data on the site; every number from Python; everything
+  provisional; the test opening of ADR 0006 is not repeated.
+
+### A1.1 What data exists for each chart (facts)
+
+Release in force: `full_v0`; floor `min_objects = 100`, `min_pixels = 20`
+(`data/interim/full_v0/eval/results.json:13-16`); 292,556 test objects (`results.json:4`).
+
+| # | Chart | Source that already exists | Needs a DL read? | Status |
+|---|---|---|---|---|
+| 1a | Reliability, LightGBM, 3 classes | `data_overview.calibration_points` (`src/astro_triage/dashboard/data_overview.py:105-129`): one-vs-rest, 10 equal-mass bins on `rel.test`, plus the pre-temperature curve from `praw_*` (`data_load.py:93`). Already exported as `overview.technical.calibration` (`web_export/pages.py:305-312`). | no | **available** |
+| 1b | Reliability, MLP and FT-Transformer | No binned aggregate exists. `dl/eval/results_dl.json` holds only scalar `ece/<class>` per system (`results_dl.json:8901-8923`) and per family with mean/min/max over 5 seeds (`results_dl.json:9745-9776`). Per-object DL probabilities exist for val + test (`dl/predictions_{mlp,ftt}_full_s*_v0.parquet`, 610,984 rows each per their manifests; `dl_eval.py:197-210` checks they cover exactly val + test). Binning them on test is a new post-test read outside the frozen protocol (ADR 0006 lines 373-374; `dl_eval.open_test_set` refuses a second opening, `dl_eval.py:165-177`). | yes | **BLOCKED, question Q1** |
+| 2 | Error rate by G, every class (LightGBM) | `data_galaxies.error_rate_table(rel, model, true_class, "G", edges)` (`data_galaxies.py:28-61`) accepts any true class; today it is called for GALAXY only (`pages.py:699`). Edges: G 10 to 22 in steps of 1 mag, the same edges as `results.json` `histograms.g_mag_edges` (`results.json:27201-27214`). | no | **available** |
+| 3 | Error rate by z, GALAXY and QSO (LightGBM) | GALAXY: `data_galaxies_z.error_rate_table_z` (`data_galaxies_z.py:117-131`). QSO: `error_rate_table(rel, model, "QSO", "z", QSO_Z_EDGES)` with new edges. STAR: spectroscopic z of a star is a radial velocity near zero, not a distance; no chart by default. | no | **available**; STAR scope is question Q3 |
+| 4 | Confusion matrix (LightGBM) | `data_overview.confusion` (`data_overview.py:83-89`) on `rel.test`; argmax of the calibrated probabilities (`data_load.py:107-111`). DL: `results_dl.json` has per-class purity/completeness and contaminant counts at one fixed point, not a confusion matrix. | LightGBM no; DL yes | **LightGBM available**; DL part is under Q1 |
+| 5 | Colour-magnitude map in cells (LightGBM) | `bp_rp` is a model feature (`dataset/build.py:101`; `train_report.json:73`) and is in `features.parquet`, but `read_release` loads only `phot_g_mean_mag` and `astrometric_params_solved` from it (`dashboard/data_load.py:81-85`). One more column in the loader; no new inference. | no | **available after a loader change**; gated by `security` and question Q5 |
+
+### A1.2 Decision
+
+1. **Route and file.** New route `/graficos/` (sixth nav item, label "Gráficos"). New file
+   `graficos.json`, the eighth file per release (`Head.page = "graficos"`, page key `graficos`).
+   `schema_version` stays `1`: the change only adds a file and new keys (same practice as the
+   phase 2a and 2b additions above). `web/lib/schema.ts` gets `Graficos` and `PageData.graficos`.
+2. **One model, one fold.** Every chart of this page is LightGBM `lgbm_full` (the Phase 1 model of
+   `predictions_lgbm_full_v0`, the same model as the rest of the site) on the test fold exactly as
+   `Release.test` already holds it. The predicted class is the argmax of the calibrated
+   probabilities. The global rule and prior do not apply: on `/graficos/` the rule and prior controls
+   are hidden and the technical-mode toggle stays; a text from Python says so.
+3. **Where code lives.** New aggregations go in a new pure module
+   `src/astro_triage/dashboard/data_charts.py` (no streamlit; reuses `error_rate_table`,
+   `error_rate_table_z`, `calibration_points`, `confusion`, `wilson_interval`). Reshaping into JSON
+   goes in a new module `src/astro_triage/web_export/graficos.py`; sentences with numbers go in
+   `web_export/web_text.py`. `web_export/pages.py` (906 lines) is not touched, which also keeps it
+   free for parallel work.
+4. **Floor.** `floor = rel.meta["floor"]["min_objects"]` (never typed). For a bin or cell with
+   `n < floor`: the value fields (`rate`, `freq`, `p_mean`, `share`) and `errors` are `null` with text
+   "n/a" and `below_floor: true` (as `sky.json` regions, so a withheld rate cannot be derived). In the
+   1D charts (1, 2, 3) `n` stays visible, as in `galaxies.technical` and `sky.regions`. In the
+   confusion cells and the map cells, `n` is `null` too (the owner's wording: "cells").
+5. **Intervals.** Every rate, observed frequency or row share carries a Wilson interval at
+   `fmt.CI_LEVEL` (`data_galaxies.wilson_interval`, `data_galaxies.py:23-25`). The reliability bins
+   stay the existing 10 equal-mass bins. Intervals are drawn only in technical mode; the table
+   always has them.
+6. **No DL read.** No task reads `dl/predictions_*`. Until Q1 is answered, charts 1 and 4 show
+   LightGBM only and the page says, in a Python text, why the networks are absent. Proposed default
+   for Q1 (task G6, only after the owner's yes): a technical panel "ECE por classe" for
+   `lgbm_full`, `mlp_full`, `ftt_full`, read from `results_dl.json` `descriptive.families` (mean and
+   min to max over 5 seeds, labelled "não é IC"), through `data_dl.load_results_dl`. That is an
+   aggregate already on disk, not a new read of the test fold.
+7. **Colour-magnitude map** (task G7, last). Fixed grid in code, never derived from the data:
+   G in [12, 21) by 0.5 mag (18 rows) by BP-RP in [-0.5, 3.0) by 0.25 mag (14 columns), 252 cells.
+   One layer: all test objects, error rate (technical mode adds the count layer). Every grid cell is
+   exported, empty ones included, so a cell with 0 objects looks the same as one with 1 to 99.
+   Below the floor `n`, `errors` and `rate` are `null`. No smoothing. Objects without G or BP-RP and
+   objects outside the grid appear only as two totals.
+   Security reasoning: (a) no identifier, coordinate, HEALPix index or per-object value is exported;
+   (b) edges fixed in code cannot leak an extreme object's value (quantile or min/max edges could);
+   (c) kernel smoothing would mix withheld cells into published values, so it is rejected;
+   (d) a single layer avoids recovering a withheld cell by subtracting per-class layers from the
+   total; (e) the floor exists for statistical reliability (`results.json:39`); Gaia and SDSS are
+   public catalogues, and a cell count says nothing about any single source. Residual risk:
+   subtracting the visible cells of a 1 mag strip from chart 2 counts bounds the sum of the withheld
+   cells in that strip; this reveals only a count of public-catalogue objects and is accepted unless
+   `security` says otherwise.
+
+### A1.3 Alternatives
+
+| Option | Real cost | Decision |
+|---|---|---|
+| Put the charts inside the technical sections of Visão geral and Galáxias | No new route; but the charts stay scattered and hidden | Rejected: the owner chose a page |
+| DL reliability and confusion on **validation** | No test read; but temperature scaling was fitted on val (`results.json:47`; DL manifests `calibration=... fit on val`), so val reliability is in-sample and optimistic next to a test curve | Not recommended; listed in Q1 |
+| A new ADR authorising one descriptive post-test read of the DL predictions | All three models in charts 1 and 4; but it reopens test exposure and needs its own protocol | Not decided here; listed in Q1 |
+| Adaptive (quantile) map bins or kernel smoothing | A smoother picture | Rejected: data-derived edges leak extreme values; smoothing spreads withheld cells |
+| One map layer per true class | Richer map | Deferred: differencing between layers recovers withheld cells |
+| Add `graficos()` to `pages.py` | One module fewer | Rejected: `pages.py` is 906 lines and parallel tasks would collide |
+
+### A1.4 Consequences
+
+Good: the five chart families come from functions that already exist (except the map cells and the
+QSO z edges); no new inference; no DL read; the page is a leaf that can be deleted in under a day.
+
+Bad, accepted:
+- The LightGBM reliability bins appear twice (`overview.technical.calibration` and
+  `graficos.calibration`). A parity test asserts both are equal where `n >= floor`.
+- The confusion diagonal shares and the 1D error rates are raw argmax, unweighted figures. They do
+  not equal the purity and completeness of Visão geral (prior-matched or as-shipped, bootstrapped).
+  The page must say so in a Python text; otherwise a reader sees a contradiction (risk R1).
+- `Release.test` gains one column (`bp_rp`, about 2.3 MB of float64 for 292,556 rows) for Streamlit
+  too; its output does not change.
+- New hand-chosen constants: `G_EDGES`, `QSO_Z_EDGES`, the map grid. Changing them changes the
+  published bins; they are reversible in minutes.
+
+Maintenance cost: 2 new Python modules (about 250 lines), 1 changed loader line, 1 changed text
+module; about 6 TypeScript files (about 700 lines); 3 test files touched or created; no new
+dependency.
+
+### A1.5 Risks
+
+| # | Risk | Mitigation | Task |
+|---|---|---|---|
+| R1 | A chart number "contradicts" Visão geral (argmax vs prior-matched purity/completeness) | `scope_text` states model, fold, argmax rule and that rule/prior do not apply; reviewer checks the wording | G2, G8 |
+| R2 | A DL read slips in through a convenience import | Invariant test: `graficos.py` and `data_charts.py` never reference `dl_eval`, `predictions_mlp`, `predictions_ftt` or `dl/`; G6 reads only `data_dl.load_results_dl` | G2, G6 |
+| R3 | The map grows into per-object data | Budget test: `graficos.json` under 150 KB; no array longer than 252; forbidden keys `source_id`, `ra`, `dec`, `l`, `b`, `healpix_l5`, `hp` in `graficos.json` | G2, G7 |
+| R4 | Below-floor values reach the client (rate derivable from n and errors) | Invariant test: every item with `below_floor: true` has `errors`, `rate`/`freq`/`share` null; map and confusion cells also have `n` null | G2, G7 |
+| R5 | The synthetic fixture lacks `bp_rp` or DL families, so a branch is never rendered in CI | G7 adds a deterministic `bp_rp` column to the synthetic features; G6 adds `descriptive.families` to the synthetic `results_dl.json`; fixture drift test proves no other file changed | G6, G7 |
+| R6 | Shared chart component change breaks Visão geral | `ReliabilityPlot` gets only optional props; existing overview render tests stay green | G4 |
+
+### A1.6 Reversal trigger
+
+Remove the page (route, view, chart components, `graficos.py`, `data_charts.py`, the loader column,
+`graficos.json` from the fixture) if: `graficos.json` exceeds 150 KB on `full_v0`; `security` finds
+that the map lets a withheld cell be recovered with more than a count; the owner rejects the charts
+after the screenshots; or Q1 is answered with a new ADR, which then replaces item 6 of A1.2.
+Reversal cost: under one day.
+
+### A1.7 Non-goals
+
+Per-object views or downloads; any read of DL predictions on any fold; new verdicts or a change to
+an existing number; changing Visão geral or Galáxias; an English version; a Streamlit counterpart;
+per-class map layers; user-chosen bins or thresholds; rebuilding the graph.
+
+### A1.8 Appendix A addition: `graficos.json`
+
+```text
+RateRow = { label: string, lo: number | null, hi: number | null,   # non-finite edge -> null
+            n: Num, errors: Num, rate: Est, below_floor: bool }   # below floor: errors, rate null
+CalBin  = { p_mean: Num(pct), freq: Est(pct), n: Num, below_floor: bool,
+            raw_p_mean: number | null, raw_freq: number | null }  # below floor: all but n null
+
+graficos.json = Head(page "graficos") + {
+  floor: int,                         # rel.meta.floor.min_objects
+  model_label: string,                # charts_base.MODEL_PT["lgbm_full"]
+  scope_text: string,                 # web_text.charts_scope(n_test, model_label)
+  floor_text: string,                 # web_text.charts_floor_note(floor)
+  calibration: { n_bins: int, networks_note: string,
+                 series[3]: { cls, label, bins: CalBin[] } },          # data_charts.calibration_bins
+  error_by_g:  { missing_note: string,
+                 series[3]: { cls, label, rows: RateRow[], missing: Num } },   # data_charts.error_by(.., "G")
+  error_by_z:  { star_note: string,
+                 series[2]: { cls: "GALAXY"|"QSO", label, rows: RateRow[], missing: Num } },
+  confusion:   { classes[3]: { cls, label },
+                 rows[3]: { true: Cls, n: Num,
+                            cells[3]: { pred: Cls, n: Num, share: Est, diagonal: bool,
+                                        below_floor: bool } } },       # data_charts.confusion_cells
+  ece: null | { status: "ok"|"unavailable", note: string,
+                rows[]: { system, label, cls, mean: Num(pct), low: number, high: number,
+                          detail_text: string } },                     # G6 only; null before
+  cmd: null | { g_edges: number[19], c_edges: number[15],
+                g_ticks[]: { value, text }, c_ticks[]: { value, text },
+                cells[252]: { gi: int, ci: int, n: Num, errors: Num, rate: Est, below_floor: bool },
+                cap: { rate: number | null, count: number | null },
+                n_missing: Num, n_outside: Num, note: string }         # G7 only; null before
+}
+```
+
+Row and series orders follow `CLASSES` (`STAR`, `GALAXY`, `QSO`) and the bin order of the source
+table; the "sem medida" row of `error_rate_table` is not a row here, its `n` goes to `missing`.
+
+### A1.9 Appendix C addition: tasks
+
+| # | Task | Agent | Depends | Parallel with | Gate |
+|---|---|---|---|---|---|
+| G0 | Owner approves this amendment and answers Q1 to Q6 | owner | none | none | approval |
+| G1 | `dashboard/data_charts.py` (calibration, error by G/z, confusion) + unit tests | coder | G0 | G4 | reviewer |
+| G2 | `web_export/graficos.py`, `web_text.py`, `__main__.py`, parity and invariant tests, regenerated fixture | coder, tester | G1 | G3 | reviewer |
+| G3 | `schema.ts`, `labels.ts` (route, labels), `StateControls.tsx` (hide rule/prior on `/graficos/`), `data.test.ts` | coder | G0 | G2 | reviewer |
+| G4 | Chart components `RateByBin.tsx`, `ConfusionGrid.tsx`, optional props on `ReliabilityPlot.tsx` + render tests | coder | G0 | G1, G2 | reviewer |
+| G5 | `app/graficos/page.tsx`, `GraficosView.tsx`, page CSS, `static.test.ts` with 6 routes, page render tests | coder, tester | G2, G3, G4 | none | reviewer |
+| G6 | ECE panel (only if Q1 = option a) | coder, tester | G5, Q1 | none | reviewer |
+| G7 | Colour-magnitude map: loader column, `cmd_cells`, export block, `CmdMap.tsx` | coder, tester | G5 (and G6 if run), Q5 | none | reviewer **and security** |
+| G8 | Cross-page check: 6 routes, seal, digit trace, n/a sweep, 1440 and 390 px screenshots | tester, reviewer | G5..G7 | none | owner approves screenshots |
+
+Each coder task runs in its own worktree created from the current main; none links `data/`.
+G1 and G4 touch disjoint files, as do G2 and G3. G6 and G7 both touch `graficos.py`, `web_text.py`,
+`GraficosView.tsx` and the fixture, so they run one after the other.
+
+### A1.10 Open questions for the owner
+
+- **Q1 (blocks the DL part of charts 1 and 4).** The networks have no binned or confusion aggregate,
+  and making one means reading their test predictions again. Options: (a) LightGBM curves and matrix
+  only, plus the ECE panel of the three models from the existing `results_dl.json` aggregate
+  (recommended; task G6); (b) DL curves and matrices on validation (no test read, but calibration was
+  fitted on val, so they look better than they are); (c) a new ADR authorising one descriptive
+  post-test read of the DL predictions. Without an answer, G6 does not run and the page shows
+  LightGBM only.
+- **Q2.** Charts 2 and 3 for LightGBM only (the default here, for the same reason as Q1). Confirm.
+- **Q3.** Redshift chart: STAR left out with an explanatory note (default), or shown as one row?
+- **Q4.** Confusion floor: applied to each cell count (default, the literal reading), or to the row
+  total (then small error counts appear)? Row totals equal the published class counts, so with one
+  withheld cell in a row its count can be recovered by subtraction; the floor protects reliability,
+  not privacy, so this is accepted unless the owner says otherwise.
+- **Q5.** Map: error rate of all classes on the fixed 252-cell grid (default) — confirm the quantity,
+  the resolution and the single layer.
+- **Q6.** The LightGBM of this page is the single Phase 1 model (seed 20261025), not the mean of the
+  five seeds used on Comparação. Confirm that this is acceptable, as on the other pages.
+
+**Owner's answers (2026-11-25).** Amendment 1 approved. Q1: LightGBM curves and matrix only; the
+networks are absent from charts 1 and 4 and the page says why (task G6, the ECE panel, is **not**
+authorised yet: it waits for an explicit yes). Q2: yes. Q3: STAR left out of the redshift chart, with
+the explanatory note. Q4: the floor of 100 objects applies to each confusion cell. Q5: yes (error rate
+of all classes, 252 fixed cells, one layer). Q6: yes. ADR 0008 itself stays Proposed until the first
+public deploy (it becomes Accepted before that deploy).
