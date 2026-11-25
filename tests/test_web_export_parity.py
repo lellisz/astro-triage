@@ -366,6 +366,30 @@ def _strip_stamp(doc: dict) -> dict:
     return {k: v for k, v in doc.items() if k != "generated_at"}
 
 
+def _same(a: object, b: object) -> bool:
+    """Deep equality where floats get a tiny tolerance; text, counts and structure stay exact.
+
+    Trig (galactic l/b) can differ in the last bit between Windows and Linux (CI), so the
+    fixture committed from one platform must not be compared bit for bit on the other.
+    """
+    if isinstance(a, dict) and isinstance(b, dict):
+        return a.keys() == b.keys() and all(_same(a[k], b[k]) for k in a)
+    if isinstance(a, list) and isinstance(b, list):
+        return len(a) == len(b) and all(_same(x, y) for x, y in zip(a, b))
+    if isinstance(a, float) and isinstance(b, float):
+        return a == pytest.approx(b, rel=1e-9, abs=1e-12)
+    return a == b and type(a) is type(b)
+
+
+def test_same_tolerates_float_noise_only() -> None:
+    assert _same({"b": -29.90172457390475}, {"b": -29.90172457390474})
+    assert not _same({"b": -29.9017}, {"b": -29.9018})
+    assert not _same({"errors": 7}, {"errors": 8})
+    assert not _same({"text": "50,0%"}, {"text": "50,1%"})
+    assert not _same([1.0, 2.0], [1.0])
+    assert not _same({"a": 1}, {"b": 1})
+
+
 def test_versioned_fixture_matches_a_fresh_export(tmp_path, monkeypatch) -> None:
     """Regenerate with the exporter; any difference but ``generated_at`` is a stale fixture."""
     build_release(tmp_path / "data")
@@ -383,7 +407,7 @@ def test_versioned_fixture_matches_a_fresh_export(tmp_path, monkeypatch) -> None
         b = json.loads((FIXTURE_DIR / f"{d}.json").read_text(encoding="utf-8"))
         if isinstance(a, dict):
             a, b = _strip_stamp(a), _strip_stamp(b)
-        assert a == b, f"{d}.json differs from the versioned fixture"
+        assert _same(a, b), f"{d}.json differs from the versioned fixture"
 
 
 # ------------------------------------------------------------------ digit-free source (extra)
