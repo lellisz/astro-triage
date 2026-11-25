@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import re
-import tomllib
 from pathlib import Path
 
 import pytest
@@ -80,24 +79,3 @@ def test_css_has_no_external_or_retired_tokens():
     for cls in (".small", ".big", ".headline", ".seal"):
         assert cls in css
 
-
-@pytest.fixture(scope="module")
-def config():
-    path = ROOT / ".streamlit" / "config.toml"
-    with path.open("rb") as fh:
-        return tomllib.load(fh)
-
-
-def test_streamlit_config_values(config):
-    assert config["client"]["toolbarMode"] == "minimal"
-    assert config["server"]["enableStaticServing"] is True
-    assert config["theme"]["base"] == "dark"
-    assert config["theme"]["backgroundColor"] == theme.BG
-    assert config["theme"]["secondaryBackgroundColor"] == theme.SECONDARY_BG
-    assert config["theme"]["textColor"] == theme.TEXT
-    assert config["theme"]["primaryColor"] == theme.ACCENT
-
-
-def test_streamlit_config_has_no_headless_or_address(config):
-    assert "headless" not in config.get("server", {})
-    assert "address" not in config.get("server", {})

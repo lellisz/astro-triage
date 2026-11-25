@@ -8,10 +8,8 @@ import re
 import pandas as pd
 
 from astro_triage.dashboard import html_galaxies as HG
-from astro_triage.dashboard import html_galaxies_tech as HT
 from astro_triage.dashboard import html_method as HM
 from astro_triage.dashboard.data_galaxies import rate_row, wilson_interval
-from astro_triage.dashboard.data_galaxies_z import GalaxyTotals
 
 TECH_TERMS = re.compile(r"Wilson|logar|\bIC\b|n = |at-rowg", re.IGNORECASE)
 
@@ -41,16 +39,7 @@ def _tables(spike=True):
     return by_g, by_z
 
 
-TOT = GalaxyTotals(n=1200, errors=60, to_qso=40, to_star=20)
 FLOOR = 100  # reporting floor used by the fixtures
-
-
-def test_log_position_endpoints_and_clamp():
-    assert HT.log_pos(HT.LOG_LO_PCT) == 0.0
-    assert math.isclose(HT.log_pos(HT.LOG_HI_PCT), 100.0)
-    assert math.isclose(HT.log_pos(1.0), 100.0 / 3)
-    assert HT.log_pos(0.0) == 0.0 and HT.log_pos(-1.0) == 0.0
-    assert HT.log_pos(1e6) == 100.0 and HT.log_pos(math.nan) == 0.0
 
 
 def test_wilson_interval_contains_rate_and_feeds_the_row():

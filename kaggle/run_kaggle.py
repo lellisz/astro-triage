@@ -57,7 +57,7 @@ EXPECTED_COUNTS = {"rows": 4283507, "STAR": 890744, "GALAXY": 2639535, "QSO": 75
 
 MIN_FREE_BYTES = 3 * 1024**3
 # Declared in requirements.txt for the local app and tooling; the pipeline does not import them.
-PIP_SKIP = {"streamlit", "plotly", "pytest", "ruff", "duckdb", "astroquery"}
+PIP_SKIP = {"pytest", "ruff", "duckdb", "astroquery"}
 PIP_SHOW = {
     "numpy",
     "pandas",

@@ -8,7 +8,6 @@ from types import SimpleNamespace
 
 import pytest
 
-from astro_triage.dashboard import charts_model as CM
 from astro_triage.dashboard import data_headline as DH
 from astro_triage.dashboard import fmt
 
@@ -106,19 +105,8 @@ def _p(key, pur, com, lo=None, hi=None, dashed=False):
     }
 
 
-def test_dumbbell_error_x_asymmetric_and_zero_for_validation():
-    pts = [_p("a", 0.7, 0.9, 0.6, 0.85), _p("v", 0.5, 0.8, dashed=True)]
-    by = {t.name: t for t in CM.dumbbell(pts).data}
-    ex = by["Pureza"].error_x
-    assert ex.symmetric is False
-    assert list(ex.array) == pytest.approx([0.15, 0.0])
-    assert list(ex.arrayminus) == pytest.approx([0.1, 0.0])
-    assert by["Completude"].error_x.array is None
 
 
-def test_dumbbell_no_intervals_no_bars():
-    by = {t.name: t for t in CM.dumbbell([_p("v", 0.5, 0.8)]).data}
-    assert by["Pureza"].error_x.array is None
 
 
 # ---- pt-BR interval text ----

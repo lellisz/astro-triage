@@ -82,14 +82,6 @@ def _font_face(family: str, file: str, style: str, weight: str) -> str:
     )
 
 
-# Tabular lining numerals keep chart columns aligned; the modebar is hidden (static charts).
-CHART_CSS = (
-    ".js-plotly-plot text, .js-plotly-plot .hovertext text { "
-    'font-feature-settings: "tnum" 1, "cv11" 1; font-variant-numeric: tabular-nums; }\n'
-    ".js-plotly-plot .modebar-container { display: none; }"
-)
-
-
 def css(wide: bool = False) -> str:
     """Page stylesheet; ``wide`` widens the content column for the chart pages."""
     from astro_triage.dashboard import (
@@ -137,25 +129,7 @@ h2, h3 {{ font-family: {FONT_SANS} !important; font-weight: 600 !important; font
 .err {{ color: {ACCENT}; font-weight: 600; }}
 [data-testid="stButtonGroup"] button {{ font-size: {CONTROL_PX}px; min-height: {MIN_TARGET_PX}px; }}
 [data-testid="stExpander"] {{ border: 1px solid {HAIRLINE}; background: transparent; margin: {SPACE_XS}px 0; }}
-{CHART_CSS}
 {kit}
 </style>
 """
 
-
-def plotly_layout(height: int, **overrides: object) -> dict[str, object]:
-    """Kwargs for ``fig.update_layout``; ``overrides`` replace top-level keys (shallow merge)."""
-    layout: dict[str, object] = {
-        "height": height,
-        "paper_bgcolor": "rgba(0,0,0,0)",
-        "plot_bgcolor": "rgba(0,0,0,0)",
-        "font": {
-            "family": FONT_SANS,
-            "size": MIN_SECONDARY_PX,
-            "color": TEXT_SECONDARY,
-        },
-        "showlegend": False,
-        "margin": {"l": 8, "r": 8, "t": 8, "b": 8},
-    }
-    layout.update(overrides)
-    return layout

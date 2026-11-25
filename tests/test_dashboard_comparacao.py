@@ -4,13 +4,11 @@ from __future__ import annotations
 
 import json
 import re
-from contextlib import nullcontext
 from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
 
-from astro_triage.dashboard import compare_model, verdict_rule, views_dl
 from astro_triage.dashboard import data_dl as DD
 from astro_triage.dashboard import html_dl as HD
 from astro_triage.dashboard import html_system as hs
@@ -22,9 +20,6 @@ REAL = ROOT / "data/interim/full_v0"
 REAL_JSON = REAL / "dl/eval/results_dl.json"
 needs_real = pytest.mark.skipif(
     not REAL_JSON.is_file(), reason="data/ is not versioned"
-)
-BANNED = re.compile(
-    r"\b(melhor|melhora|ganho|equivalente|verde|vermelho)\b", re.IGNORECASE
 )
 TIE = "tie: LightGBM stays"
 
@@ -53,14 +48,6 @@ def _results(
         "mlp_full-lgbm_full": {"P2": {"0.80": mlp}},
         "ftt_full-lgbm_full": {"P2": {"0.80": f, "0.90": sens}, "P1": {"0.80": sens}},
     }}}  # fmt: skip
-
-
-def _page(results):
-    return views_dl.page_html(compare_model.build(results), "")
-
-
-def _text(html):
-    return re.sub(r"<[^>]+>", " ", html)
 
 
 def _real():
@@ -116,35 +103,6 @@ def test_a2_unknown_class_token_fails(token):
         DD.headline(_results(ftt=(TIE, token, "tie")))
 
 
-def test_a2_unknown_token_is_visible_in_the_page(monkeypatch):
-    chunks = []
-    fake = SimpleNamespace(
-        markdown=lambda t, **_: chunks.append(t), expander=lambda *_: nullcontext()
-    )
-    monkeypatch.setattr(views_dl, "st", fake)
-    monkeypatch.setattr(
-        views_dl.DC, "load_results_dl", lambda r: _results(ftt=("zzz", "win", "win"))
-    )
-    views_dl.dl_page(SimpleNamespace(name="full_v0", root=Path("nowhere")))
-    out = " ".join(chunks)
-    assert "ilegíveis" in out and "zzz" in out and "vence o par" not in out
-
-
-def test_a4_no_banned_terms():
-    pages = [
-        HD.hs.method_note(verdict_rule.rule_text()),
-        views_dl.page_html(compare_model.build(_results(ftt=(TIE, "win", "tie"))), "x"),
-        HD.descriptive_html([], "P2", "0.80"),
-        HD.error_html("x"),
-    ]
-    if REAL_JSON.is_file():
-        pages.append(
-            HD.limitations_html(DD.load_limitations(SimpleNamespace(root=REAL)))
-        )
-    for html in pages:
-        assert not BANNED.search(_text(html)), BANNED.search(_text(html))
-
-
 # A5 -- numbers and axis labels
 def _numbers(obj, out):
     if isinstance(obj, dict):
@@ -157,37 +115,6 @@ def _numbers(obj, out):
         out.add(f"{abs(obj):.4f}".replace(".", ","))
         out.add(f"{abs(obj) * 100:.2f}".replace(".", ","))
         out.add(f"{abs(obj):.3f}".replace(".", ","))
-
-
-def _assert_numbers_in_artifact(raw, html):
-    allowed = {"95", "0,80", "0,90", "0", "5", "0,00", "0006"}
-    # method-note constants come from the producer, not from the artifact
-    allowed |= {
-        str(int(x))
-        for x in (
-            dl_compare.DELTA_SD_MULTIPLIER,
-            dl_compare.DELTA_DDOF,
-            dl_compare.N_SEEDS,
-            dl_compare.BLOCK_LEVEL,
-            dl_compare.BLOCK_DIVISOR,
-            dl_compare.MIN_BLOCKS,
-        )
-    }
-    _numbers(raw, allowed)
-    html = re.sub(r"<[^>]*>", " ", re.sub(r"aria-label='[^']*'", "", html))
-    for tok in re.findall(r"(?<![\w])\d+(?:,\d+)?", html):
-        assert tok in allowed, tok
-
-
-def test_a5_every_rendered_number_is_in_the_artifact():
-    raw = _results(ftt=(TIE, "win", "tie"))
-    _assert_numbers_in_artifact(raw, _page(raw))
-
-
-@needs_real
-def test_a5_every_rendered_number_is_in_the_real_artifact():
-    raw = DD.load_results_dl(SimpleNamespace(root=REAL))
-    _assert_numbers_in_artifact(_real(), _page(raw))
 
 
 # A6 -- ruler unit at the smallest delta and interval
@@ -273,14 +200,6 @@ def test_a7_seal_reason_is_derived():
     )
 
 
-def test_comparison_page_does_not_repeat_the_shell_seal():
-    reasons = HD.reasons_html("Proposed", True, 0, True)
-    page = views_dl.page_html(
-        compare_model.build(_results(ftt=(TIE, "win", "tie"))), reasons
-    )
-    assert hs.seal("full_v0") not in page and "PROVISÓRIO" not in page
-
-
 def test_a7_reads_fail_to_na(tmp_path):
     assert DD.adr_status(tmp_path) is None
     assert DD.load_limitations(SimpleNamespace(root=tmp_path)) is None
@@ -307,7 +226,7 @@ def test_a7_real_adr_status_and_lang():
 
 # A9 -- guards
 @pytest.mark.parametrize(
-    "name", ["data_dl.py", "html_dl.py", "views_dl.py", "html_system.py"]
+    "name", ["data_dl.py", "html_dl.py", "html_system.py"]
 )
 def test_a9_tab_never_touches_the_test_exposure(name):
     text = (DASH / name).read_text(encoding="utf-8")

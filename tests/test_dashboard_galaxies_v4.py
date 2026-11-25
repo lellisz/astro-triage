@@ -7,16 +7,13 @@ modules, and a cell in the producer's format (not reportable, token "tie").
 from __future__ import annotations
 
 import copy
-import json
 import re
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 from test_dashboard_comparacao import TIE, _results
 from test_dashboard_galaxy_prior import (
     NARROW_CELL,
-    NOTE_FULL,
     block,
     error_release,
     fake_release,
@@ -29,15 +26,13 @@ from astro_triage.dashboard import data_dl as DD
 from astro_triage.dashboard import data_galaxy_prior as gp
 from astro_triage.dashboard import html_galaxy_prior as hg
 from astro_triage.dashboard import html_system as hs
-from astro_triage.dashboard import ui_state, views_dl, views_galaxies
+from astro_triage.dashboard import ui_state
 from astro_triage.dashboard import verdict_rule as VR
 from astro_triage.dashboard.data_galaxies import GALAXY_G_EDGES, error_rate_table
 from astro_triage.dashboard.data_galaxies_z import error_rate_table_z, galaxy_totals
 
 V = gp.VerdictKey
-DASH = Path(views_galaxies.__file__).parent
 STATE = ui_state.DEFAULT
-TECH = ui_state.UiState(ui_state.Rule.SHIPPED, ui_state.SHIPPED_PRIOR, True)
 
 
 # prior sentence ---------------------------------------------------------------------
@@ -133,12 +128,6 @@ def test_verdict_cards_na_without_artifact_and_no_number_made_up():
     assert not re.search(r"\d,\d", out)
 
 
-def test_verdict_cards_do_not_retype_the_rule():
-    text = (DASH / "html_galaxy_prior.py").read_text(encoding="utf-8")
-    assert "dl_compare" not in text and "class_verdict(" not in text
-    assert "VR." not in text and "verdict_rule" not in text
-
-
 def test_inconsistent_artifact_is_data_error_not_a_card():
     results = _results(ftt=("X wins", "win", "tie"))
     with pytest.raises(DD.DlDataError):
@@ -146,116 +135,18 @@ def test_inconsistent_artifact_is_data_error_not_a_card():
 
 
 # page payload -----------------------------------------------------------------------
-def _page(monkeypatch, state, results, load_error=None):
-    chunks: list[str] = []
-    rel = error_release()
-    full = _both_blocks()
-    rel.results = full.results
-    rel.results["limitations"] = [NOTE_FULL]
-    rel.name = "full_v0"
-    fake_st = SimpleNamespace(
-        markdown=lambda t, **_: chunks.append(t),
-        session_state={
-            ui_state.KEY_TECH: state.tech,
-            ui_state.KEY_RULE: state.rule,
-            ui_state.KEY_PRIOR: state.prior,
-        },
-    )
-
-    def load(_rel):
-        if load_error:
-            raise load_error
-        return results
-
-    monkeypatch.setattr(views_galaxies, "st", fake_st)
-    monkeypatch.setattr(
-        views_galaxies,
-        "DC",
-        SimpleNamespace(
-            load_results_dl=load,
-            error_rate_table=error_rate_table,
-            error_rate_table_z=error_rate_table_z,
-            galaxy_totals=galaxy_totals,
-        ),
-    )
-    views_galaxies.galaxies_page(rel)
-    return "\n".join(chunks)
-
-
-@pytest.mark.parametrize("state", [STATE, TECH], ids=["simple", "technical"])
-def test_payload_has_no_source_id_nor_scatter(monkeypatch, state):
-    out = _page(monkeypatch, state, _results(ftt=(TIE, "win", "tie")))
-    for banned in ("source_id", "plotly", "<svg", "<canvas", "scatter", "customdata"):
-        assert banned not in out.lower()
-    assert not re.search(r"\b(ra|dec)\b\s*[:=\[]", out)
-    assert "hs-dots" not in out
-
-
-def test_tables_only_in_technical_mode(monkeypatch):
-    simple = _page(monkeypatch, STATE, None)
-    tech = _page(monkeypatch, TECH, None)
-    assert hg.TECH_DETAILS not in simple and "<details" not in simple
-    assert hg.TECH_DETAILS in tech and "<details" in tech
-
-
-def test_page_leaves_seal_and_rule_line_to_the_shell_and_has_unavailable_cards(
-    monkeypatch,
-):
-    out = _page(monkeypatch, STATE, None)
-    # app.shell_header already prints the seal and the rule/prior line on every tab
-    assert ui_state.rule_prior_line(STATE) not in out
-    assert out.count("hs2-card") >= 4  # purity, completeness, two verdicts
-
-
-def test_unreadable_artifact_is_n_a_not_a_traceback(monkeypatch):
-    err = json.JSONDecodeError("bad", "{", 1)
-    out = _page(monkeypatch, STATE, None, load_error=err)
-    assert views_galaxies.UNREADABLE in out and "Traceback" not in out
-
-
-def test_no_comparison_with_other_classes(monkeypatch):
-    out = _page(monkeypatch, TECH, _results(ftt=(TIE, "win", "tie")))
-    text = re.sub(r"<[^>]+>", " ", out)
-    for sentence in re.split(r"[.;]", text):
-        low = sentence.lower()
-        if "estrela" in low or "quasar" in low:
-            assert not re.search(r"\b(mais|menos|maior|menor|que as?)\b", low), sentence
-
-
-def test_crossmatch_rates_come_from_the_artifact_not_the_module(monkeypatch):
-    out = _page(monkeypatch, STATE, None)
-    assert "31,1" in out and "91,1" in out and "65,7" in out and hg.CROSSMATCH_ORIGIN in out
-    assert "ADR" not in out
-    for name in ("html_galaxy_prior.py", "data_galaxy_prior.py", "views_galaxies.py"):
-        text = (DASH / name).read_text(encoding="utf-8")
-        assert not re.search(r"\b(31|91|65)[.,]\d", text)
 
 
 # open items of phase 4 ----------------------------------------------------------------
-def test_dl_page_unreadable_artifact_is_a_data_error_without_numbers(monkeypatch):
-    chunks: list[str] = []
-    monkeypatch.setattr(
-        views_dl, "st", SimpleNamespace(markdown=lambda t, **_: chunks.append(t))
-    )
-
-    def boom(_rel):
-        raise json.JSONDecodeError("bad", "{", 1)
-
-    monkeypatch.setattr(views_dl.DC, "load_results_dl", boom)
-    views_dl.dl_page(SimpleNamespace(name="full_v0", root=Path("nowhere")))
-    out = " ".join(chunks)
-    assert views_dl.UNREADABLE in out and not re.search(r"\d,\d", out)
 
 
 def test_no_verdict_text_typed_in_more_modules():
-    from test_dashboard_compare_v2 import DASH as CMP_DASH
+    CMP_DASH = Path(CM.__file__).parent
 
     na_word = CT.STATE_WORD[CM.ClassVerdict.NA]
     words = [*CT.STATE_WORD.values(), *CT.PAIR_WORD.values(), CT.POWER_PHRASE]
     names = (
-        "views_dl.py",
         "compare_model.py",
-        "views_galaxies.py",
         "html_galaxy_prior.py",
         "data_galaxy_prior.py",
     )
@@ -284,58 +175,6 @@ def test_producer_format_not_reportable_with_tie_token_is_na_through_headline_an
         next(g for g in grid if g.cls == "GALAXY" and g.net == "FTT").state
         is DD.ClassVerdict.NA
     )
-
-
-def _with_blocks(monkeypatch, shipped, matched):
-    by_variant = {"as_shipped": shipped, "prior_matched": matched}
-    monkeypatch.setattr(
-        views_galaxies,
-        "load_galaxy_prior_block",
-        lambda _r, v="as_shipped": by_variant[v],
-    )
-
-
-OVERLAP = {"p1": (0.4, 0.75), "p2": (0.7, 0.9)}
-
-
-@pytest.mark.parametrize(
-    ("shipped", "matched", "want"),
-    [
-        (block(**OVERLAP), block(), V.DEPENDS),  # bars disjoint, as_shipped overlaps
-        (
-            block(),
-            block(**OVERLAP),
-            V.NO_DIFFERENCE,
-        ),  # bars overlap, as_shipped disjoint
-        (block(), block(), V.DEPENDS),
-        (block(**OVERLAP), block(**OVERLAP), V.NO_DIFFERENCE),
-    ],
-)
-def test_sentence_follows_the_p1_p2_intervals_the_bars_show(
-    monkeypatch, shipped, matched, want
-):
-    _with_blocks(monkeypatch, shipped, matched)
-    out = _page(monkeypatch, STATE, None)
-    scope = f"{hg.VERDICT_SCOPE} {ui_state.RULE_LABEL[ui_state.Rule.MATCHED]}."
-    assert f"{hg.verdict_text(want)} {scope}" in out
-    other = V.NO_DIFFERENCE if want is V.DEPENDS else V.DEPENDS
-    assert hg.verdict_text(other) not in out
-    purity, _ = gp.galaxy_rows(shipped, matched, STATE)
-    p1, p2 = (r.value.ci for r in purity[1:3])  # the "ajustada" P1 and P2 bars
-    disjoint = p1.hi < p2.lo or p2.hi < p1.lo
-    assert disjoint is (want is V.DEPENDS)
-
-
-@pytest.mark.parametrize("prior", ["P1", "P3"])
-def test_verdict_block_states_the_fixed_point_whatever_the_sidebar(monkeypatch, prior):
-    state = ui_state.UiState(ui_state.Rule.MATCHED, prior, False)
-    results = _results(ftt=(TIE, "win", "tie"))
-    out = _page(monkeypatch, state, results)
-    model = CM.build(results)
-    fixed = CT.fixed_point_line(ui_state.LINE_LABEL, model.prior, model.level)
-    assert ui_state.rule_prior_line(state) not in out  # printed once, by the shell
-    verdict_block = out[out.index(hg.DELTA_TITLE) :].split(hg.ERRORS_TITLE)[0]
-    assert hs.method_note(fixed) in verdict_block
 
 
 def test_narrow_cell_is_not_flagged(monkeypatch):

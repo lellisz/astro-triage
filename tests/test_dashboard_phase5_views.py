@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import re
 from pathlib import Path
 
 import pytest
@@ -11,13 +10,7 @@ import pytest
 from test_dashboard_phase4_sky2 import _literals, has_hand_written_digits
 
 DASH = Path(__file__).resolve().parents[1] / "src" / "astro_triage" / "dashboard"
-VIEWS = ["views_galaxies.py"]
-SWEPT = [
-    "data_galaxies_z.py",
-    "charts_galaxies_rates.py",
-    "charts_galaxies_scatter.py",
-    *VIEWS,
-]
+SWEPT = ["data_galaxies_z.py"]
 KNOWN = {96, 1.6, 72.5, 95.8, 163, 93.9, 112571, 1016}
 
 
@@ -27,14 +20,6 @@ def _src(name: str) -> str:
 
 def _strings(name: str) -> list[str]:
     return [n.value for n in _literals(DASH / name) if isinstance(n.value, str)]
-
-
-# (7) views
-@pytest.mark.parametrize("name", VIEWS)
-def test_view_text_has_no_azul_or_trace(name):
-    for s in _strings(name):
-        # whole word "trace"; "tracejada" (dashed) is legitimate Portuguese
-        assert not re.search(r"azul|\btrace\b", s, re.IGNORECASE), s
 
 
 # (8) nothing hand-written

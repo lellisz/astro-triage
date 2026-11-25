@@ -2,21 +2,14 @@
 
 from __future__ import annotations
 
-import json
-from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
-from test_dashboard_comparacao import TIE, _results
 
-from astro_triage.dashboard import compare_model as CM
 from astro_triage.dashboard import html_method as HM
 from astro_triage.dashboard import method_notes as notes
-from astro_triage.dashboard import verdict_rule as VR
-from astro_triage.dashboard import views_dl, views_method
-from astro_triage.dashboard.html_system import NA, method_note
+from astro_triage.dashboard.html_system import NA
 
-DASH = Path(views_method.__file__).parent
 _REL = SimpleNamespace(
     meta={
         "n_test": 10,
@@ -30,33 +23,12 @@ _REL = SimpleNamespace(
 )
 
 
-def _method_html(monkeypatch, tech):
-    sent: list[str] = []
-    monkeypatch.setattr(views_method.st, "markdown", lambda h, **_: sent.append(h))
-    monkeypatch.setattr(views_method, "tech_on", lambda: tech)
-    views_method.method_page(_REL)
-    return "".join(sent)
 
 
-def test_rule_text_method_equals_comparison(monkeypatch):
-    note = method_note(VR.rule_text())
-    comparison = views_dl.page_html(CM.build(_results(ftt=(TIE, "win", "tie"))), "")
-    assert note in comparison and note in HM.rule_html()
-    for tech in (False, True):
-        assert note in _method_html(monkeypatch, tech)
 
 
-def test_rule_has_a_single_source(monkeypatch):
-    monkeypatch.setattr(VR, "rule_lines", lambda: ("REGRA UNICA",))
-    comparison = views_dl.page_html(CM.build(_results(ftt=(TIE, "win", "tie"))), "")
-    assert "REGRA UNICA" in comparison and "REGRA UNICA" in HM.rule_html()
 
 
-def test_old_next_step_card_absent():
-    old = ("Comparar com " + "redes neurais", "Próximo " + "passo")
-    for path in DASH.glob("*.py"):
-        text = path.read_text(encoding="utf-8")
-        assert not any(s in text for s in old), path.name
 
 
 def test_three_limitations_present():
@@ -68,14 +40,6 @@ def test_three_limitations_present():
     assert f"<li>{NA}</li>" in HM.three_limits_html([])
 
 
-def test_page_shows_the_three_limitations_and_the_links(monkeypatch):
-    refs = json.loads(HM.REFERENCES_PATH.read_text(encoding="utf-8"))
-    for tech in (False, True):
-        html = _method_html(monkeypatch, tech)
-        assert HM.THREE_LIMITS_TITLE in html and notes.PRIOR_NOTE in html
-        assert HM.LINKS_TITLE in html and HM.GLOSSARY_TITLE in html
-        assert len(refs) == 7
-        assert all(r["url"] in html for r in refs)
 
 
 def test_glossary_missing_term_is_na():

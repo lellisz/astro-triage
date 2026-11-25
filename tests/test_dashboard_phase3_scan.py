@@ -19,12 +19,9 @@ import pytest
 DASH = Path(__file__).resolve().parents[1] / "src" / "astro_triage" / "dashboard"
 FILES = [
     "data_triage.py",
-    "charts_triage.py",
-    "views_method.py",
     "sky_text.py",
     "sky_map_html.py",
     "html_galaxies.py",
-    "html_galaxies_tech.py",
     "html_method.py",
     "method_notes.py",
     "html_kit.py",
@@ -50,7 +47,7 @@ KNOWN_METRICS = {
     0.016,
 }
 # CSS/markup modules: px sizes and aria levels are layout, not metrics (metric scan still applies).
-MARKUP_DIGITS = {"sky_map_html.py", "html_galaxies_tech.py", "html_kit.py"}
+MARKUP_DIGITS = {"sky_map_html.py", "html_kit.py"}
 
 
 def _literals(path: Path):

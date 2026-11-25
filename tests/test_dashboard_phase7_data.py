@@ -8,7 +8,6 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from astro_triage.dashboard import charts_galaxies_scatter as CGS
 from astro_triage.dashboard import data as D
 from astro_triage.dashboard import data_galaxies_z as GZ
 from astro_triage.dashboard import data_sky as SKY
@@ -216,12 +215,3 @@ def test_scatter_sample_is_stratified_by_z_band() -> None:
     assert np.all(np.abs(got - budget * full / full.sum()) <= 1.0 + 1e-9)
 
 
-def test_scatter_figure_never_sends_per_object_confidence() -> None:
-    df = scatter_df(3000)
-    fig = CGS.galaxy_scatter(GZ.scatter_sample(df))
-    assert any(t.hovertemplate for t in fig.data)
-    for t in fig.data:
-        assert "conf" not in (t.hovertemplate or "").lower()
-        if t.customdata is not None:
-            cd = np.asarray(t.customdata)
-            assert cd.shape[1] == 2  # (z, predicted class) only

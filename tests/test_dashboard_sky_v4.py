@@ -93,17 +93,6 @@ def test_map_payload_has_only_region_columns():
     assert rate.loc[rate["below_floor"], "rate"].isna().all()
 
 
-def test_count_layer_only_in_tech():
-    import inspect
-
-    from astro_triage.dashboard import views_sky
-
-    src = inspect.getsource(views_sky.sky_page)
-    assert src.index("if tech:") < src.index("_pick_mode()")
-    s = _stats()
-    simple = sky_map_html.build_map(s, True, FLOOR)
-    assert "objetos ou mais" not in simple and "n/a: menos de" in simple
-    assert "objetos ou mais" in sky_map_html.build_map(s, False, FLOOR)
 
 
 def test_map_has_no_fixed_width_wider_than_narrow_viewport():

@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
 
-from astro_triage.dashboard import charts, data_sky, fmt
+from astro_triage.dashboard import data_sky, fmt
 
 
 # (d) CI label
@@ -36,6 +35,3 @@ def test_pixel_stats_columns():
 
 
 # (f) charts.py
-def test_charts_does_not_reexport_mollweide_outline():
-    assert not hasattr(charts, "_mollweide_outline")
-    assert "_mollweide_outline" not in Path(charts.__file__).read_text(encoding="utf-8")

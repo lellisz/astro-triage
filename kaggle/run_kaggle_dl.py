@@ -43,7 +43,7 @@ MIN_FREE_BYTES = 3 * 1024**3
 # Order of ADR 0006 section 9.4 / spec P-gpu.
 SYSTEMS = (("ftt", "full"), ("mlp", "full"), ("ftt", "noind"), ("mlp", "noind"))
 MODE_KEYS = {"seeds", "max_epochs", "patience", "train_subset", "ensemble"}
-PIP_SKIP = {"streamlit", "plotly", "pytest", "ruff", "duckdb", "astroquery", "torch"}
+PIP_SKIP = {"pytest", "ruff", "duckdb", "astroquery", "torch"}
 BANNED_NAMES = ("labels.parquet", "features.parquet")
 ARTEFACT_RE = re.compile(
     r"^(?:predictions_(.+)_v0\.parquet(?:\.manifest\.json)?|models/(?:model_)?(.+?)"

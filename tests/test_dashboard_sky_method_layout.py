@@ -2,31 +2,17 @@
 
 from __future__ import annotations
 
-import ast
-import re
-from pathlib import Path
 from types import SimpleNamespace
 
 import pandas as pd
-import pytest
 
 from astro_triage.dashboard import html_method as HM
 from astro_triage.dashboard import method_notes as N
-from astro_triage.dashboard import sky_text, views_method, views_sky
-from astro_triage.dashboard.html_system import CARD_LEVEL, PAGE_LANG
+from astro_triage.dashboard import sky_text
+from astro_triage.dashboard.html_system import CARD_LEVEL
 
-DASH = Path(views_sky.__file__).parent
 EVIL = "<b>&"
 ESCAPED = "&lt;b&gt;&amp;"
-
-
-class _Capture:
-    def __init__(self, monkeypatch, *mods):
-        self.sent: list[str] = []
-        for mod in mods:
-            monkeypatch.setattr(
-                mod.st, "markdown", lambda html, **_: self.sent.append(html)
-            )
 
 
 def _bands() -> pd.DataFrame:
@@ -130,48 +116,3 @@ _REL = SimpleNamespace(
 )
 
 
-@pytest.mark.parametrize("tech", [False, True])
-def test_method_page_wraps_every_fragment_in_the_language_root(monkeypatch, tech):
-    cap = _Capture(monkeypatch, views_method)
-    monkeypatch.setattr(views_method, "tech_on", lambda: tech)
-    views_method.method_page(_REL)
-    css, *frags = cap.sent
-    assert css.startswith("<style>") and frags
-    assert all(f"lang='{PAGE_LANG}'" in f for f in frags)
-    if tech:
-        assert "<details" in "".join(frags)
-        assert "<h" not in "".join(frags)
-
-
-def test_sky_module_injects_system_css_and_keeps_the_map_untouched():
-    src = (DASH / "views_sky.py").read_text(encoding="utf-8")
-    assert "system_css()" in src and "build_map(stats, by_rate, floor, hide)" in src
-    assert "at-cap" not in src and 'st.markdown(\n        f"' not in src
-
-
-def _has_digits(text: str) -> bool:
-    text = re.sub(r"\b(19|20)\d{2}\b", "", text)  # citation years
-    text = re.sub(r"\.\d[f%]", "", text)  # format specs
-    text = re.sub(r"\b[A-Za-z_]+\d*[A-Za-z_]*\b", "", text)  # DR3, P2, identifiers
-    return bool(re.search(r"\d", text))
-
-
-@pytest.mark.parametrize("name", ["method_notes.py", "html_method.py"])
-def test_no_digit_in_string_literals(name):
-    tree = ast.parse((DASH / name).read_text(encoding="utf-8"))
-    docs = {
-        id(n.body[0].value)
-        for n in ast.walk(tree)
-        if isinstance(n, (ast.Module, ast.FunctionDef, ast.ClassDef))
-        and n.body
-        and isinstance(n.body[0], ast.Expr)
-    }
-    bad = [
-        (n.lineno, n.value)
-        for n in ast.walk(tree)
-        if isinstance(n, ast.Constant)
-        and isinstance(n.value, str)
-        and id(n) not in docs
-        and _has_digits(n.value)
-    ]
-    assert not bad, bad

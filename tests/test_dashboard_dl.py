@@ -20,9 +20,7 @@ from astro_triage.dashboard import (
 from astro_triage.evaluation import dl_compare
 
 DASH = Path(__file__).resolve().parents[1] / "src" / "astro_triage" / "dashboard"
-TESTS = Path(__file__).resolve().parent
 TAB_FILES = (
-    "views_dl.py",
     "html_dl.py",
     "data_dl.py",
     "verdict_rule.py",
@@ -40,7 +38,7 @@ def test_b_obsolete_strings_banned():
         "No DL result appears",
         "não está congelado",
     ]
-    allowed = {("html_overview_plots.py", "só foi medida em validação")}
+    allowed = {("só foi medida em validação")}
     for path in DASH.glob("*.py"):
         text = path.read_text(encoding="utf-8")
         for s in banned:

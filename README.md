@@ -114,17 +114,17 @@ bash:
 .venv/bin/python -m pytest -q
 ```
 
-**4. Start the dashboard** (opens at `http://localhost:8501`)
+**4. Export the numbers and build the site** (the Streamlit dashboard was removed; the web front end in `web/` replaces it)
 
 PowerShell:
 ```powershell
-.venv\Scripts\python.exe -m streamlit run src/astro_triage/dashboard/app.py
+.venv\Scripts\python.exe -m astro_triage.web_export --release full_v0 --out web\data
+cd web
+$env:ASTRO_RELEASE = "full_v0"; $env:ASTRO_WEB_DATA = "$PWD\data"
+npm ci; npm run build
 ```
 
-bash:
-```bash
-.venv/bin/python -m streamlit run src/astro_triage/dashboard/app.py
-```
+The export needs the local `data/` release (not in the repository) and writes only aggregates; the static site lands in `web/out/`. See `docs/adr/0008-web-frontend-nextjs-static-json.md`.
 
 ### Data policy
 - No raw data in the repository; terms are in `manifests/README.md`.
@@ -242,17 +242,17 @@ bash:
 .venv/bin/python -m pytest -q
 ```
 
-**4. Iniciar o dashboard** (abre em `http://localhost:8501`)
+**4. Exportar os números e gerar o site** (o dashboard Streamlit foi removido; o front em `web/` o substitui)
 
 PowerShell:
 ```powershell
-.venv\Scripts\python.exe -m streamlit run src/astro_triage/dashboard/app.py
+.venv\Scripts\python.exe -m astro_triage.web_export --release full_v0 --out web\data
+cd web
+$env:ASTRO_RELEASE = "full_v0"; $env:ASTRO_WEB_DATA = "$PWD\data"
+npm ci; npm run build
 ```
 
-bash:
-```bash
-.venv/bin/python -m streamlit run src/astro_triage/dashboard/app.py
-```
+A exportação precisa da release local em `data/` (fora do repositório) e grava só agregados; o site estático fica em `web/out/`. Veja `docs/adr/0008-web-frontend-nextjs-static-json.md`.
 
 ### Política de dados
 - Nenhum dado bruto no repositório; os termos estão em `manifests/README.md`.

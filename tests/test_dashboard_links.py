@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import json
 
-from test_dashboard_method_v2 import _method_html
 from test_dashboard_phase4_sky2 import has_hand_written_digits
 
 from astro_triage.dashboard import html_method as HM
@@ -117,13 +116,6 @@ def test_missing_file_invalid_json_or_empty_list_show_na(monkeypatch, tmp_path):
         _point_to(monkeypatch, tmp_path, text)
         out = HM.links_html()
         assert HM.LINKS_TITLE in out and NA in out and "<a " not in out
-
-
-def test_method_page_shows_links_in_both_modes(monkeypatch):
-    refs = _file_refs()
-    for tech in (False, True):
-        html = _method_html(monkeypatch, tech)
-        assert all(f'<a href="{r["url"]}"' in html for r in refs)
 
 
 def test_references_file_has_no_adr_acronym():

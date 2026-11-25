@@ -20,11 +20,9 @@ from test_dashboard_phase4_sky2 import has_hand_written_digits
 from test_dashboard_phase7_data import fake_release
 
 from astro_triage.dashboard import data as D
-from astro_triage.dashboard import data_cached as DC
 from astro_triage.dashboard import data_dl, data_headline, paths
 
 DASH_DIR = Path(D.__file__).resolve().parent
-APP = DASH_DIR / "app.py"
 WRITE_FLAGS = os.O_WRONLY | os.O_RDWR | os.O_CREAT | os.O_APPEND
 WRITE_METHODS = (
     "write_text",
@@ -195,109 +193,12 @@ def data_root(tmp_path: Path) -> Path:
     return root
 
 
-def exercise(
-    monkeypatch: pytest.MonkeyPatch,
-    root: Path,
-    extra: Callable[[Path], object] | None = None,
-) -> list[str]:
-    interim = root / "interim"
-    with write_guard(monkeypatch, root) as hits:
-        rel = D.load_release("rel", base=interim)
-        assert D.load_layer2(rel) is None
-        assert data_dl.load_results_dl(rel) == {"k": 1}
-        assert data_dl.load_risk_coverage_dl(rel) is not None
-        assert data_dl.load_limitations(rel) == ["um"]
-        assert data_dl.freeze_exists(rel)
-        assert data_headline.load_delta(rel) == {"k": 1}
-        assert DC.root_stamp(rel.root) > 0
-        if extra is not None:
-            with contextlib.suppress(WriteAttempt):
-                extra(root)
-    return hits
 
 
-def test_no_loader_opens_for_write_under_root(
-    data_root: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    assert exercise(monkeypatch, data_root) == []
 
 
-@pytest.mark.parametrize(
-    "plant",
-    [
-        lambda root: open(root / "interim" / "x.txt", "w"),  # noqa: SIM115
-        lambda root: (root / "interim" / "x.txt").write_text("x"),
-        lambda root: (root / "interim" / "d").mkdir(),
-        lambda root: os.open(root / "interim" / "y", os.O_WRONLY | os.O_CREAT),
-        lambda root: pd.DataFrame({"a": [1]}).to_csv(root / "interim" / "x.csv"),
-        lambda root: pd.DataFrame({"a": [1]}).to_csv(path_or_buf=root / "x.csv"),
-        lambda root: pd.DataFrame({"a": [1]}).to_json(root / "interim" / "x.json"),
-        lambda root: pd.DataFrame({"a": [1]}).to_feather(root / "interim" / "x.f"),
-        lambda root: (root / "interim" / "lnk").symlink_to(root.parent),
-        lambda root: (root.parent / "lnk").symlink_to(root),
-        lambda root: (root.parent / "lnk").symlink_to(root / "interim", True),
-        lambda root: (root / "interim" / "lnk").hardlink_to(root.parent / "f"),
-        lambda root: os.symlink(root.parent, root / "interim" / "lnk"),
-        lambda root: os.symlink(root, root.parent / "lnk"),
-        lambda root: os.link(root / "interim" / "rel", root.parent / "lnk"),
-        lambda root: os.link(root.parent, root / "interim" / "lnk"),
-        lambda root: (root / "interim" / "rel").rename(root.parent / "moved"),
-        lambda root: (root.parent / "src").rename(root / "interim" / "moved"),
-        lambda root: (root / "interim" / "rel").replace(root.parent / "moved"),
-        lambda root: (root.parent / "src").replace(root / "interim" / "moved"),
-        lambda root: os.rename(root / "interim" / "rel", root.parent / "moved"),
-        lambda root: os.rename(root.parent / "src", root / "interim" / "moved"),
-        lambda root: os.replace(root / "interim" / "rel", root.parent / "moved"),
-        lambda root: os.replace(root.parent / "src", root / "interim" / "moved"),
-        lambda root: os.remove(root / "interim" / "rel"),
-        lambda root: os.makedirs(root / "interim" / "d"),
-    ],
-    ids=[
-        "open",
-        "write_text",
-        "mkdir",
-        "os.open",
-        "to_csv",
-        "to_csv-named",
-        "to_json",
-        "to_feather",
-        "symlink_to-inside",
-        "symlink_to-into-root",
-        "symlink_to-dir-target",
-        "hardlink_to",
-        "os.symlink-inside",
-        "os.symlink-into-root",
-        "os.link-source",
-        "os.link-dest",
-        "Path.rename-source",
-        "Path.rename-dest",
-        "Path.replace-source",
-        "Path.replace-dest",
-        "os.rename-source",
-        "os.rename-dest",
-        "os.replace-source",
-        "os.replace-dest",
-        "os.remove",
-        "os.makedirs",
-    ],
-)
-def test_planted_write_is_caught(
-    data_root: Path, monkeypatch: pytest.MonkeyPatch, plant: Callable[[Path], object]
-) -> None:
-    hits = exercise(monkeypatch, data_root, extra=plant)
-    assert len(hits) == 1
-    assert sorted(p.name for p in (data_root / "interim").iterdir()) == ["rel"]
-    assert sorted(p.name for p in data_root.parent.iterdir()) == ["data"]
 
 
-def test_write_outside_root_is_not_flagged(
-    data_root: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    other = tmp_path / "elsewhere.txt"
-    assert (
-        exercise(monkeypatch, data_root, extra=lambda _: other.write_text("ok")) == []
-    )
-    assert other.read_text() == "ok"
 
 
 # ------------------------------------------------------------------ source scans
@@ -490,19 +391,107 @@ def test_paths_text_has_no_hand_written_digits() -> None:
 
 
 # ------------------------------------------------------------------------- the app
-def test_app_without_root_shows_error(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    from streamlit.testing.v1 import AppTest
 
-    monkeypatch.setenv(paths.ENV_VAR, str(tmp_path / "empty"))
-    # A real launch imports data_release with the variable already set; mirror that here.
-    monkeypatch.setattr(D, "INTERIM_DIR", paths.interim_dir())
-    at = AppTest.from_file(str(APP), default_timeout=60).run()
-    assert not at.exception
-    assert len(at.error) == 1
-    message = at.error[0].value
-    assert paths.ENV_VAR in message
-    assert str(tmp_path) not in message
-    assert not has_hand_written_digits(message)
-    assert not (tmp_path / "empty").exists()
+
+def exercise(
+    monkeypatch: pytest.MonkeyPatch,
+    root: Path,
+    extra: Callable[[Path], object] | None = None,
+) -> list[str]:
+    interim = root / "interim"
+    with write_guard(monkeypatch, root) as hits:
+        rel = D.load_release("rel", base=interim)
+        assert D.load_layer2(rel) is None
+        assert data_dl.load_results_dl(rel) == {"k": 1}
+        assert data_dl.load_risk_coverage_dl(rel) is not None
+        assert data_dl.load_limitations(rel) == ["um"]
+        assert data_dl.freeze_exists(rel)
+        assert data_headline.load_delta(rel) == {"k": 1}
+        if extra is not None:
+            with contextlib.suppress(WriteAttempt):
+                extra(root)
+    return hits
+
+
+def test_no_loader_opens_for_write_under_root(
+    data_root: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    assert exercise(monkeypatch, data_root) == []
+
+
+@pytest.mark.parametrize(
+    "plant",
+    [
+        lambda root: open(root / "interim" / "x.txt", "w"),  # noqa: SIM115
+        lambda root: (root / "interim" / "x.txt").write_text("x"),
+        lambda root: (root / "interim" / "d").mkdir(),
+        lambda root: os.open(root / "interim" / "y", os.O_WRONLY | os.O_CREAT),
+        lambda root: pd.DataFrame({"a": [1]}).to_csv(root / "interim" / "x.csv"),
+        lambda root: pd.DataFrame({"a": [1]}).to_csv(path_or_buf=root / "x.csv"),
+        lambda root: pd.DataFrame({"a": [1]}).to_json(root / "interim" / "x.json"),
+        lambda root: pd.DataFrame({"a": [1]}).to_feather(root / "interim" / "x.f"),
+        lambda root: (root / "interim" / "lnk").symlink_to(root.parent),
+        lambda root: (root.parent / "lnk").symlink_to(root),
+        lambda root: (root.parent / "lnk").symlink_to(root / "interim", True),
+        lambda root: (root / "interim" / "lnk").hardlink_to(root.parent / "f"),
+        lambda root: os.symlink(root.parent, root / "interim" / "lnk"),
+        lambda root: os.symlink(root, root.parent / "lnk"),
+        lambda root: os.link(root / "interim" / "rel", root.parent / "lnk"),
+        lambda root: os.link(root.parent, root / "interim" / "lnk"),
+        lambda root: (root / "interim" / "rel").rename(root.parent / "moved"),
+        lambda root: (root.parent / "src").rename(root / "interim" / "moved"),
+        lambda root: (root / "interim" / "rel").replace(root.parent / "moved"),
+        lambda root: (root.parent / "src").replace(root / "interim" / "moved"),
+        lambda root: os.rename(root / "interim" / "rel", root.parent / "moved"),
+        lambda root: os.rename(root.parent / "src", root / "interim" / "moved"),
+        lambda root: os.replace(root / "interim" / "rel", root.parent / "moved"),
+        lambda root: os.replace(root.parent / "src", root / "interim" / "moved"),
+        lambda root: os.remove(root / "interim" / "rel"),
+        lambda root: os.makedirs(root / "interim" / "d"),
+    ],
+    ids=[
+        "open",
+        "write_text",
+        "mkdir",
+        "os.open",
+        "to_csv",
+        "to_csv-named",
+        "to_json",
+        "to_feather",
+        "symlink_to-inside",
+        "symlink_to-into-root",
+        "symlink_to-dir-target",
+        "hardlink_to",
+        "os.symlink-inside",
+        "os.symlink-into-root",
+        "os.link-source",
+        "os.link-dest",
+        "Path.rename-source",
+        "Path.rename-dest",
+        "Path.replace-source",
+        "Path.replace-dest",
+        "os.rename-source",
+        "os.rename-dest",
+        "os.replace-source",
+        "os.replace-dest",
+        "os.remove",
+        "os.makedirs",
+    ],
+)
+def test_planted_write_is_caught(
+    data_root: Path, monkeypatch: pytest.MonkeyPatch, plant: Callable[[Path], object]
+) -> None:
+    hits = exercise(monkeypatch, data_root, extra=plant)
+    assert len(hits) == 1
+    assert sorted(p.name for p in (data_root / "interim").iterdir()) == ["rel"]
+    assert sorted(p.name for p in data_root.parent.iterdir()) == ["data"]
+
+
+def test_write_outside_root_is_not_flagged(
+    data_root: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    other = tmp_path / "elsewhere.txt"
+    assert (
+        exercise(monkeypatch, data_root, extra=lambda _: other.write_text("ok")) == []
+    )
+    assert other.read_text() == "ok"

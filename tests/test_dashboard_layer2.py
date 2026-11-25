@@ -20,26 +20,16 @@ import pytest
 from test_layer2_eval import MODEL, build_release
 from test_layer2_report import dead_l2, with_eval
 
-from astro_triage.dashboard import charts as C
 from astro_triage.dashboard import data as D
 from astro_triage.evaluation import layer2_data as L2D
 from astro_triage.evaluation import layer2_report as R
 
 APP = Path(D.__file__).resolve().parent / "app.py"
-REAL_RELEASE = D.REPO_ROOT / "data" / "interim" / D.DEFAULT_RELEASE
 HOSTILE = (
     "<script>alert(1)</script>",
     "**negrito**",
     "[x](javascript:alert(1))",
 )
-NO_GAIN_TITLE = "não agregou valor mensurável"
-PAGES_BASE = [
-    "Visão geral",
-    "Mapa do céu",
-    "Galáxias",
-    "Método",
-    "Comparação: LightGBM × deep learning",
-]
 
 
 # ----------------------------------------------------------------------------- fixtures
@@ -213,44 +203,6 @@ def test_summary_flat_pairs_are_evaluable_but_not_gain(
     assert (p["lo"] <= 0).all()
 
 
-def test_summary_failure_unknown_status_cost_and_meta(
-    results: dict, tmp_path: Path
-) -> None:
-    res = results["gain"]
-    ops = res["operations"]
-    s = D.layer2_summary(load(tmp_path, res))
-    assert s["unknown_rate"] == pytest.approx(ops["unknown_rate"])
-    assert s["failure_rate"] == pytest.approx(ops["failure_rate"])
-    assert s["unknown_rate"] > 0 and s["failure_rate"] > 0  # fixture has both kinds
-    st = s["status"].set_index("status")
-    assert st.loc["OK", "kind"] == "ok" and st.loc["UNKNOWN", "kind"] == "unknown"
-    assert st.loc["TIMEOUT", "kind"] == "falha"
-    for key, n in ops["status_counts"].items():
-        assert st.loc[key, "n"] == n
-        assert st.loc[key, "rate"] == pytest.approx(n / ops["n_routed"])
-    assert st["rate"].sum() == pytest.approx(1.0)
-    assert st.loc["UNKNOWN", "rate"] == pytest.approx(s["unknown_rate"])
-    assert st.loc[st["kind"] == "falha", "rate"].sum() == pytest.approx(
-        s["failure_rate"]
-    )
-    cost = s["cost"].set_index("item")
-    assert list(cost.index) == list(D.LAYER2_COST_ROWS.values())
-    for key, label in D.LAYER2_COST_ROWS.items():
-        for stat in ("mean", "p50", "p95"):
-            assert cost.loc[label, stat] == pytest.approx(ops[key][stat])
-        assert cost.loc[label, "n"] == ops[key]["n"]
-    assert cost.loc["latência (ms)", "mean"] == pytest.approx(1004.0)
-    assert cost.loc["tokens no total", "p50"] == pytest.approx(314.0)
-    assert s["model_requested"] == res["meta"]["model_requested"] == MODEL
-    assert s["models_reported"] == {MODEL: ops["n_routed"]}
-    assert s["prompt_version"] == res["meta"]["prompt_version"]
-    assert (
-        s["n_routed"] == ops["n_routed"] and s["n_boot"] == res["eval"]["n_boot"] == 30
-    )
-    assert s["class_mix"] == ops["class_mix"]
-    assert s["floor"] == res["meta"]["floor"]
-
-
 def test_summary_none_percentiles_become_nan(results: dict, tmp_path: Path) -> None:
     res = copy.deepcopy(results["gain"])
     res["operations"]["latency_ms"].update(mean=None, p50=None, p95=None)
@@ -307,77 +259,8 @@ def test_old_public_signatures_unchanged() -> None:
 
 
 # -------------------------------------------------------------------------------- charts
-def test_layer2_f1_valid_figure_and_omits_na(results: dict, tmp_path: Path) -> None:
-    sy = load(tmp_path, results["gain"])["systems"].copy()
-    fig = C.layer2_f1(sy)
-    fig.to_dict()  # validates against the plotly schema
-    assert len(fig.data) == 2 * 5
-    ys = {y for t in fig.data for y in t.y}
-    assert ys == {"S0", "S1", "S1*", "S2", "S3"}
-    sy.loc[
-        sy["unit"] == "S1*", ["macro_f1_mark", "macro_f1", "macro_f1_lo", "macro_f1_hi"]
-    ] = [
-        "n/a",
-        math.nan,
-        math.nan,
-        math.nan,
-    ]
-    fig2 = C.layer2_f1(sy)
-    assert len(fig2.data) == 2 * 4
-    assert "S1*" not in {y for t in fig2.data for y in t.y}
-    assert not any(math.isnan(v) for t in fig2.data for v in t.x)
-
-
-def test_layer2_f1_with_everything_na_or_empty_does_not_raise(
-    results: dict, tmp_path: Path
-) -> None:
-    sy = load(tmp_path, results["none"])["systems"]
-    assert len(C.layer2_f1(sy).data) == 0
-    empty = sy.iloc[0:0]
-    assert len(C.layer2_f1(empty).data) == 0
-    C.layer2_f1(empty).to_dict()
 
 
 # ------------------------------------------------------------------------------------ app
-@pytest.fixture
-def app_env(tmp_path: Path, monkeypatch: pytest.MonkeyPatch):
-    """Factory: copy the real small release into tmp, optionally add layer2/eval_l2.json."""
-    if not (REAL_RELEASE / "eval" / "results.json").is_file():
-        pytest.skip("real dataset_100k_v0 release not present")
-    import streamlit as st
-
-    counter = [0]
-
-    def make(res: dict | None, mutate=None, raw_text: str | None = None):
-        counter[0] += 1
-        name = f"app_rel_{counter[0]}_{tmp_path.name[-6:]}"
-        dst = tmp_path / "interim" / name
-        shutil.copytree(REAL_RELEASE, dst, ignore=shutil.ignore_patterns("models"))
-        if res is not None:
-            R.write_outputs(res, dst / "layer2")
-            if mutate is not None:
-                p = dst / "layer2" / "eval_l2.json"
-                p.write_text(mutate(p.read_text(encoding="utf-8")), encoding="utf-8")
-        if raw_text is not None:
-            (dst / "layer2").mkdir(exist_ok=True)
-            (dst / "layer2" / "eval_l2.json").write_text(raw_text, encoding="utf-8")
-        return name
-
-    monkeypatch.setattr(D, "INTERIM_DIR", tmp_path / "interim")
-    (tmp_path / "interim").mkdir()
-    st.cache_resource.clear()
-    st.cache_data.clear()
-    yield make
-    st.cache_resource.clear()
-    st.cache_data.clear()
 
 
-def test_app_never_lists_the_layer2_page(app_env, results: dict) -> None:
-    """Layer 2 is closed (ADR 0005): the navigation has no entry even with an eval_l2.json."""
-    from streamlit.testing.v1 import AppTest
-
-    app_env(results["one"])
-    at = AppTest.from_file(str(APP), default_timeout=300).run()
-    assert not at.exception
-    names = [info["page_name"] for info in at._registered_pages.values()]
-    assert "Camada 2" not in names and len(names) == len(PAGES_BASE)

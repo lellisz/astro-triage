@@ -206,7 +206,7 @@ def test_top_error_regions_order_floor_and_position():
 
 
 # sweeps
-@pytest.mark.parametrize("name", ["views_sky.py", "sky_text.py", "sky_model.py"])
+@pytest.mark.parametrize("name", ["sky_text.py", "sky_model.py"])
 def test_no_hand_written_digits_in_text_modules(name):
     bad = [
         (n.lineno, n.value[:60])
@@ -216,7 +216,7 @@ def test_no_hand_written_digits_in_text_modules(name):
     assert not bad, bad
 
 
-@pytest.mark.parametrize("name", ["views_sky.py", "sky_text.py", "sky_map_html.py"])
+@pytest.mark.parametrize("name", ["sky_text.py", "sky_map_html.py"])
 def test_size_hex_and_forbidden_words(name):
     src = (DASH / name).read_text(encoding="utf-8")
     assert len(src.splitlines()) <= 200

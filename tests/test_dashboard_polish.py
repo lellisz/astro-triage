@@ -12,20 +12,6 @@ def test_v4_method_box_states_the_full_win_rule_and_no_hand_written_result():
     assert "todos os pares" not in text and "permanece" not in text
 
 
-def test_v5_fragments_of_every_tab_carry_the_page_language(monkeypatch):
-    from astro_triage.dashboard import views_method, views_overview, views_sky
-    from astro_triage.dashboard.html_system import PAGE_LANG
-
-    sent: list[str] = []
-    for mod, name in (
-        (views_overview, "_md"),
-        (views_sky, "_md"),
-        (views_method, "_html"),
-    ):
-        monkeypatch.setattr(mod.st, "markdown", lambda html, **_: sent.append(html))
-        getattr(mod, name)("<p>x</p>")
-    assert len(sent) == 3
-    assert all(f"lang='{PAGE_LANG}'" in html for html in sent)
 
 
 def test_v6_header_has_a_solid_background_at_every_width():
