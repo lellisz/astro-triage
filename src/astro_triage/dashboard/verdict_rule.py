@@ -77,7 +77,7 @@ def rule_lines() -> tuple[str, ...]:
         ),
         (
             "O par vence só com vitória nas duas classes. Célula abaixo do piso de relato "
-            "conta como empate. Em empate, fica o LightGBM."
+            "conta como sem diferença detectável. Sem vitória do par, fica o LightGBM."
         ),
         "Sem correção de multiplicidade entre os dois pares.",
         (

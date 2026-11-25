@@ -363,9 +363,7 @@ def _headline(rel: D.Release) -> dict:
         "pairs": [
             {
                 "net": net,
-                "text": CT.PAIR_WORD[v]
-                if v is data_dl.PairVerdict.WIN
-                else web_text.PAIR_NO_DIFF,
+                "text": CT.PAIR_WORD[v],
             }
             for net, v in model.pairs
         ],

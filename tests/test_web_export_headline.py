@@ -60,7 +60,7 @@ def test_all_ties_give_no_detectable_difference(synthetic, monkeypatch) -> None:
     assert h["title"] == "Sem diferença detectável"
     assert CT.POWER_PHRASE in h["caveat"]
     assert "MLP" in h["lead"] and "FTT" in h["lead"]
-    assert [p["text"] for p in h["pairs"]] == [web_text.PAIR_NO_DIFF] * 2
+    assert [p["text"] for p in h["pairs"]] == [CT.PAIR_WORD[PairVerdict.TIE]] * 2
     # The owner's wording: a missing difference is never called a tie on the Overview.
     shown = " ".join([h["title"], h["lead"], h["caveat"], *(p["text"] for p in h["pairs"])])
     assert "empate" not in shown.lower()

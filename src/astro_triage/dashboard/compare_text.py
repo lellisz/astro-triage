@@ -15,13 +15,13 @@ if TYPE_CHECKING:
 
 STATE_WORD: Final[Mapping[ClassVerdict, str]] = {
     ClassVerdict.WIN: "vitória",
-    ClassVerdict.TIE: "empate",
+    ClassVerdict.TIE: "sem diferença detectável",
     ClassVerdict.WORSE: "pior (descritivo)",
     ClassVerdict.NA: NA,
 }
 PAIR_WORD: Final[Mapping[PairVerdict, str]] = {
     PairVerdict.WIN: "vence o par, com vitória nas duas classes",
-    PairVerdict.TIE: "empate, fica o LightGBM",
+    PairVerdict.TIE: "sem diferença detectável, fica o LightGBM",
 }
 POWER_PHRASE: Final = "falta de poder, não igualdade"
 NOT_CI_LABEL: Final = "não é IC"

@@ -64,9 +64,6 @@ def missing_note(by_g: pd.DataFrame) -> str:
     )
 
 
-PAIR_NO_DIFF = "sem diferença detectável; fica o LightGBM"
-
-
 def headline_lead(key: str, nets: list[str], winners: list[str]) -> str:
     """One sentence naming the networks of the pairs; no figure is written here."""
     if key == KEY_WIN:
