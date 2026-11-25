@@ -10,6 +10,7 @@ const PAGES: PageKey[] = [
   "compare",
   "fmt_samples",
   "galaxies",
+  "graficos",
   "meta",
   "method",
   "overview",

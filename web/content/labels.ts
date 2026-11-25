@@ -11,10 +11,12 @@ export const routes: readonly Route[] = [
   { href: "/ceu/", label: "Mapa do céu" },
   { href: "/galaxias/", label: "Galáxias" },
   { href: "/comparacao-dl/", label: "Comparação com DL" },
+  { href: "/graficos/", label: "Gráficos" },
   { href: "/metodo/", label: "Método" },
 ];
 
 export const compareHref = "/comparacao-dl/";
+export const chartsHref = "/graficos/";
 
 export type PageLabels = { eyebrow: string; title: string; lead: string };
 
@@ -38,6 +40,11 @@ export const pages = {
     eyebrow: "Redes neurais contra o modelo de árvores",
     title: "Comparação com aprendizado profundo",
     lead: "O que as redes neurais mudam em relação ao classificador entregue.",
+  },
+  charts: {
+    eyebrow: "Como o classificador acerta e erra",
+    title: "Gráficos",
+    lead: "Calibração, taxa de erro por magnitude e por redshift, e matriz de confusão do modelo de árvores.",
   },
   method: {
     eyebrow: "Como os resultados foram obtidos",
@@ -304,6 +311,43 @@ export const methodLabels = {
     completeness: "Completude fixa",
   },
   classes: { STAR: "Estrela", GALAXY: "Galáxia", QSO: "Quasar" },
+};
+
+export const graficosLabels = {
+  calibrationTitle: "Calibração por classe",
+  calibrationChart: "Diagrama de confiabilidade do modelo de árvores",
+  calibrationX: "Probabilidade média prevista",
+  calibrationY: "Frequência observada",
+  errorByGTitle: "Taxa de erro por magnitude G",
+  errorByGChart: "Taxa de erro por faixa de magnitude G, por classe",
+  errorByGX: "Magnitude G",
+  errorByZTitle: "Taxa de erro por redshift",
+  errorByZChart: "Taxa de erro por faixa de redshift, por classe",
+  errorByZX: "Redshift z",
+  errorY: "Taxa de erro",
+  confusionTitle: "Matriz de confusão",
+  confusionCaption: "Classe verdadeira por classe prevista, com a fração de cada linha",
+  confusionTrue: "Classe verdadeira",
+  confusionPred: "Classe prevista",
+  colRange: "Faixa",
+  colObjects: "Objetos",
+  colErrors: "Erros",
+  colRate: "Taxa de erro",
+  colRateCi: "Intervalo de confiança",
+  colMeanProb: "Probabilidade média",
+  colFreq: "Frequência observada",
+  colFreqCi: "Intervalo de confiança",
+  colShare: "Fração da linha",
+  colClass: "Classe",
+  viewNumbers: "Ver os números",
+  tableRegion: "Tabela rolável",
+  chartRegion: "Gráfico rolável na horizontal",
+  legendTitle: "Legenda",
+  legendBelowFloor: "Marcador vazio: abaixo do piso, sem valor",
+  legendInterval: "Barras: intervalo de confiança, só no modo técnico",
+  legendRaw: "Marcador oco: antes do ajuste de temperatura",
+  legendDiagonal: "Diagonal: acertos",
+  notAvailable: "n/a",
 };
 
 export const chartLabels = {
