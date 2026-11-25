@@ -8,8 +8,9 @@
     linear-gradient(to left, color-mix(in srgb, var(--border-strong) 70%, transparent), transparent) right / 1.5rem 100% no-repeat scroll;
 }
 
+/* Texto do SVG vale --text-sm so com escala 1: piso e teto = largura do viewBox (640). */
 .scroll svg {
-  min-width: 560px;
+  min-width: 640px;
   max-width: 640px;
 }
 

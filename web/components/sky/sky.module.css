@@ -8,10 +8,15 @@
   outline-offset: var(--focus-offset);
 }
 
+/* O rotulo do grafico (.gratLon, 0.13 unidades de um viewBox de 6.7) so vale
+ * --text-sm (15px) com a largura abaixo: 15 / 0.13 * 6.7 = 773px no piso; o teto
+ * evita rotulo gigante no desktop (900px = 17,5px). */
 .wrap {
   position: relative;
   width: 100%;
-  min-width: 600px;
+  min-width: 780px;
+  max-width: 900px;
+  margin-inline: auto;
 }
 
 .svg {

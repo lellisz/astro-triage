@@ -47,8 +47,9 @@
   overflow-x: auto;
 }
 
+/* Texto do SVG vale --text-sm so com escala 1: piso e teto = largura do viewBox (640). */
 .scroll svg {
-  min-width: 560px;
+  min-width: 640px;
   max-width: 640px;
 }
 
