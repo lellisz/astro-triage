@@ -12,6 +12,7 @@ from typing import Final
 import pandas as pd
 
 from astro_triage.dashboard import fmt
+from astro_triage.dashboard.html_dl import class_label
 from astro_triage.dashboard.kit_types import NA_WORD
 
 KEY_TIE: Final = "no_detectable_difference"
@@ -34,6 +35,48 @@ ERROR_ROWS_NOTE: Final = (
     "As faixas listadas são pequenas (veja o n de cada uma); a taxa de todas as "
     "galáxias é calculada sobre o conjunto inteiro, por isso as duas não se contradizem."
 )
+NETWORKS_ABSENT: Final = (
+    "As redes neurais (MLP e FT-Transformer) não aparecem nesta página: desenhar a curva "
+    "de calibração e a matriz delas exigiria reler as previsões do conjunto de teste, "
+    "que já foi aberto uma vez. Aqui só há o LightGBM."
+)
+STAR_Z_NOTE: Final = (
+    "Estrelas ficam fora do gráfico por redshift: o z espectroscópico de uma estrela é uma "
+    "velocidade radial perto de zero, não uma distância."
+)
+
+
+def charts_scope(n_test: int, model_label: str) -> str:
+    """Model, fold and rule of every chart; says why these shares differ from Visão geral."""
+    return (
+        f"Todos os gráficos usam o modelo {model_label} no conjunto de teste "
+        f"({fmt.pt_int(n_test)} objetos). A classe prevista é a de maior probabilidade "
+        "calibrada; a regra de decisão e o prior das outras páginas não valem aqui. "
+        "Por isso estes acertos e erros não são a pureza nem a completude da Visão geral."
+    )
+
+
+def charts_floor_note(floor: int) -> str:
+    """Floor rule: 1D charts keep the count, the confusion cells hide it too."""
+    return (
+        f"Faixas e células com menos de {fmt.pt_int(floor)} objetos não têm valor "
+        "confiável e aparecem como n/a. Nos gráficos por faixa o n continua visível; "
+        "nas células da matriz de confusão, não."
+    )
+
+
+def missing_g_note(counts: Mapping[str, int]) -> str:
+    """Objects without a measured G that the by-magnitude charts leave out; "" if none."""
+    shown = [
+        f"{class_label(cls).lower()}: {fmt.pt_int(n)}" for cls, n in counts.items() if n
+    ]
+    if not shown:
+        return ""
+    return (
+        "Objetos sem magnitude medida não entram nos gráficos por brilho ("
+        + "; ".join(shown)
+        + ")."
+    )
 
 
 def how(by_rate: bool, n_hidden: int, floor: int, hidden_on_map: bool) -> str:

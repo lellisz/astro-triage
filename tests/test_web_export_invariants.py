@@ -21,10 +21,23 @@ from astro_triage.web_export.__main__ import main
 from astro_triage.web_export.types import clean, est, head, num
 
 RELEASE = "synth_v0"
-FILES = ("meta", "overview", "sky", "galaxies", "compare", "method", "fmt_samples")
+FILES = (
+    "meta",
+    "overview",
+    "sky",
+    "galaxies",
+    "compare",
+    "method",
+    "fmt_samples",
+    "graficos",
+)
 FORBIDDEN_KEYS = {"source_id", "ra", "dec"}
+GRAFICOS_FORBIDDEN_KEYS = FORBIDDEN_KEYS | {"l", "b", "healpix_l5", "hp"}
+GRAFICOS_BANNED_SOURCE = ("dl_eval", "predictions_mlp", "predictions_ftt", '"dl"')
 TAG = re.compile(r"<[A-Za-z/!]")
 SKY_MAX_BYTES = 250 * 1024
+GRAFICOS_MAX_BYTES = 150 * 1024
+GRAFICOS_MAX_ARRAY = 252
 
 
 # ----------------------------------------------------------------------------- helpers
@@ -71,6 +84,26 @@ def _check_sky(sky: dict) -> None:
     for path, _, value in _walk(sky):
         if isinstance(value, list):
             assert len(value) <= len(regions), f"{path} has {len(value)} items"
+
+
+def _check_graficos(doc: dict) -> None:
+    """Below-floor items are null, no per-object key, no long array (ADR 0008 A1.5 R3, R4)."""
+    for path, key, value in _walk(doc):
+        assert key not in GRAFICOS_FORBIDDEN_KEYS, f"graficos: key {key} at {path}"
+        if isinstance(value, list):
+            assert len(value) <= GRAFICOS_MAX_ARRAY, f"{path} has {len(value)} items"
+        if isinstance(value, dict) and value.get("below_floor") is True:
+            for field in ("errors", "p_mean", "freq", "share", "rate"):
+                if field in value:
+                    sub = value[field]
+                    assert sub["value" if "value" in sub else "point"] is None, path
+            if "pred" in value:
+                assert value["n"]["value"] is None, f"{path}: n of a confusion cell"
+            else:
+                assert value["n"]["value"] is not None, f"{path}: 1D charts keep n"
+            for raw in ("raw_p_mean", "raw_freq"):
+                assert value.get(raw) is None, path
+    assert doc["page"] == "graficos" and doc["ece"] is None and doc["cmd"] is None
 
 
 def _export_dir(out: Path, release: str) -> Path:
@@ -208,6 +241,60 @@ def test_synthetic_export_invariants(export) -> None:
         _check_content(doc, name)
     _check_sky(docs["sky"])
     assert len(docs["sky"]["regions"]) > 0
+    _check_graficos(docs["graficos"])
+
+
+def test_graficos_below_floor_items_are_withheld() -> None:
+    """Falsifier: the checker must reject a below-floor item that still carries a value."""
+    cell = {"pred": "QSO", "n": {"value": None}, "share": {"point": None}, "below_floor": True}
+    _check_graficos_items(cell)
+    for bad in (
+        {**cell, "n": {"value": 3}},
+        {**cell, "share": {"point": 0.1}},
+    ):
+        with pytest.raises(AssertionError):
+            _check_graficos_items(bad)
+    with pytest.raises(AssertionError):
+        _check_graficos_items({"n": {"value": None}, "rate": {"point": None}, "below_floor": True})
+
+
+def _check_graficos_items(item: dict) -> None:
+    doc = {
+        "page": "graficos",
+        "ece": None,
+        "cmd": None,
+        "items": [item],
+    }
+    _check_graficos(doc)
+
+
+def test_graficos_sources_do_not_touch_deep_learning_outputs() -> None:
+    from astro_triage.dashboard import data_charts
+    from astro_triage.web_export import graficos
+
+    for module in (graficos, data_charts):
+        source = Path(module.__file__).read_text(encoding="utf-8")
+        for banned in GRAFICOS_BANNED_SOURCE:
+            assert banned not in source, f"{module.__name__} contains {banned}"
+
+
+def test_graficos_import_does_not_load_streamlit() -> None:
+    import os
+    import subprocess
+    import sys
+
+    from astro_triage.web_export import graficos
+
+    src = str(Path(graficos.__file__).parents[2])
+    env = {**os.environ, "PYTHONPATH": src}
+    code = (
+        "import sys, astro_triage.web_export.graficos;"
+        "assert 'streamlit' not in sys.modules and 'plotly' not in sys.modules"
+    )
+    done = subprocess.run(
+        [sys.executable, "-c", code], capture_output=True, text=True, env=env, check=False
+    )
+    assert done.returncode == 0, done.stderr
 
 
 # ------------------------------------------------------------------------- 3. CLI
@@ -317,6 +404,8 @@ def test_real_release_invariants(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     for name, doc in docs.items():
         _check_content(doc, name)
     _check_sky(docs["sky"])
+    _check_graficos(docs["graficos"])
+    assert (out / real / "graficos.json").stat().st_size < GRAFICOS_MAX_BYTES
 
 
 # ------------------------------------------- 5. REV-A01: never touch the data folder

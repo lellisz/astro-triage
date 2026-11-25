@@ -19,6 +19,7 @@ import pytest
 from astro_triage.dashboard import compare_model as CM
 from astro_triage.dashboard import data as D
 from astro_triage.dashboard import (
+    data_charts,
     data_galaxy_prior,
     data_headline,
     data_sky,
@@ -30,12 +31,21 @@ from astro_triage.dashboard import (
 )
 from astro_triage.dashboard.ui_state import UiState
 from astro_triage.web_export import __main__ as export
-from astro_triage.web_export import pages
+from astro_triage.web_export import graficos, pages
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE_DIR = ROOT / "web" / "test" / "fixtures" / "fixture_v0"
 NAME = "fixture_v0"
-DOCS = ("meta", "overview", "sky", "galaxies", "compare", "method", "fmt_samples")
+DOCS = (
+    "meta",
+    "overview",
+    "sky",
+    "galaxies",
+    "compare",
+    "method",
+    "fmt_samples",
+    "graficos",
+)
 PIXELS = {100: 14, 101: 14, 102: 14, 103: 3}  # pixel -> test objects; 103 is below the floor
 FLOOR = {"min_objects": 5, "min_pixels": 2}
 CLASSES = ("STAR", "GALAXY", "QSO")
@@ -306,6 +316,87 @@ def assert_parity(rel: D.Release) -> None:
     assert met["facts"]["n_test"]["text"] == facts.n_test
     assert met["facts"]["n_test"]["value"] == rel.meta["n_test"]
     assert met["facts"]["n_boot"]["text"] == facts.n_boot
+    assert_graficos_parity(rel, docs)
+
+
+def _same_est(got: dict, point: float, lo: float, hi: float) -> None:
+    assert (got["point"], got["lo"], got["hi"]) == (point, lo, hi)
+
+
+def _assert_rows(rows: list[dict], table: pd.DataFrame, floor: int) -> None:
+    placed = table[table["lo"].notna()]
+    assert len(rows) == len(placed) > 0
+    for got, (_, r) in zip(rows, placed.iterrows(), strict=True):
+        assert got["label"] == r["label"]
+        assert got["n"]["value"] == int(r["n"])
+        assert got["below_floor"] == (int(r["n"]) < floor)
+        if got["below_floor"]:
+            assert got["errors"]["value"] is None and got["rate"]["point"] is None
+        else:
+            assert got["errors"]["value"] == int(r["errors"])
+            _same_est(got["rate"], r["rate"], r["ci_lo"], r["ci_hi"])
+
+
+def assert_graficos_parity(rel: D.Release, docs: dict) -> None:
+    """Every bin, rate row and confusion cell of graficos.json equals ``data_charts``."""
+    doc = docs["graficos"]
+    floor = int(rel.meta["floor"]["min_objects"])
+    model = graficos.MODEL
+    assert doc["floor"] == floor and doc["ece"] is None and doc["cmd"] is None
+    for series in doc["calibration"]["series"]:
+        frame = data_charts.calibration_bins(rel, model)[series["cls"]]
+        assert len(series["bins"]) == len(frame) > 0
+        for got, (_, r) in zip(series["bins"], frame.iterrows(), strict=True):
+            assert got["n"]["value"] == int(r["n"])
+            assert got["below_floor"] == (int(r["n"]) < floor)
+            if got["below_floor"]:
+                assert got["p_mean"]["value"] is None and got["freq"]["point"] is None
+                assert got["raw_p_mean"] is None and got["raw_freq"] is None
+            else:
+                assert got["p_mean"]["value"] == r["mean_pred"]
+                _same_est(got["freq"], r["observed"], r["ci_lo"], r["ci_hi"])
+                assert got["raw_p_mean"] == r["raw_mean_pred"]
+                assert got["raw_freq"] == r["raw_observed"]
+    for key, by in (("error_by_g", "G"), ("error_by_z", "z")):
+        tables = data_charts.error_by(rel, model, by)
+        assert [s["cls"] for s in doc[key]["series"]] == list(tables)
+        for series in doc[key]["series"]:
+            table = tables[series["cls"]]
+            _assert_rows(series["rows"], table, floor)
+            gone = table[table["lo"].isna()]
+            assert series["missing"]["value"] == int(gone["n"].sum())
+    cells = data_charts.confusion_cells(rel, model)
+    assert [r["true"] for r in doc["confusion"]["rows"]] == list(CLASSES)
+    flat = [(r, c) for r in doc["confusion"]["rows"] for c in r["cells"]]
+    assert len(flat) == len(cells) == 9
+    for (row, got), (_, want) in zip(flat, cells.iterrows(), strict=True):
+        assert (row["true"], got["pred"]) == (want["true"], want["pred"])
+        assert row["n"]["value"] == int(want["row_n"])
+        assert got["diagonal"] == (want["true"] == want["pred"])
+        assert got["below_floor"] == (int(want["n"]) < floor)
+        if got["below_floor"]:
+            assert got["n"]["value"] is None and got["share"]["point"] is None
+        else:
+            assert got["n"]["value"] == int(want["n"])
+            _same_est(got["share"], want["share"], want["ci_lo"], want["ci_hi"])
+    # the same LightGBM reliability bins as overview.technical.calibration where n >= floor
+    shown = docs["overview"]["technical"]["calibration"]
+    for series in doc["calibration"]["series"]:
+        old = shown[series["cls"]]
+        assert len(old) == len(series["bins"])
+        for want, got in zip(old, series["bins"], strict=True):
+            assert want["n"] == got["n"]["value"]
+            if not got["below_floor"]:
+                assert want["p_mean"] == got["p_mean"]["value"]
+                assert want["freq"] == got["freq"]["point"]
+    # the GALAXY by-z rows are those of galaxies.technical.by_z (same function, same edges)
+    galaxy_z = next(s for s in doc["error_by_z"]["series"] if s["cls"] == "GALAXY")
+    old_z = docs["galaxies"]["technical"]["by_z"]
+    assert len(old_z) == len(galaxy_z["rows"]) > 0
+    for want, got in zip(old_z, galaxy_z["rows"], strict=True):
+        assert (want["label"], want["n"]) == (got["label"], got["n"])
+        if want["reportable"]:
+            assert want["errors"] == got["errors"] and want["rate"] == got["rate"]
 
 
 def _results_dl_of(rel: D.Release) -> dict | None:
