@@ -1,0 +1,149 @@
+.figure {
+  margin: 0;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.caption {
+  margin-bottom: var(--space-2);
+  color: var(--text-2);
+  font-size: var(--text-base);
+}
+
+.svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.label,
+.tick {
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+}
+
+.label {
+  fill: var(--text-strong);
+}
+
+.tick {
+  fill: var(--axis);
+}
+
+.grid {
+  stroke: var(--gridline);
+  stroke-width: 1;
+}
+
+.axis {
+  stroke: var(--axis);
+  stroke-width: 1;
+}
+
+.mark {
+  fill: var(--text-strong);
+  stroke: var(--text-strong);
+  stroke-width: 1;
+}
+
+.markHollow {
+  fill: var(--surface);
+  stroke: var(--text-strong);
+  stroke-width: 2;
+}
+
+.whisker {
+  stroke: var(--chart-1);
+  stroke-width: 2;
+  fill: none;
+}
+
+.naBox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.matrix {
+  border-collapse: collapse;
+  width: 100%;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+.matrix caption {
+  margin-bottom: var(--space-2);
+  color: var(--text-2);
+  font-size: var(--text-base);
+  text-align: left;
+}
+
+.matrix th,
+.matrix td {
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  font-size: var(--text-sm);
+  text-align: center;
+}
+
+.matrix th {
+  background: var(--surface-2);
+  color: var(--text-2);
+  font-weight: 400;
+}
+
+.matrix th[scope="row"] {
+  text-align: left;
+}
+
+.rowN {
+  display: block;
+  color: var(--text-2);
+}
+
+.cell {
+  position: relative;
+  min-width: 96px;
+  background: var(--surface);
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  background: var(--text-strong);
+  pointer-events: none;
+}
+
+.cellBody {
+  position: relative;
+  display: block;
+}
+
+.share {
+  display: block;
+  color: var(--text);
+}
+
+.count,
+.interval {
+  display: block;
+  color: var(--text-2);
+}
+
+.diagonal {
+  border: 3px solid var(--text-strong);
+}
+
+.diagonal .share {
+  color: var(--text-strong);
+  font-weight: 700;
+}
