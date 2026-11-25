@@ -7,13 +7,14 @@ import { Tabs, type TabItem } from "@/components/kit/Tabs";
 import { CompareView } from "@/components/pages/CompareView";
 import { GalaxiesView } from "@/components/pages/GalaxiesView";
 import MethodPage from "@/app/metodo/page";
-import { chartLabels, compareLabels, methodLabels } from "@/content/labels";
+import { StateControls } from "@/components/shell/StateControls";
+import { chartLabels, compareHref, compareLabels, controls, methodLabels } from "@/content/labels";
 import type { Compare, Est, Galaxies, Meta, Method } from "@/lib/schema";
 
-const nav = vi.hoisted(() => ({ search: "" }));
+const nav = vi.hoisted(() => ({ search: "", path: "/" }));
 vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(nav.search),
-  usePathname: () => "/",
+  usePathname: () => nav.path,
   useRouter: () => ({ push: () => {}, replace: () => {}, prefetch: () => {} }),
 }));
 
@@ -636,5 +637,38 @@ describe("A8 Metodo: todos os campos do method.json aparecem", () => {
     const z = clone(method);
     z.facts.n_boot = { value: 0, text: "0" };
     expect(withMethod(z).match(new RegExp(`${methodLabels.facts.n_boot}</p><p[^>]*>([^<]*)</p>`))?.[1]).toBe("0");
+  });
+});
+
+describe("Metodo: frase do modo simples so fora do modo tecnico", () => {
+  const render = (search: string): string => {
+    store.pages = { meta, method };
+    nav.search = search;
+    return textOf(renderToStaticMarkup(<MethodPage />));
+  };
+
+  it("aparece no modo simples e some com tecnico=1", () => {
+    expect(render("")).toContain(method.simple);
+    expect(render("tecnico=1")).not.toContain(method.simple);
+  });
+});
+
+describe("Comparacao: sem barra de ajustes (a pagina nao tem modo tecnico)", () => {
+  const bar = (path: string): string => {
+    nav.path = path;
+    nav.search = "";
+    const out = renderToStaticMarkup(<StateControls meta={meta} />);
+    nav.path = "/";
+    return out;
+  };
+
+  it("em /comparacao-dl, com ou sem barra final, nada e renderizado", () => {
+    expect(bar(compareHref)).toBe("");
+    expect(bar(`${compareHref}/`)).toBe("");
+  });
+
+  it("nas outras paginas o checkbox do modo tecnico continua", () => {
+    expect(bar("/")).toContain(controls.tech);
+    expect(bar("/galaxias")).toContain(controls.tech);
   });
 });

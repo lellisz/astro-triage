@@ -75,6 +75,23 @@ function Technical({ technical, open }: { technical: TechnicalMethod; open: bool
   );
 }
 
+// A frase do modo simples so vale fora do modo tecnico (como no Streamlit). O
+// estado vem da URL, entao o filtro e feito aqui, no cliente.
+function SimpleNoticeWithState({ meta, text: notice }: { meta: Meta; text: string }) {
+  const params = useSearchParams();
+  return readState(params, meta).tech ? null : <p className={styles.notice}>{notice}</p>;
+}
+
+export function SimpleNotice({ meta, text: notice }: { meta: Meta; text: string }) {
+  return (
+    <Suspense
+      fallback={meta.default_state.tech ? null : <p className={styles.notice}>{notice}</p>}
+    >
+      <SimpleNoticeWithState meta={meta} text={notice} />
+    </Suspense>
+  );
+}
+
 function WithState({ meta, technical }: Props) {
   const params = useSearchParams();
   return <Technical technical={technical} open={readState(params, meta).tech} />;

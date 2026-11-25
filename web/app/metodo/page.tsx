@@ -1,5 +1,5 @@
 import { Kpi } from "@/components/kit/Kpi";
-import { MethodView } from "@/components/pages/MethodView";
+import { MethodView, SimpleNotice } from "@/components/pages/MethodView";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { methodLabels as text, pages } from "@/content/labels";
 import { loadPage } from "@/lib/data";
@@ -50,7 +50,7 @@ export default function MethodPage() {
         </h2>
         <p>{method.method_text}</p>
         <p className={styles.muted}>{method.mix_text}</p>
-        <p className={styles.notice}>{method.simple}</p>
+        <SimpleNotice meta={meta} text={method.simple} />
       </section>
 
       <section className={styles.panel} aria-labelledby="fatos">

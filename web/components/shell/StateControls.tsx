@@ -115,6 +115,9 @@ function ControlsWithState({ meta, hideRuleAndPrior }: Props) {
 
 export function StateControls({ meta, hideRuleAndPrior }: Props) {
   const pathname = usePathname();
+  // Comparacao nao tem modo tecnico nem usa regra e prior (como no Streamlit):
+  // sem controles com efeito, a barra inteira sai.
+  if (trimSlash(pathname) === trimSlash(compareHref)) return null;
   return (
     <section className={styles.bar} aria-label={acessibilidade.settingsRegion}>
       <h2 className={styles.title}>{controls.settings}</h2>
