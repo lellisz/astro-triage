@@ -8,7 +8,7 @@ import { CompareView } from "@/components/pages/CompareView";
 import { GalaxiesView } from "@/components/pages/GalaxiesView";
 import MethodPage from "@/app/metodo/page";
 import { StateControls } from "@/components/shell/StateControls";
-import { chartLabels, compareHref, compareLabels, controls, methodLabels } from "@/content/labels";
+import { chartLabels, chartsHref, compareHref, compareLabels, controls, methodLabels } from "@/content/labels";
 import type { Compare, Est, Galaxies, Meta, Method } from "@/lib/schema";
 
 const nav = vi.hoisted(() => ({ search: "", path: "/" }));
@@ -670,5 +670,36 @@ describe("Comparacao: sem barra de ajustes (a pagina nao tem modo tecnico)", () 
   it("nas outras paginas o checkbox do modo tecnico continua", () => {
     expect(bar("/")).toContain(controls.tech);
     expect(bar("/galaxias")).toContain(controls.tech);
+  });
+});
+
+describe("Graficos: barra sem regra nem prior, com modo tecnico", () => {
+  const bar = (path: string): string => {
+    nav.path = path;
+    nav.search = "";
+    const out = renderToStaticMarkup(<StateControls meta={meta} />);
+    nav.path = "/";
+    return out;
+  };
+
+  it("em /graficos, com ou sem barra final, so o checkbox tecnico aparece", () => {
+    for (const p of [chartsHref, chartsHref.replace(/\/$/, "")]) {
+      const html = bar(p);
+      expect(html).toContain(controls.tech);
+      expect(html).toContain('type="checkbox"');
+      expect(html).not.toContain('type="radio"');
+      expect(html).not.toContain(controls.rule);
+      expect(html).not.toContain(controls.prior);
+    }
+  });
+
+  it("nas outras rotas os controles de regra e prior continuam", () => {
+    for (const p of ["/", "/galaxias"]) {
+      const html = bar(p);
+      expect(html).toContain('type="radio"');
+      expect(html).toContain(controls.rule);
+      expect(html).toContain(controls.prior);
+    }
+    expect(bar(compareHref)).toBe("");
   });
 });

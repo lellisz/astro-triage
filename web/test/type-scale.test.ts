@@ -35,19 +35,30 @@ describe("escala do texto dos graficos SVG", () => {
     .readdirSync(chartDir)
     .filter((f) => f.endsWith(".tsx"))
     .flatMap((f) => {
-      const m = /const VIEW_W = (\d+);/.exec(fs.readFileSync(path.join(chartDir, f), "utf8"));
+      const m = /const (?:VIEW_W|VIEWBOX_W) = (\d+);/.exec(fs.readFileSync(path.join(chartDir, f), "utf8"));
       return m ? [{ file: f, w: Number(m[1]) }] : [];
     });
 
-  it("os 7 graficos declaram VIEW_W", () => {
-    expect(viewWidths.length).toBe(7);
+  it("os 8 graficos declaram a largura do viewBox", () => {
+    expect(viewWidths.length).toBe(8);
   });
 
-  for (const page of ["overview", "galaxies", "compare"]) {
-    it(`${page}: piso e teto do SVG mantem o texto entre ${TEXT_SM}px e ${TEXT_SM * MAX_GROWTH}px`, () => {
-      const rule = ruleOf(read("components", "pages", `${page}.module.css`), ".scroll svg");
+  // RateByBin (720) so existe em /graficos; as demais paginas nao o usam.
+  const GRAFICOS_ONLY = ["RateByBin.tsx"];
+  const others = viewWidths.map((v) => v.file).filter((f) => !GRAFICOS_ONLY.includes(f));
+  const pageCharts: [string, string, string[]][] = [
+    ["overview", ".scroll svg", others],
+    ["galaxies", ".scroll svg", others],
+    ["compare", ".scroll svg", others],
+    ["graficos", ".scroll svg", ["RateByBin.tsx"]],
+    ["graficos", ".scrollCal svg", ["ReliabilityPlot.tsx"]],
+  ];
+
+  for (const [page, selector, files] of pageCharts) {
+    it(`${page} ${selector}: piso e teto do SVG mantem o texto entre ${TEXT_SM}px e ${TEXT_SM * MAX_GROWTH}px`, () => {
+      const rule = ruleOf(read("components", "pages", `${page}.module.css`), selector);
       const [min, max] = [width(rule, "min-width"), width(rule, "max-width")];
-      for (const { file, w } of viewWidths) {
+      for (const { file, w } of viewWidths.filter((v) => files.includes(v.file))) {
         expect(min / w, `${page}: piso em ${file}`).toBeGreaterThanOrEqual(1);
         expect(max / w, `${page}: teto em ${file}`).toBeLessThanOrEqual(MAX_GROWTH);
       }

@@ -1,17 +1,6 @@
-import { NA } from "@/components/kit/NA";
 import { ptPct } from "@/lib/fmt";
-import type { Est, Num } from "@/lib/schema";
+import type { RateRow } from "@/lib/schema";
 import styles from "./graficos.module.css";
-
-type RateRow = {
-  label: string;
-  lo: number | null;
-  hi: number | null;
-  n: Num;
-  errors: Num;
-  rate: Est;
-  below_floor: boolean;
-};
 
 type RateByBinProps = {
   id: string;
@@ -35,13 +24,13 @@ const LABEL_X = PLOT_X + PLOT_W + 12;
 const MARK = 6;
 const CAP = 5;
 const DODGE = 14;
-const NA_W = 44;
-const NA_H = 22;
 const LABEL_GAP = 20;
 const TICK_FRACTIONS = [0, 0.25, 0.5, 0.75, 1];
 const MIN_ROTATE_BINS = 7;
 const FALLBACK_TOP = 1;
-const TOP_MARGIN = 1.1;
+// Tetos redondos: com as quatro divisoes do eixo, cada tick cai em numero redondo.
+// Taxa nunca passa de 100%.
+const NICE_TOPS = [0.02, 0.04, 0.08, 0.1, 0.2, 0.4, 0.5, 0.8, 1];
 
 const reportable = (r: RateRow): boolean => !r.below_floor && r.rate.point !== null;
 
@@ -88,7 +77,8 @@ export function RateByBin({ id, title, series, showCi, yLabel, naText }: RateByB
       if (v !== null) tops.push(v);
     }
   }
-  const top = tops.length > 0 && Math.max(...tops) > 0 ? Math.max(...tops) * TOP_MARGIN : FALLBACK_TOP;
+  const peak = tops.length > 0 ? Math.max(...tops) : 0;
+  const top = peak > 0 ? (NICE_TOPS.find((t) => t >= peak) ?? FALLBACK_TOP) : FALLBACK_TOP;
   const py = (v: number): number => baseY - (v / top) * PLOT_H;
   const cx = (i: number, si: number): number =>
     PLOT_X + band * (i + 0.5) + (si - (series.length - 1) / 2) * DODGE;
@@ -187,11 +177,6 @@ export function RateByBin({ id, title, series, showCi, yLabel, naText }: RateByB
                 <g key={`${r.label}-${i}`} data-row={`${s.key}-${i}`} data-below-floor="">
                   <title>{`${s.label}, ${r.label}: ${r.rate.text || naText}`}</title>
                   <Marker shape={si} cx={x} cy={baseY} hollow />
-                  <foreignObject x={x - NA_W / 2} y={baseY - MARK - 6 - (si + 1) * NA_H} width={NA_W} height={NA_H}>
-                    <div className={styles.naBox}>
-                      <NA text={r.rate.text || naText} />
-                    </div>
-                  </foreignObject>
                 </g>
               );
             })}
