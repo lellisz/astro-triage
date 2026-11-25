@@ -7,6 +7,9 @@ export type DotCIRow = {
   key: string;
   label: string;
   est: Est;
+  // Distingue series sem depender de tom: forma do marcador e traco do intervalo.
+  marker?: "diamond" | "square" | "circle";
+  dashed?: boolean;
 };
 
 type DotCIProps = {
@@ -70,6 +73,20 @@ function wrapLabel(label: string): { lines: string[]; truncated: boolean } {
   return { lines, truncated: truncated || cur.endsWith("…") };
 }
 
+function PointMark({ kind, x, cy }: { kind: "diamond" | "square" | "circle"; x: number; cy: number }) {
+  if (kind === "circle") return <circle className={styles.diamond} data-point="" cx={x} cy={cy} r={DIAMOND} />;
+  if (kind === "square") {
+    return <rect className={styles.diamond} data-point="" x={x - DIAMOND} y={cy - DIAMOND} width={DIAMOND * 2} height={DIAMOND * 2} />;
+  }
+  return (
+    <polygon
+      className={styles.diamond}
+      data-point=""
+      points={`${x},${cy - DIAMOND} ${x + DIAMOND},${cy} ${x},${cy + DIAMOND} ${x - DIAMOND},${cy}`}
+    />
+  );
+}
+
 export function DotCI({ id, title, rows, zeroLine = false, naLabel }: DotCIProps) {
   const plotH = rows.length * ROW_H;
   const viewH = plotH + AXIS_H;
@@ -124,17 +141,13 @@ export function DotCI({ id, title, rows, zeroLine = false, naLabel }: DotCIProps
                 <>
                   <title>{`${r.est.text}. ${r.est.ci_text}`}</title>
                   {lo !== null && hi !== null ? (
-                    <g className={styles.ci} data-ci="">
+                    <g className={r.dashed ? styles.ciDashed : styles.ci} data-ci="">
                       <line x1={x(lo)} x2={x(hi)} y1={cy} y2={cy} />
                       <line x1={x(lo)} x2={x(lo)} y1={cy - CAP} y2={cy + CAP} />
                       <line x1={x(hi)} x2={x(hi)} y1={cy - CAP} y2={cy + CAP} />
                     </g>
                   ) : null}
-                  <polygon
-                    className={styles.diamond}
-                    data-point=""
-                    points={`${x(point)},${cy - DIAMOND} ${x(point) + DIAMOND},${cy} ${x(point)},${cy + DIAMOND} ${x(point) - DIAMOND},${cy}`}
-                  />
+                  <PointMark kind={r.marker ?? "diamond"} x={x(point)} cy={cy} />
                   <text className={styles.value} x={VALUE_X} y={cy} dominantBaseline="central">
                     {r.est.text}
                   </text>

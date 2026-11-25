@@ -6,6 +6,8 @@ export words the same sentence by grey level instead.
 
 from __future__ import annotations
 
+import pandas as pd
+
 from astro_triage.dashboard import fmt
 
 
@@ -23,3 +25,15 @@ def how(by_rate: bool, n_hidden: int, floor: int, hidden_on_map: bool) -> str:
         else f"Anel vazio = {few}, sem taxa confiável."
     )
     return f"quanto mais claro o ponto, maior a taxa de erro da região. {tail}"
+
+
+def missing_note(by_g: pd.DataFrame) -> str:
+    """Same structure as ``missing_note_text``, without the colour key (no web chart highlights a rate)."""
+    gone = by_g[by_g["lo"].isna()]
+    n = int(gone["n"].sum()) if len(gone) else 0
+    if not n:
+        return ""
+    return (
+        f"Faltam {fmt.pt_int(n)} galáxias sem magnitude medida, "
+        "que não entram na parte de brilho."
+    )

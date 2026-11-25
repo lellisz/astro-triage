@@ -172,7 +172,10 @@ export type GalaxyBar = {
 };
 
 export type GalaxyNetwork = {
+  label: string;
   state: CompareState;
+  word: string;
+  diff: Est;
   d: number;
   lo: number;
   hi: number;
@@ -188,15 +191,18 @@ export type Galaxies = Head & {
   verdict: {
     key: "depends_wide" | "depends" | "wide" | "no_difference" | "unavailable";
     text: string;
-    scope_text: string;
+    scope_text: string | null;
   };
   networks: {
     mlp_full: GalaxyNetwork | null;
     ftt_full: GalaxyNetwork | null;
   };
+  power_note: string | null;
+  networks_note: string | null;
   dl_error: string | null;
   fixed_point_text: string;
   error_rows: GalaxyErrorRow[];
+  floor_note: string;
   crossmatch_note: string | null;
   technical: {
     by_g: (GalaxyErrorRow & { reportable: boolean })[];
@@ -216,17 +222,22 @@ type CompareOk = Head & {
   pairs: { net: string; verdict: "tie" | "win"; text: string }[];
   grid: {
     cls: string;
+    cls_label: string;
     net: string;
     state: CompareState;
     word: string;
     d: number;
     lo: number;
     hi: number;
+    diff: Est;
     delta: number | null;
     underpowered: boolean;
   }[];
+  power_note: string | null;
   purity: {
     system: string;
+    reference: boolean;
+    net: string | null;
     label: string;
     low: number;
     median: number;
@@ -241,6 +252,7 @@ type CompareOk = Head & {
     d: number;
     lo: number;
     hi: number;
+    diff: Est;
     text: string;
   }[];
   // No JSON real e uma lista de strings simples (o Apendice A nao fixa o tipo).
@@ -257,6 +269,7 @@ type CompareUnavailable = Head & {
   freeze_exists: boolean;
   pairs: null;
   grid: null;
+  power_note: null;
   purity: null;
   rule_lines: null;
   descriptive: null;

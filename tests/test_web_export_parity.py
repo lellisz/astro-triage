@@ -292,6 +292,15 @@ def assert_parity(rel: D.Release) -> None:
         for k, g in enumerate(grid):
             assert cmp_["grid"][k]["state"] == g.state.value
             assert (cmp_["grid"][k]["cls"], cmp_["grid"][k]["net"]) == (g.cls, g.net)
+    assert "Azul" not in gal["technical"]["missing_note"]
+    nets = [n for n in gal["networks"].values() if n is not None]
+    assert (gal["power_note"] is not None) == any(n["underpowered"] for n in nets)
+    if results is not None:
+        assert (cmp_["power_note"] is not None) == any(g.underpowered for g in grid)
+        assert [p["reference"] for p in cmp_["purity"]].count(True) == 1
+        for p in cmp_["purity"]:
+            assert (p["net"] is None) == p["reference"]
+        assert all(g["cls_label"] for g in cmp_["grid"])
     # method.facts.n_test == method_facts(rel).n_test
     facts = method_model.method_facts(rel)
     assert met["facts"]["n_test"]["text"] == facts.n_test

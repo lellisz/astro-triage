@@ -10,13 +10,7 @@ export default function GalaxiesPage() {
   return (
     <>
       <PageHeader eyebrow={eyebrow} title={title} lead={lead} showStateChip meta={meta} />
-      <GalaxiesView
-        meta={meta}
-        verdict={galaxies.verdict}
-        fixedPointText={galaxies.fixed_point_text}
-        crossmatchNote={galaxies.crossmatch_note}
-        missingNote={galaxies.technical.missing_note}
-      />
+      <GalaxiesView meta={meta} galaxies={galaxies} />
     </>
   );
 }

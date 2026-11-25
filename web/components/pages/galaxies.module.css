@@ -1,0 +1,92 @@
+.context {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.scroll {
+  margin-top: var(--space-3);
+  overflow-x: auto;
+  background:
+    linear-gradient(to right, var(--scroll-cover, var(--surface)) 30%, transparent) left / 2rem 100% no-repeat local,
+    linear-gradient(to left, var(--scroll-cover, var(--surface)) 30%, transparent) right / 2rem 100% no-repeat local,
+    linear-gradient(to right, color-mix(in srgb, var(--border-strong) 70%, transparent), transparent) left / 1.5rem 100% no-repeat scroll,
+    linear-gradient(to left, color-mix(in srgb, var(--border-strong) 70%, transparent), transparent) right / 1.5rem 100% no-repeat scroll;
+}
+
+.scroll svg {
+  min-width: 560px;
+}
+
+.scroll figcaption {
+  overflow-wrap: anywhere;
+}
+
+.nets {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.net {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2) var(--space-4);
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+}
+
+.net strong {
+  color: var(--text-strong);
+}
+
+.tag {
+  padding: 0 var(--space-2);
+  border: 1px dashed var(--border-strong);
+  border-radius: var(--radius-sm);
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
+.notes {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+}
+
+.notes p {
+  color: var(--text-2);
+  font-size: var(--text-sm);
+  max-width: 72ch;
+}
+
+.contextList {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-2);
+  margin: var(--space-3) 0 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
+.tech {
+  --scroll-cover: var(--surface);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-4);
+  margin-top: var(--space-3);
+}
+
+.scroll:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-offset);
+}

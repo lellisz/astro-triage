@@ -188,6 +188,16 @@ Head  = { schema_version: 1, release: string, provisional: true, generated_at: s
 - `texts {title, lead, how_rate, how_rate_hidden, how_count, map_lead, position_note,
   neighbour_note, spread_note}`.
 - Emenda fase 2a (para revisão do owner): how_rate, how_rate_hidden e how_count são gerados pelo web_export em texto neutro, sem nome de cor; o texto do Streamlit (sky_text.how) não muda.
+- Emenda fase 2b (para revisão do owner): galaxies.json technical.missing_note é gerado pelo web_export em texto neutro, sem nome de cor e sem legenda de destaque (nenhum gráfico de /galaxias destaca taxa alta; a frase "Marcador em destaque = taxa acima de ..." foi removida, fica só a contagem de galáxias sem magnitude, vazia se não houver); html_galaxies_tech.missing_note_text não muda.
+- Emenda fase 2b (para revisão do owner): galaxies.json ganha `power_note: string | null` (compare_text.POWER_PHRASE quando alguma rede em networks é underpowered; null caso contrário).
+- Emenda fase 2b (para revisão do owner): galaxies.json ganha `networks_note: string | null` (html_dl.UNAVAILABLE_NOTE quando nenhuma rede tem célula e não há dl_error, como no Streamlit; null caso contrário).
+- Emenda fase 2b (para revisão do owner): galaxies.json networks.{mlp_full,ftt_full} ganha `label: string` (html_dl.system_label).
+- Emenda fase 2b (para revisão do owner): galaxies.json networks.{mlp_full,ftt_full} ganha `word: string` (palavra do veredito, `grid.verdict.word`) e `diff: Est` (`est(d, lo, hi, kind="num", digits=4, signed=True)`: texto e IC da diferença D, para o desenho com linha de zero); `d`, `lo`, `hi` seguem como números.
+- Emenda fase 2b (para revisão do owner): galaxies.json ganha `floor_note: string` (frase com o piso de objetos por faixa, gerada em `pages.py` com `fmt.pt_int`); `verdict.scope_text` passa a ser tipado `string | null` no schema.ts, como o exportador já emitia quando o veredito é indisponível.
+- Emenda fase 2b (para revisão do owner): compare.json ganha `power_note: string | null` (POWER_PHRASE quando algum item de grid é underpowered; null se status != ok).
+- Emenda fase 2b (para revisão do owner): compare.json purity[] ganha `reference: boolean` (system == compare_model.REFERENCE_SYSTEM) e `net: string | null` (nome curto de compare_model.net_name, igual a pairs[].net e grid[].net; null na referência).
+- Emenda fase 2b (para revisão do owner): compare.json grid[] ganha `cls_label: string` (html_dl.class_label, o mesmo rótulo de descriptive[].cls).
+- Emenda fase 2b (para revisão do owner): compare.json grid[] e descriptive[] ganham `diff: Est` (`est(d, lo, hi, kind="num", digits=4, signed=True)`: texto e IC da diferença D por célula, para o forest plot e as tabelas); `d`, `lo`, `hi` seguem como números.
 - `color_cap {rate: number | null, count: number}`.
 - `graticule {meridians: [[x, y], ...][], parallels: [[x, y], ...][], labels[] {x, y, text}}`
   (map units of `data_sky.mollweide`).

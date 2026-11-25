@@ -34,6 +34,45 @@
   padding-left: var(--space-5);
 }
 
+.kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: var(--space-3);
+}
+
+.disclosure,
+.nested {
+  border: 1px solid var(--border-soft);
+  border-radius: var(--radius-sm);
+}
+
+.nested {
+  margin-top: var(--space-2);
+}
+
+.summary {
+  display: flex;
+  align-items: center;
+  min-height: var(--target-min);
+  padding: var(--space-2) var(--space-4);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.summary:focus-visible {
+  outline: var(--focus-outline);
+  outline-offset: var(--focus-offset);
+}
+
+.disclosureBody {
+  padding: 0 var(--space-4) var(--space-4);
+  overflow-wrap: anywhere;
+}
+
+.nested > p {
+  padding: 0 var(--space-4) var(--space-3);
+}
+
 .glossary {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));

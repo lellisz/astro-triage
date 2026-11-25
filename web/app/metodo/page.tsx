@@ -1,8 +1,22 @@
-import { PageHeader } from "@/components/shell/PageHeader";
+import { Kpi } from "@/components/kit/Kpi";
 import { MethodView } from "@/components/pages/MethodView";
+import { PageHeader } from "@/components/shell/PageHeader";
 import { methodLabels as text, pages } from "@/content/labels";
 import { loadPage } from "@/lib/data";
+import type { Cls, Method, Num } from "@/lib/schema";
 import styles from "@/components/pages/method.module.css";
+
+const FACT_KEYS = [
+  "n_test",
+  "n_pixels",
+  "prior_qso",
+  "min_objects",
+  "min_pixels",
+  "n_boot",
+  "completeness",
+] as const satisfies readonly (keyof Method["facts"])[];
+
+const CLASS_KEYS = ["STAR", "GALAXY", "QSO"] as const satisfies readonly Cls[];
 
 function isHttps(url: string): boolean {
   try {
@@ -11,6 +25,8 @@ function isHttps(url: string): boolean {
     return false;
   }
 }
+
+const shown = (n: Num): string => (n.value === null ? text.notAvailable : n.text);
 
 export default function MethodPage() {
   const meta = loadPage("meta");
@@ -37,13 +53,48 @@ export default function MethodPage() {
         <p className={styles.notice}>{method.simple}</p>
       </section>
 
+      <section className={styles.panel} aria-labelledby="fatos">
+        <h2 id="fatos" className={styles.panelTitle}>
+          {text.factsTitle}
+        </h2>
+        <div className={styles.kpis}>
+          {FACT_KEYS.map((key) => (
+            <Kpi key={key} label={text.facts[key]} text={shown(method.facts[key])} />
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.panel} aria-labelledby="mistura">
+        <h2 id="mistura" className={styles.panelTitle}>
+          {text.mixTitle}
+        </h2>
+        <div className={styles.kpis}>
+          {CLASS_KEYS.map((cls) => (
+            <Kpi key={cls} label={text.classes[cls]} text={shown(method.mix[cls])} />
+          ))}
+        </div>
+      </section>
+
+      {method.three_limits.length > 0 ? (
+        <section className={styles.panel} aria-labelledby="tres-limites">
+          <h2 id="tres-limites" className={styles.panelTitle}>
+            {text.limits}
+          </h2>
+          <ul className={styles.list}>
+            {method.three_limits.map((item, i) => (
+              <li key={`${i}-${item}`}>{item}</li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
       <MethodView
         meta={meta}
         technical={{
           reading: method.reading,
           usage: method.usage,
           rule_lines: method.rule_lines,
-          three_limits: method.three_limits,
+          limitations: method.limitations,
         }}
       />
 

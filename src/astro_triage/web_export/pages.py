@@ -38,7 +38,6 @@ from astro_triage.dashboard.charts_base import MODEL_PT
 from astro_triage.dashboard.data_overview_page import PRIOR, PageData, load_page
 from astro_triage.dashboard.data_release import CLASSES, wilson
 from astro_triage.dashboard.html_galaxies import SMALL_RATE
-from astro_triage.dashboard.html_galaxies_tech import missing_note_text
 from astro_triage.dashboard.html_galaxy_prior import VERDICT_SCOPE, verdict_text
 from astro_triage.dashboard.html_system import SEAL_PREFIX
 from astro_triage.dashboard.limits_pt import omit_record_refs, translate
@@ -56,6 +55,7 @@ MAP_DIGITS: Final = 4
 CURVE_POINTS: Final = 37
 EDGE_LON_DEG: Final = 180
 ACCEPTED_STATUS: Final = "Accepted"
+ENSEMBLE_PREFIX: Final = "ens_"
 COMPARE_BLOCKS: Final = (
     "fixed_point",
     "answer_text",
@@ -64,6 +64,7 @@ COMPARE_BLOCKS: Final = (
     "freeze_exists",
     "pairs",
     "grid",
+    "power_note",
     "purity",
     "rule_lines",
     "descriptive",
@@ -557,7 +558,10 @@ def _networks(cells: dict[str, data_dl.ClassCell | None]) -> dict:
             continue
         grid = CM.grid_cell(net, cell)
         out[net] = {
+            "label": HD.system_label(net),
             "state": grid.state.value,
+            "word": grid.verdict.word,
+            "diff": est(cell.d, cell.lo, cell.hi, kind="num", digits=4, signed=True),
             "d": cell.d,
             "lo": cell.lo,
             "hi": cell.hi,
@@ -565,6 +569,11 @@ def _networks(cells: dict[str, data_dl.ClassCell | None]) -> dict:
             "underpowered": grid.underpowered,
         }
     return out
+
+
+def _power_note(underpowered: bool) -> str | None:
+    """The tie is a lack of power, not equivalence: the Streamlit phrase, as plain text."""
+    return CT.POWER_PHRASE if underpowered else None
 
 
 def _error_rate(r: data_galaxy_prior.ErrorRate | None) -> dict:
@@ -626,6 +635,7 @@ def galaxies(rel: D.Release) -> dict:
     floor = int(rel.meta["floor"]["min_objects"])
     note = data_galaxy_prior.crossmatch_note(rel)
     scope = f"{VERDICT_SCOPE} {ui_state.RULE_LABEL[ui_state.Rule.MATCHED]}."
+    networks = _networks(cells)
     return {
         **head(rel.name, "galaxies"),
         "blocks": {
@@ -638,17 +648,29 @@ def galaxies(rel: D.Release) -> dict:
             "text": verdict_text(key),
             "scope_text": None if unavailable else scope,
         },
-        "networks": _networks(cells),
+        "networks": networks,
+        "power_note": _power_note(
+            any(n is not None and n["underpowered"] for n in networks.values())
+        ),
+        "networks_note": (
+            HD.UNAVAILABLE_NOTE
+            if dl_error is None and all(n is None for n in networks.values())
+            else None
+        ),
         "dl_error": dl_error,
         "fixed_point_text": CT.fixed_point_line(
             LINE_LABEL, VR.RULE_PRIOR, str(VR.RULE_COMPLETENESS)
         ),
         "error_rows": _error_rows(rel, by_g, by_z),
+        "floor_note": (
+            f"Faixas com menos de {fmt.pt_int(floor)} objetos não têm taxa "
+            "confiável e aparecem como n/a."
+        ),
         "crossmatch_note": translate(note)[0] if note else None,
         "technical": {
             "by_g": _bands_table(by_g, floor),
             "by_z": _bands_table(by_z, floor),
-            "missing_note": missing_note_text(by_g),
+            "missing_note": web_text.missing_note(by_g),
         },
     }
 
@@ -682,20 +704,34 @@ def _compare_blocks(rel: D.Release, results: dict) -> dict:
         "grid": [
             {
                 "cls": g.cls,
+                "cls_label": HD.class_label(g.cls),
                 "net": g.net,
                 "state": g.state.value,
                 "word": g.verdict.word,
                 "d": g.verdict.d,
                 "lo": None if g.verdict.ci is None else g.verdict.ci.lo,
                 "hi": None if g.verdict.ci is None else g.verdict.ci.hi,
+                "diff": est(
+                    g.verdict.d,
+                    None if g.verdict.ci is None else g.verdict.ci.lo,
+                    None if g.verdict.ci is None else g.verdict.ci.hi,
+                    kind="num",
+                    digits=4,
+                    signed=True,
+                ),
                 "delta": g.verdict.delta,
                 "underpowered": g.underpowered,
             }
             for g in model.grid
         ],
+        "power_note": _power_note(any(g.underpowered for g in model.grid)),
         "purity": [
             {
                 "system": system,
+                "reference": system == CM.REFERENCE_SYSTEM,
+                "net": None
+                if system == CM.REFERENCE_SYSTEM
+                else CM.net_name(system.removeprefix(ENSEMBLE_PREFIX)),
                 "label": CT.REFERENCE_NAME
                 if system == CM.REFERENCE_SYSTEM
                 else HD.system_label(system),
@@ -715,6 +751,7 @@ def _compare_blocks(rel: D.Release, results: dict) -> dict:
                 "d": c.d,
                 "lo": c.lo,
                 "hi": c.hi,
+                "diff": est(c.d, c.lo, c.hi, kind="num", digits=4, signed=True),
                 "text": (
                     f"D {HD.signed(c.d)}; {fmt.pt_ci_label()} {HD.interval(c.lo, c.hi)}; "
                     f"δ {HD.plain(c.delta)}"
