@@ -316,6 +316,86 @@ export type Method = Head & {
   sources: string[];
 };
 
+export type RateRow = {
+  label: string;
+  lo: number | null;
+  hi: number | null;
+  n: Num;
+  errors: Num;
+  rate: Est;
+  below_floor: boolean;
+};
+
+export type CalBin = {
+  p_mean: Num;
+  freq: Est;
+  n: Num;
+  below_floor: boolean;
+  raw_p_mean: number | null;
+  raw_freq: number | null;
+};
+
+export type GraficosTick = { value: number; text: string };
+
+export type Graficos = Head & {
+  floor: number;
+  model_label: string;
+  scope_text: string;
+  floor_text: string;
+  calibration: {
+    n_bins: number;
+    networks_note: string;
+    series: { cls: Cls; label: string; bins: CalBin[] }[];
+  };
+  error_by_g: {
+    missing_note: string;
+    series: { cls: Cls; label: string; rows: RateRow[]; missing: Num }[];
+  };
+  error_by_z: {
+    star_note: string;
+    series: { cls: "GALAXY" | "QSO"; label: string; rows: RateRow[]; missing: Num }[];
+  };
+  confusion: {
+    classes: { cls: Cls; label: string }[];
+    rows: {
+      true: Cls;
+      n: Num;
+      cells: { pred: Cls; n: Num; share: Est; diagonal: boolean; below_floor: boolean }[];
+    }[];
+  };
+  ece: {
+    status: "ok" | "unavailable";
+    note: string;
+    rows: {
+      system: string;
+      label: string;
+      cls: Cls;
+      mean: Num;
+      low: number;
+      high: number;
+      detail_text: string;
+    }[];
+  } | null;
+  cmd: {
+    g_edges: number[];
+    c_edges: number[];
+    g_ticks: GraficosTick[];
+    c_ticks: GraficosTick[];
+    cells: {
+      gi: number;
+      ci: number;
+      n: Num;
+      errors: Num;
+      rate: Est;
+      below_floor: boolean;
+    }[];
+    cap: { rate: number | null; count: number | null };
+    n_missing: Num;
+    n_outside: Num;
+    note: string;
+  } | null;
+};
+
 export type FmtSample = { fn: string; args: (number | boolean)[]; text: string };
 
 export type PageData = {
@@ -325,6 +405,7 @@ export type PageData = {
   galaxies: Galaxies;
   compare: Compare;
   method: Method;
+  graficos: Graficos;
   fmt_samples: FmtSample[];
 };
 
