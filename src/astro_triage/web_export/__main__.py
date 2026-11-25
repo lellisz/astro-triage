@@ -1,6 +1,6 @@
 """CLI: ``python -m astro_triage.web_export --release <name> --out <dir>``.
 
-Writes the seven JSON files of ADR 0008 into ``<out>/<release>/``. The data root is only
+Writes the eight JSON files of ADR 0008 into ``<out>/<release>/``. The data root is only
 read; the files are written to a temporary folder inside ``<out>`` and moved into place once
 all of them exist, so a failed run never leaves a half export.
 """
@@ -20,7 +20,7 @@ from typing import Final
 
 from astro_triage.dashboard import data as D
 from astro_triage.dashboard import paths
-from astro_triage.web_export import pages
+from astro_triage.web_export import graficos, pages
 from astro_triage.web_export.types import clean
 
 RELEASE_NAME: Final = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.-]*")
@@ -85,6 +85,7 @@ def _documents(rel: D.Release) -> dict[str, object]:
         "compare": lambda: pages.compare(rel),
         "method": lambda: pages.method(rel),
         "fmt_samples": pages.fmt_samples,
+        "graficos": lambda: graficos.graficos(rel),
     }
     docs = {}
     for name, build in builders.items():
