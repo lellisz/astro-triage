@@ -52,7 +52,19 @@ export type OverviewRow = {
   partial_notice: string | null;
 };
 
+export type OverviewHeadline = {
+  key: "no_detectable_difference" | "network_wins" | "unavailable";
+  question: string;
+  title: string;
+  lead: string;
+  caveat: string | null;
+  pairs: { net: string; text: string }[];
+  contrast: { accuracy: Num; qso_purity: Est; text: string };
+  summary_en: string;
+};
+
 export type Overview = Head & {
+  headline: OverviewHeadline;
   rows: OverviewRow[];
   accuracy_note: string;
   technical: {
@@ -202,6 +214,7 @@ export type Galaxies = Head & {
   dl_error: string | null;
   fixed_point_text: string;
   error_rows: GalaxyErrorRow[];
+  error_rows_note: string;
   floor_note: string;
   crossmatch_note: string | null;
   technical: {

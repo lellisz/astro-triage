@@ -174,6 +174,7 @@ function Body({ props, state }: { props: Props; state: UiState }) {
             partialTag={chartLabels.partialTag}
           />
         </Scroller>
+        <p className={galaxiesStyles.errorsNote}>{g.error_rows_note}</p>
       </Panel>
 
       <Panel id="gal-limits" title={L.limitsTitle}>

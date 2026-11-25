@@ -332,6 +332,68 @@ def _technical(rel: D.Release) -> dict:
     }
 
 
+def _headline(rel: D.Release) -> dict:
+    """The answer to the central question, from the Comparação model; no network, no answer."""
+    model: CM.CompareModel | None = None
+    lead = HD.UNAVAILABLE_NOTE
+    try:
+        results = data_dl.load_results_dl(rel)
+        if results is not None:
+            model = CM.build(results)
+    except data_dl.DlDataError as exc:
+        lead = str(exc)
+    except (ValueError, OSError):
+        lead = UNREADABLE_DL
+    base = {"question": web_text.QUESTION, "caveat": None, "pairs": []}
+    if model is None or not model.pairs:
+        return {
+            **base,
+            "key": web_text.KEY_NA,
+            "title": web_text.TITLES[web_text.KEY_NA],
+            "lead": lead,
+        }
+    wins = [n for n, v in model.pairs if v is data_dl.PairVerdict.WIN]
+    key = web_text.KEY_WIN if wins else web_text.KEY_TIE
+    return {
+        **base,
+        "key": key,
+        "title": web_text.TITLES[key],
+        "lead": web_text.headline_lead(key, [n for n, _ in model.pairs], wins),
+        "caveat": None if wins else web_text.headline_caveat(CT.POWER_PHRASE),
+        "pairs": [
+            {
+                "net": net,
+                "text": CT.PAIR_WORD[v]
+                if v is data_dl.PairVerdict.WIN
+                else web_text.PAIR_NO_DIFF,
+            }
+            for net, v in model.pairs
+        ],
+    }
+
+
+def _below(a: float | None, b: float | None) -> bool:
+    """True when both values exist and ``a`` is under ``b``; the caller words the contrast."""
+    return a is not None and b is not None and a < b
+
+
+def _contrast(rows: list[dict]) -> dict:
+    shipped = next(
+        r
+        for r in rows
+        if (r["rule"], r["prior"]) == (ui_state.Rule.SHIPPED.value, ui_state.SHIPPED_PRIOR)
+    )
+    return {
+        "accuracy": shipped["accuracy"],
+        "qso_purity": shipped["purity"],
+        "text": web_text.contrast_text(
+            shipped["accuracy"]["text"],
+            shipped["purity"]["text"],
+            purity_lower=_below(shipped["purity"]["point"], shipped["accuracy"]["value"]),
+        ),
+    }
+
+
 def overview(rel: D.Release, pixels: pd.DataFrame) -> dict:
     """overview.json: the four QSO rows and the technical blocks.
 
@@ -339,9 +401,15 @@ def overview(rel: D.Release, pixels: pd.DataFrame) -> dict:
     count from the headline, so it is not read here.
     """
     del pixels
+    rows = _rows(rel)
     return {
         **head(rel.name, "overview"),
-        "rows": _rows(rel),
+        "headline": {
+            **_headline(rel),
+            "contrast": _contrast(rows),
+            "summary_en": web_text.SUMMARY_EN,
+        },
+        "rows": rows,
         "accuracy_note": overview_text.ACCURACY_NOTE,
         "technical": _technical(rel),
     }
@@ -662,6 +730,7 @@ def galaxies(rel: D.Release) -> dict:
             LINE_LABEL, VR.RULE_PRIOR, str(VR.RULE_COMPLETENESS)
         ),
         "error_rows": _error_rows(rel, by_g, by_z),
+        "error_rows_note": web_text.ERROR_ROWS_NOTE,
         "floor_note": (
             f"Faixas com menos de {fmt.pt_int(floor)} objetos não têm taxa "
             "confiável e aparecem como n/a."

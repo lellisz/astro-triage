@@ -128,3 +128,128 @@
   outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
+
+.headline {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-5);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius);
+  background: var(--surface);
+}
+
+.question {
+  color: var(--text-2);
+  font-size: var(--text-sm);
+  max-width: 72ch;
+}
+
+.title {
+  margin: 0;
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+  overflow-wrap: anywhere;
+}
+
+.lead {
+  color: var(--text);
+  font-size: var(--text-md);
+  max-width: 72ch;
+}
+
+.caveat {
+  padding: var(--space-3) var(--space-4);
+  border-left: 3px solid var(--border-strong);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: var(--text-base);
+  max-width: 72ch;
+}
+
+.pairs {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: var(--text);
+  font-size: var(--text-base);
+}
+
+.pairs strong {
+  color: var(--text-strong);
+}
+
+.contrast {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-3);
+}
+
+.figure {
+  display: grid;
+  gap: var(--space-1);
+  min-width: 0;
+  padding: var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+}
+
+.figureLabel {
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
+.figureValue {
+  color: var(--text-strong);
+  font-family: var(--font-display);
+  font-size: var(--text-3xl);
+  line-height: var(--leading-tight);
+}
+
+.contrastText {
+  color: var(--text);
+  font-size: var(--text-base);
+  max-width: 72ch;
+}
+
+.summaryEn {
+  color: var(--text-2);
+  font-size: var(--text-sm);
+  max-width: 72ch;
+}
+
+.techLink {
+  display: inline-flex;
+  align-items: center;
+  justify-self: start;
+  min-height: var(--target-min);
+  padding: 0 var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-strong);
+  text-decoration: none;
+}
+
+.techLink:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-2);
+}
+
+@media (max-width: 640px) {
+  .headline {
+    padding: var(--space-4);
+  }
+
+  .title {
+    font-size: var(--text-2xl);
+  }
+
+  .figureValue {
+    font-size: var(--text-2xl);
+  }
+}

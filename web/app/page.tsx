@@ -12,6 +12,7 @@ export default function OverviewPage() {
       <PageHeader eyebrow={eyebrow} title={title} lead={lead} showStateChip meta={meta} />
       <OverviewView
         meta={meta}
+        headline={overview.headline}
         rows={overview.rows}
         accuracyNote={overview.accuracy_note}
         technical={overview.technical}

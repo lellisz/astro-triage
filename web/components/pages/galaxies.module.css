@@ -92,3 +92,10 @@
   outline: var(--focus-outline);
   outline-offset: var(--focus-offset);
 }
+
+.errorsNote {
+  margin-top: var(--space-3);
+  color: var(--text-2);
+  font-size: var(--text-sm);
+  max-width: 72ch;
+}

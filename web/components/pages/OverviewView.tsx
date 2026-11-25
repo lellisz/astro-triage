@@ -10,20 +10,70 @@ import { Panel } from "@/components/kit/Panel";
 import { GaiaFigure } from "@/components/media/GaiaFigure";
 import { OverviewTechnical } from "./OverviewTechnical";
 import { chartLabels, overviewLabels as L, routes } from "@/content/labels";
-import type { Meta, Overview } from "@/lib/schema";
+import type { Meta, Overview, OverviewHeadline } from "@/lib/schema";
 import { readState, withState, type UiState } from "@/lib/ui-state";
 import overviewStyles from "./overview.module.css";
 import styles from "./page.module.css";
 
 type Props = {
   meta: Meta;
+  headline?: OverviewHeadline;
   rows: Overview["rows"];
   accuracyNote: string;
   technical: Overview["technical"];
 };
 
+function Headline({ h, meta, state }: { h: OverviewHeadline; meta: Meta; state: UiState }) {
+  const unavailable = h.key === "unavailable";
+  const o = overviewStyles;
+  return (
+    <section className={o.headline} aria-labelledby="ov-headline-title" data-key={h.key}>
+      <p className={o.question}>{h.question}</p>
+      <h2 id="ov-headline-title" className={o.title}>
+        {h.title}
+      </h2>
+      <p className={o.lead}>{h.lead}</p>
+      {h.caveat ? <p className={o.caveat}>{h.caveat}</p> : null}
+      {unavailable ? null : (
+        <>
+          <ul className={o.pairs}>
+            {h.pairs.map((p) => (
+              <li key={p.net}>
+                <strong>{p.net}</strong>: {p.text}
+              </li>
+            ))}
+          </ul>
+          <div className={o.contrast} role="group" aria-label={L.contrastRegion}>
+            <p className={o.figure}>
+              <span className={o.figureLabel}>{L.contrastAccuracy}</span>
+              <span className={o.figureValue}>{h.contrast.accuracy.text}</span>
+            </p>
+            <p className={o.figure}>
+              <span className={o.figureLabel}>{L.contrastPurity}</span>
+              <span className={o.figureValue}>{h.contrast.qso_purity.text}</span>
+            </p>
+          </div>
+          <p className={o.contrastText}>{h.contrast.text}</p>
+        </>
+      )}
+      <p className={o.summaryEn} lang="en">
+        {h.summary_en}
+      </p>
+      {state.tech ? null : (
+        <Link
+          className={o.techLink}
+          href={withState("/", { ...state, tech: true }, meta.release)}
+          aria-label={L.techLinkAria}
+        >
+          {L.techLink}
+        </Link>
+      )}
+    </section>
+  );
+}
+
 function Body({ props, state }: { props: Props; state: UiState }) {
-  const { meta, rows, accuracyNote, technical } = props;
+  const { meta, headline, rows, accuracyNote, technical } = props;
   const row = rows.find((r) => r.rule === state.rule && r.prior === state.prior);
   const partialRow = rows.find((r) => r.partial && r.partial_notice);
   const chartRows = (pick: "purity" | "completeness"): HBarCIRow[] =>
@@ -46,6 +96,7 @@ function Body({ props, state }: { props: Props; state: UiState }) {
 
   return (
     <div className={styles.stack}>
+      {headline ? <Headline h={headline} meta={meta} state={state} /> : null}
       {row ? (
         <>
           <div className={overviewStyles.context}>
