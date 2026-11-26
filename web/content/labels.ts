@@ -73,7 +73,6 @@ export const acessibilidade = {
 export const kitLabels = {
   notAvailable: "não disponível",
   tableRegion: "Tabela rolável",
-  creditPrefix: "Crédito",
 };
 
 export const footer = {
@@ -93,8 +92,11 @@ export const overviewLabels = {
   chartsRegion: "Gráficos de pureza e completude, rolável na horizontal",
   shortcutsTitle: "Continue explorando",
   shortcutsSub: "Outras páginas, mantendo a regra e o prior escolhidos",
-  gaiaTitle: "Distribuição no céu",
-  gaiaSub: "Referência astronômica real; não é saída do classificador",
+  skyTitle: "Onde os erros aparecem no céu",
+  skySub: "Versão pequena do mapa da página do céu",
+  skyAria: "Mapa do céu inteiro: cada ponto é uma região com taxa de erro",
+  skyCaption:
+    "Cada ponto é uma região do céu com objetos suficientes para a conta. Quanto mais forte a cor, maior a taxa de erro. Regiões com poucos objetos não aparecem.",
   contrastRegion: "Acerto geral contra pureza de quasar",
   contrastAccuracy: "Acerto geral",
   contrastPurity: "Pureza de quasar na regra como entregue",
@@ -164,8 +166,6 @@ export const skyLabels = {
   modeRateBtn: "Taxa de erro",
   modeCountBtn: "Quantidade de objetos",
   hideBelow: "Ocultar regiões abaixo do piso",
-  contextTitle: "Imagem de contexto",
-  contextSub: "O céu inteiro visto pelo Gaia, apenas para referência visual.",
   topTitle: "Regiões com as maiores taxas de erro",
   bandsTitle: "Faixas de latitude galáctica",
   colPosition: "Posição",

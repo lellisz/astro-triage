@@ -5,7 +5,6 @@ import { useSearchParams } from "next/navigation";
 import { Kpi } from "@/components/kit/Kpi";
 import { Panel } from "@/components/kit/Panel";
 import { DataTable, type DataColumn } from "@/components/kit/DataTable";
-import { GaiaFigure } from "@/components/media/GaiaFigure";
 import { MapLegend } from "@/components/sky/MapLegend";
 import { MollweideMap, isSaturated, type MapMode } from "@/components/sky/MollweideMap";
 import { skyLabels as L, skyMapLabels } from "@/content/labels";
@@ -127,10 +126,6 @@ function Body({ props, tech }: { props: Props; tech: boolean }) {
           <p>{texts.neighbour_note}</p>
           <p>{texts.spread_note}</p>
         </div>
-      </Panel>
-
-      <Panel id="sky-context" title={L.contextTitle} subtitle={L.contextSub}>
-        <GaiaFigure variant="split" />
       </Panel>
 
       {tech ? (

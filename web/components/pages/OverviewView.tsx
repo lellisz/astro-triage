@@ -7,10 +7,10 @@ import { HBarCI, type HBarCIRow } from "@/components/charts/HBarCI";
 import { ContextStrip } from "@/components/kit/ContextStrip";
 import { Kpi } from "@/components/kit/Kpi";
 import { Panel } from "@/components/kit/Panel";
-import { GaiaFigure } from "@/components/media/GaiaFigure";
+import { SkyThumb } from "@/components/sky/SkyThumb";
 import { OverviewTechnical } from "./OverviewTechnical";
 import { chartLabels, overviewLabels as L, routes } from "@/content/labels";
-import type { Meta, Overview, OverviewHeadline } from "@/lib/schema";
+import type { Meta, Overview, OverviewHeadline, Sky } from "@/lib/schema";
 import { readState, withState, type UiState } from "@/lib/ui-state";
 import overviewStyles from "./overview.module.css";
 import styles from "./page.module.css";
@@ -21,6 +21,7 @@ type Props = {
   rows: Overview["rows"];
   accuracyNote: string;
   technical: Overview["technical"];
+  sky?: Sky;
 };
 
 function Headline({ h, meta, state }: { h: OverviewHeadline; meta: Meta; state: UiState }) {
@@ -73,7 +74,7 @@ function Headline({ h, meta, state }: { h: OverviewHeadline; meta: Meta; state: 
 }
 
 function Body({ props, state }: { props: Props; state: UiState }) {
-  const { meta, headline, rows, accuracyNote, technical } = props;
+  const { meta, headline, rows, accuracyNote, technical, sky } = props;
   const row = rows.find((r) => r.rule === state.rule && r.prior === state.prior);
   const partialRow = rows.find((r) => r.partial && r.partial_notice);
   const chartRows = (pick: "purity" | "completeness"): HBarCIRow[] =>
@@ -151,9 +152,17 @@ function Body({ props, state }: { props: Props; state: UiState }) {
         </Panel>
         </div>
         <div className={overviewStyles.side}>
-          <Panel id="ov-gaia" title={L.gaiaTitle} subtitle={L.gaiaSub}>
-            <GaiaFigure />
-          </Panel>
+          {sky ? (
+            <Panel id="ov-sky" title={L.skyTitle} subtitle={L.skySub}>
+              <SkyThumb
+                graticule={sky.graticule}
+                regions={sky.regions}
+                colorCap={sky.color_cap}
+                aria={L.skyAria}
+                caption={L.skyCaption}
+              />
+            </Panel>
+          ) : null}
           <Panel id="ov-links" title={L.shortcutsTitle} subtitle={L.shortcutsSub}>
             <ul className={overviewStyles.shortcuts}>
               {shortcuts.map((r) => (

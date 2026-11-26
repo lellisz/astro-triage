@@ -4,7 +4,7 @@ import { useState } from "react";
 import type { Sky, SkyRegion } from "@/lib/schema";
 import type { SkyMapLabels } from "@/content/labels";
 import { RegionTooltip } from "./RegionTooltip";
-import { MIN_OPACITY } from "./scale";
+import { VIEW_H, VIEW_W, VIEW_X, VIEW_Y, opacityFor, points } from "./scale";
 import styles from "./sky.module.css";
 
 export type MapMode = "rate" | "count";
@@ -21,13 +21,8 @@ export type MollweideMapProps = {
   summary: string;
 };
 
-// Constantes de desenho (nao sao dado): moldura de tela em unidades de mapa e
-// raio do marcador. A unica transformacao aplicada as coordenadas exportadas e
-// y_svg = -y, porque o SVG cresce para baixo.
-const VIEW_X = -3.35;
-const VIEW_Y = -1.52;
-const VIEW_W = 6.7;
-const VIEW_H = 3.04;
+// Constantes de desenho (nao sao dado): raio do marcador. A moldura e a unica
+// transformacao das coordenadas (y_svg = -y) ficam em scale.ts.
 const DOT_RADIUS = 0.035;
 // Deslocamentos de tela dos rotulos: latitude fora da borda esquerda, longitude
 // logo abaixo do equador.
@@ -40,12 +35,6 @@ function regionValue(region: SkyRegion, mode: MapMode): number | null {
 
 function capFor(colorCap: Sky["color_cap"], mode: MapMode): number | null {
   return mode === "rate" ? colorCap.rate : colorCap.count;
-}
-
-function opacityFor(value: number | null, cap: number | null): number {
-  if (value === null || cap === null || cap <= 0) return MIN_OPACITY;
-  const t = Math.min(Math.max(value / cap, 0), 1);
-  return MIN_OPACITY + (1 - MIN_OPACITY) * t;
 }
 
 // Ha saturacao quando alguma regiao desenhada com valor passa do teto da escala.
@@ -63,9 +52,6 @@ export function isSaturated(
     return v !== null && v > cap;
   });
 }
-
-const points = (line: [number, number][]): string =>
-  line.map(([x, y]) => `${x},${-y}`).join(" ");
 
 export function MollweideMap({
   regions,

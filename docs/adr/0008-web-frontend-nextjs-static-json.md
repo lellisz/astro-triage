@@ -98,7 +98,7 @@ the web side, one CI job, and a dependency update every few months.
 
 | Risk | Mitigation | Owner |
 |---|---|---|
-| **Data and image licences.** Publishing aggregates derived from Gaia DR3 and SDSS, and three Gaia sky images converted to grey, may carry attribution or share-alike terms. The provenance of the three images is "provided by the user" (prototype brief), not a cited source. | `researcher` confirms the Gaia DR3, SDSS and ESA image terms and the exact credit lines **before** task W8 and any upload. Images stay out of the build until the source URL and licence are recorded in `web/public/gaia/CREDITS.md`. Footer carries the data acknowledgements. | researcher, owner |
+| **Data and image licences.** Publishing aggregates derived from Gaia DR3 and SDSS may carry attribution or share-alike terms. Amendment 2026-11-26 (audit SEC-01, owner decision): the site uses no third-party image; the Gaia sky images were removed and replaced by own SVG figures drawn from the reportable regions of `sky.json`. | `researcher` confirms the Gaia DR3 and SDSS terms and the exact credit lines. A test fails if any raster image (png, jpg, jpeg, webp, gif, avif) exists in `web/public`. Footer carries the data acknowledgements. | researcher, owner |
 | **Font licence.** Instrument Serif and Inter are redistributed without a licence file (none in the repo today). | Ship `OFL.txt` next to the fonts in `web/app/fonts/`; `researcher` confirms the licence. | W3 |
 | **Numeric parity.** The web shows a number that differs from Streamlit. | Section 6. | W2, W9 |
 | **Versioning by release.** A JSON from one release rendered with code expecting another schema. | `schema_version` and `release` in every file; the build fails on a mismatch or a missing file. | W2, W3 |
@@ -376,21 +376,18 @@ web/
     fmt.ts                          Intl pt-BR formatting for axis ticks only
   content/
     labels.ts                       static pt-BR headings and nav labels; no digits
-    images.ts                       the 3 Gaia images: src, alt, caption, credit
   components/
     shell/   Shell, TopNav, StateControls, ProvisionalSeal, PageHeader, Footer
     kit/     Panel, Kpi, HBarCI, IntervalStrip, VerdictCard, DataTable, Note, Details, NA
     charts/  DotCI (forest plot), RateBands, ReliabilityPlot, HistogramPair
-    sky/     MollweideMap, MapLegend, RegionTooltip
-    media/   GaiaFigure
-  public/gaia/                      gaia-skymap-monochrome.png, gaia-galactic-plane.png,
-                                    gaia-magellanic-clouds.png, CREDITS.md (source URL, licence)
+    sky/     MollweideMap, MapLegend, RegionTooltip, SkyThumb
+  public/                           no raster image (guarded by a test)
 ```
 
-Placement of the three images (each with a visible caption that says it is a reference image, not
-classifier output, and the credit line): `gaia-skymap-monochrome.png` on Visão geral (side panel)
-and Mapa do céu (context panel under the map); `gaia-galactic-plane.png` and
-`gaia-magellanic-clouds.png` on Galáxias (reference gallery).
+Own figure, no third-party image (amendment 2026-11-26): Visão geral shows a compact static SVG sky
+map (`SkyThumb`) drawn from the reportable regions of `sky.json` (not below the floor, rate not
+null), with a short pt-BR caption from `labels.ts`. Mapa do céu has no context image: its own map is
+the figure.
 
 Key specs:
 
@@ -470,7 +467,7 @@ Pages (each a server component reading its JSON, client islands only for control
 | W5 | Mapa do céu | coder | W3 | Circle count equals regions; below-floor rings hollow in rate mode; band boundaries text from JSON; technical tables only with `tecnico=1` |
 | W6 | Galáxias (without images) | coder | W3 | P1/P2/P3 for both rules; P3 partial tag; verdict text from JSON; error rows n/a below floor |
 | W7 | Comparação com DL | coder | W3 | Grid cells equal compare.grid; status unavailable renders "não disponível" with no numbers; rule chip hidden |
-| W8 | Método + Gaia images on Visão geral, Céu, Galáxias | coder | W3, W0 | Every image has alt, caption and credit from `content/images.ts`; `public/gaia/CREDITS.md` names source URL and licence |
+| W8 | Método + own sky figure on Visão geral (no third-party image) | coder | W3, W0 | The figure is SVG from `sky.json` with an accessible name and caption from `labels.ts`; `web/public` has no raster image |
 | W9 | Cross-page verification: seal on 5 routes, state kept across navigation, digit trace, "ADR" sweep, 1440 and 390 px screenshots for the owner | tester, reviewer, security | W4..W8 | All checks green; reviewer and security without BLOCKER or MAJOR; owner approves screenshots |
 | W10 | CI job for `web/` against fixtures | devops | W9 | CI green on a branch; job never needs `data/` |
 | W11 | Vercel preview deploy (CLI, prebuilt, from the owner's machine) | devops | W10 | **PENDING owner approval (upload).** Preview URL shows the seal and the right release |

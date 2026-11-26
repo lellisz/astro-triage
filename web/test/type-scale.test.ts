@@ -80,7 +80,7 @@ describe("escala do texto dos graficos SVG", () => {
   it("mapa Mollweide: rotulo do grafico entre o token e o teto", () => {
     const sky = read("components", "sky", "sky.module.css");
     const label = Number(/font-size:\s*(\d*\.?\d+)px/.exec(ruleOf(sky, ".gratLat,\n.gratLon"))![1]);
-    const viewW = Number(/const VIEW_W = ([\d.]+);/.exec(read("components", "sky", "MollweideMap.tsx"))![1]);
+    const viewW = Number(/const VIEW_W = ([\d.]+);/.exec(read("components", "sky", "scale.ts"))![1]);
     const wrap = ruleOf(sky, ".wrap");
     const at = (px: number) => (label * px) / viewW;
     expect(at(width(wrap, "min-width"))).toBeGreaterThanOrEqual(TEXT_SM);

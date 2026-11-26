@@ -59,6 +59,23 @@
   cursor: pointer;
 }
 
+.dotStatic {
+  fill: var(--chart-1);
+  stroke: var(--text-3);
+  stroke-width: 0.75;
+  vector-effect: non-scaling-stroke;
+}
+
+.thumb {
+  margin: 0;
+}
+
+.thumbCaption {
+  margin-top: var(--space-2);
+  color: var(--text-2);
+  font-size: var(--text-sm);
+}
+
 .dotRing {
   fill: none;
   pointer-events: all;

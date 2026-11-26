@@ -7,7 +7,6 @@ import { DotCI } from "@/components/charts/DotCI";
 import { HBarCI, type HBarCIRow } from "@/components/charts/HBarCI";
 import { DataTable } from "@/components/kit/DataTable";
 import { NA } from "@/components/kit/NA";
-import { GaiaFigure } from "@/components/media/GaiaFigure";
 import { OverviewTechnical } from "@/components/pages/OverviewTechnical";
 import { OverviewView } from "@/components/pages/OverviewView";
 import { SkyView } from "@/components/pages/SkyView";
@@ -174,14 +173,18 @@ describe("A3 Visao geral", () => {
     }
   });
 
-  it("GaiaFigure: alt, aviso de nao-classificador e credito", () => {
-    const html = render("");
-    expect(html.match(/<img[^>]*\balt="([^"]+)"/)?.[1].length).toBeGreaterThan(0);
-    const cap = html.match(/<img[^>]*>\s*<figcaption[^>]*>([\s\S]*?)<\/figcaption>/)![1];
-    expect(cap).toContain("não representa a saída do classificador");
-    expect(cap).toContain("ESA/Gaia/DPAC");
-    const direct = renderToStaticMarkup(<GaiaFigure />);
-    expect(direct).toContain("ESA/Gaia/DPAC");
+  it("mapa proprio do ceu: so regioes reportaveis, sem <img, com legenda", () => {
+    nav.search = "";
+    const html = renderToStaticMarkup(<OverviewView {...props} sky={sky} />);
+    const fig = html.match(/<figure class="[^"]*thumb[^"]*">[\s\S]*?<\/figure>/)![0];
+    const reportable = sky.regions.filter((r) => !r.below_floor && r.rate !== null).length;
+    expect(reportable).toBeGreaterThan(0);
+    expect(count(fig, /<circle/g)).toBe(reportable);
+    expect(fig).not.toContain("<img");
+    expect(fig).toContain(escapeHtml(overviewLabels.skyAria));
+    expect(fig).toContain(escapeHtml(overviewLabels.skyCaption));
+    expect(render("")).not.toContain('id="ov-sky"');
+    expect(html).toContain('id="ov-sky"');
   });
 
   it("sem tecnico nao ha conteudo tecnico; com tecnico=1 ele aparece", () => {

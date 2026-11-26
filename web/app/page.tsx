@@ -6,6 +6,7 @@ import { loadPage } from "@/lib/data";
 export default function OverviewPage() {
   const meta = loadPage("meta");
   const overview = loadPage("overview");
+  const sky = loadPage("sky");
   const { eyebrow, title, lead } = pages.overview;
   return (
     <>
@@ -16,6 +17,7 @@ export default function OverviewPage() {
         rows={overview.rows}
         accuracyNote={overview.accuracy_note}
         technical={overview.technical}
+        sky={sky}
       />
     </>
   );

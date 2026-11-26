@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import os from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
 
@@ -17,7 +18,14 @@ function walk(dir: string, exts: string[]): string[] {
   return res;
 }
 
-const stripCssComments = (s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
+const RASTER = /\.(png|jpe?g|webp|gif|avif)$/i;
+const rasterIn = (dir: string): string[] =>
+  walk(dir, [""])
+    .filter((f) => RASTER.test(f))
+    .map((f) => path.relative(dir, f).split(path.sep).join("/"))
+    .sort();
+
+const stripCssComments =(s: string) => s.replace(/\/\*[\s\S]*?\*\//g, "");
 const stripTsComments = (s: string) =>
   s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/(^|[^:])\/\/.*$/gm, "$1");
 
@@ -210,17 +218,17 @@ describe("saida estatica (web/out)", () => {
 // ---- P2-T9: invariantes estaticos adicionais (A8, A9, A11) ----
 
 const rel = (f: string) => path.relative(WEB, f).split(path.sep).join("/");
-const COMPONENT_DIRS = ["charts", "sky", "kit", "media", "pages"];
+const COMPONENT_DIRS = ["charts", "sky", "kit", "pages"];
 const componentTsx = COMPONENT_DIRS.flatMap((d) => walk(path.join(WEB, "components", d), [".tsx"]));
 
 describe("A11 varredura de cor literal cobre os diretorios novos", () => {
-  it("charts, sky, kit, media e pages entram na lista de tsx e css varridos", () => {
+  it("charts, sky, kit e pages entram na lista de tsx e css varridos", () => {
     const tsx = walk(path.join(WEB, "components"), [".tsx"]).map(rel);
     const css = walk(path.join(WEB, "components"), [".css"]).map(rel);
     for (const d of COMPONENT_DIRS) {
       expect(tsx.some((f) => f.startsWith(`components/${d}/`)), `tsx em ${d}`).toBe(true);
     }
-    for (const d of ["charts", "sky", "kit", "media"]) {
+    for (const d of ["charts", "sky", "kit"]) {
       expect(css.some((f) => f.startsWith(`components/${d}/`)), `css em ${d}`).toBe(true);
     }
   });
@@ -287,9 +295,20 @@ describe("A9 TST-01 invariantes de repositorio", () => {
     expect(bad).toEqual([]);
   });
 
-  it("web/public contem so gaia/gaia-skymap-monochrome.png e gaia/CREDITS.md", () => {
-    const files = walk(path.join(WEB, "public"), [""]).map((f) => path.relative(path.join(WEB, "public"), f).split(path.sep).join("/"));
-    expect(files.sort()).toEqual(["gaia/CREDITS.md", "gaia/gaia-skymap-monochrome.png"]);
+  it("nenhuma imagem rasterizada em web/public (sem imagem de terceiros)", () => {
+    expect(rasterIn(path.join(WEB, "public"))).toEqual([]);
+  });
+
+  it("o detector de imagem rasterizada pega o caso real (teste do teste)", () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "raster-"));
+    try {
+      fs.mkdirSync(path.join(tmp, "x"));
+      fs.writeFileSync(path.join(tmp, "x", "Mapa.PNG"), "");
+      fs.writeFileSync(path.join(tmp, "ok.svg"), "<svg/>");
+      expect(rasterIn(tmp)).toEqual(["x/Mapa.PNG"]);
+    } finally {
+      fs.rmSync(tmp, { recursive: true, force: true });
+    }
   });
 
   it("nenhum arquivo por objeto em web/data e web/test/fixtures", () => {

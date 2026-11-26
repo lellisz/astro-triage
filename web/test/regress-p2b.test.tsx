@@ -3,11 +3,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { GaiaFigure } from "@/components/media/GaiaFigure";
 import { OverviewView } from "@/components/pages/OverviewView";
 import { SkyView } from "@/components/pages/SkyView";
-import { gaiaSkymap } from "@/content/images";
-import { kitLabels, skyLabels } from "@/content/labels";
+import { skyLabels } from "@/content/labels";
 import type { Meta, Overview, Sky } from "@/lib/schema";
 
 const nav = vi.hoisted(() => ({ search: "" }));
@@ -151,15 +149,13 @@ describe("(d) OverviewView: ContextStrip", () => {
   });
 });
 
-describe("(e) GaiaFigure split", () => {
-  const html = renderToStaticMarkup(<GaiaFigure variant="split" />);
+describe("(e) SkyView sem imagem de terceiros", () => {
+  nav.search = "";
+  const html = renderToStaticMarkup(<SkyView meta={meta} sky={sky} />);
 
-  it("mantem alt, legenda de nao-saida e credito", () => {
-    expect(gaiaSkymap.alt.length).toBeGreaterThan(10);
-    expect(html).toContain(`alt="${escapeHtml(gaiaSkymap.alt)}"`);
-    expect(gaiaSkymap.caption).toMatch(/não representa a saída do classificador/);
-    expect(html).toContain(escapeHtml(gaiaSkymap.caption));
-    expect(html).toContain(`${kitLabels.creditPrefix}: ${escapeHtml(gaiaSkymap.credit)}`);
-    expect(html).toMatch(/<figure[^>]*>[\s\S]*<img[\s\S]*<figcaption/);
+  it("nao ha painel de contexto nem <img; o mapa da pagina e a figura", () => {
+    expect(html).not.toContain("sky-context");
+    expect(html).not.toContain("<img");
+    expect(html).toContain('aria-labelledby="sky-map"');
   });
 });
