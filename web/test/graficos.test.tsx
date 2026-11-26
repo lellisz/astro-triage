@@ -4,6 +4,8 @@ import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { GraficosView } from "@/components/pages/GraficosView";
+import { cmdRange } from "@/components/charts/CmdMap";
+import { MIN_OPACITY } from "@/components/sky/scale";
 import { ptPct } from "@/lib/fmt";
 import type { Graficos, Meta } from "@/lib/schema";
 
@@ -46,12 +48,12 @@ const NUMBER = /\d+(?:[.,]\d+)*%?/g;
 describe("/graficos: modo simples", () => {
   const html = render("");
 
-  it("cinco figuras (o by-z tem uma por classe), cada uma com alternativa em tabela", () => {
-    expect(count(html, "<figure")).toBe(5);
-    expect(count(html, "<details")).toBe(4);
-    expect(count(html, "<table")).toBe(4 + 1);
+  it("seis figuras (o by-z tem uma por classe), cada uma com alternativa em tabela", () => {
+    expect(count(html, "<figure")).toBe(6);
+    expect(count(html, "<details")).toBe(5);
+    expect(count(html, "<table")).toBe(5 + 1);
     expect(count(html, "<th scope=\"col\"")).toBeGreaterThan(8);
-    expect(count(html, "Ver os números")).toBe(4);
+    expect(count(html, "Ver os números")).toBe(5);
     expect(count(html, 'role="img"')).toBeGreaterThanOrEqual(3);
   });
 
@@ -88,10 +90,11 @@ describe("/graficos: modo simples", () => {
     }
   });
 
-  it("nao ha secao de ECE nem de mapa cor-magnitude", () => {
+  it("nao ha secao de ECE; o mapa cor-magnitude aparece com o texto do JSON", () => {
     expect(graficos.ece).toBeNull();
-    expect(graficos.cmd).toBeNull();
-    expect(textOf(html)).not.toMatch(/\bECE\b|cor-magnitude/i);
+    expect(textOf(html)).not.toMatch(/\bECE\b/i);
+    expect(textOf(html)).toContain("Mapa cor-magnitude");
+    expect(textOf(html)).toContain(graficos.cmd!.note);
   });
 
   it("nenhum 'empate' nem 'ADR'", () => {
@@ -101,7 +104,7 @@ describe("/graficos: modo simples", () => {
   });
 
   it("figuras rotuladas e tabelas reais", () => {
-    expect(count(html, "<figcaption")).toBe(4);
+    expect(count(html, "<figcaption")).toBe(5);
     expect(count(html, "aria-labelledby")).toBeGreaterThanOrEqual(7);
     expect(html).toContain("<caption>");
   });
@@ -118,9 +121,11 @@ describe("/graficos: modo tecnico", () => {
     expect(html).toContain("Objetos");
   });
 
-  it("as mesmas cinco figuras", () => {
-    expect(count(html, "<figure")).toBe(5);
-    expect(count(html, "<details")).toBe(4);
+  it("as mesmas figuras, mais o mapa de contagem so no modo tecnico", () => {
+    expect(count(html, "<figure")).toBe(7);
+    expect(count(html, "<details")).toBe(5);
+    expect(count(html, 'id="graf-cmd-count"')).toBe(1);
+    expect(count(render(""), 'id="graf-cmd-count"')).toBe(0);
   });
 });
 
@@ -163,7 +168,8 @@ describe("/graficos: abaixo do piso mostra o texto NA do JSON", () => {
     );
     expect(below.length).toBeGreaterThan(0);
     const html = render("");
-    expect(count(html, "data-below-floor")).toBe(below.length);
+    const rows = html.slice(0, html.indexOf('id="graf-cmd"'));
+    expect(count(rows, "data-below-floor")).toBe(below.length);
     for (const r of below) expect(r.rate.point).toBeNull();
     expect(textOf(html)).toContain(below[0].rate.text);
   });
@@ -177,5 +183,73 @@ describe("/graficos: abaixo do piso mostra o texto NA do JSON", () => {
     const cellHtml = new RegExp(`data-cell="${data.confusion.rows[0].true}-${cell.pred}"[\\s\\S]*?</td>`).exec(html)![0];
     expect(cellHtml).toContain("SEM-VALOR");
     expect(cellHtml).not.toContain("data-shade");
+  });
+});
+
+describe("/graficos: mapa cor-magnitude", () => {
+  const cmd = graficos.cmd!;
+
+  it("a fixture traz as 252 celulas, todas abaixo do piso: hachuradas e sem valor", () => {
+    const html = render("");
+    const section = html.slice(html.indexOf('id="graf-cmd"'));
+    expect(cmd.cells).toHaveLength(252);
+    expect(count(section, "data-cell=")).toBe(252);
+    expect(count(section, "data-below-floor")).toBe(cmd.cells.filter((c) => c.below_floor).length);
+    expect(count(section, "data-point")).toBe(cmd.cells.length - count(section, "data-below-floor"));
+    expect(textOf(section)).toContain("Célula hachurada");
+  });
+
+  const dense = (): Graficos => {
+    const data = structuredClone(graficos);
+    const c = data.cmd!;
+    for (const [i, cell] of c.cells.slice(0, 3).entries()) {
+      const rate = 0.1 * (i + 1);
+      cell.below_floor = false;
+      cell.n = { value: 50 * (i + 1), text: `N${i}` };
+      cell.errors = { value: 5, text: `E${i}` };
+      cell.rate = { point: rate, lo: rate / 2, hi: rate * 2, text: `R${i}`, ci_text: `CI${i}` };
+    }
+    c.cap = { ...c.cap, rate: 0.3, count: 150 };
+    return data;
+  };
+
+  it("celulas com valor viram retangulos cinza com opacidade minima e linhas da tabela", () => {
+    const html = render("", dense());
+    const section = html.slice(html.indexOf('id="graf-cmd"'));
+    expect(count(section, "data-point")).toBe(3);
+    const ops = [...section.matchAll(/data-point=""[^>]*fill-opacity="([\d.]+)"/g)].map((m) => Number(m[1]));
+    expect(ops).toHaveLength(3);
+    expect(Math.min(...ops)).toBeGreaterThan(MIN_OPACITY);
+    expect(Math.max(...ops)).toBe(1);
+    const table = section.slice(section.indexOf("<tbody"), section.indexOf("</tbody>"));
+    expect(count(table, "<tr")).toBe(3);
+    for (const i of [0, 1, 2]) expect(table).toContain(`R${i}`);
+    const range = cmdRange(cmd, cmd.cells[0]);
+    expect(table).toContain(range.g);
+    expect(table).toContain(range.c);
+    expect(table).not.toContain("CI0");
+  });
+
+  it("no modo tecnico o mapa de contagem usa n e a tabela ganha n e intervalo", () => {
+    const html = render("tecnico=1", dense());
+    const from = html.slice(html.indexOf('id="graf-cmd-count"'));
+    expect(count(from.slice(0, from.indexOf("</figure>")), "data-point")).toBe(3);
+    expect(from).toContain("N2");
+    expect(html.slice(html.indexOf("<tbody", html.indexOf('id="graf-cmd"')))).toContain("CI0");
+  });
+
+  it("sem cmd no JSON a secao nao existe", () => {
+    const data = structuredClone(graficos);
+    data.cmd = null;
+    const html = render("", data);
+    expect(html).not.toContain('id="graf-cmd');
+    expect(textOf(html)).not.toContain("Mapa cor-magnitude");
+    expect(count(html, "<figure")).toBe(5);
+  });
+
+  it("nenhuma chave por objeto no JSON versionado e o tamanho e pequeno", () => {
+    const text = JSON.stringify(graficos);
+    expect(text).not.toMatch(/"(source_id|ra|dec|l|b|healpix_l5|hp)":/);
+    expect(Buffer.byteLength(text)).toBeLessThan(150 * 1024);
   });
 });

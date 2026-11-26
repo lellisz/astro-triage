@@ -337,6 +337,36 @@ export type CalBin = {
 
 export type GraficosTick = { value: number; text: string };
 
+export type CmdCell = {
+  gi: number;
+  ci: number;
+  n: Num;
+  errors: Num;
+  rate: Est;
+  below_floor: boolean;
+};
+
+export type Cmd = {
+  g_edges: number[];
+  c_edges: number[];
+  g_ticks: GraficosTick[];
+  c_ticks: GraficosTick[];
+  cells: CmdCell[];
+  g_labels: string[];
+  c_labels: string[];
+  cap: {
+    rate: number | null;
+    count: number | null;
+    rate_text: string | null;
+    count_text: string | null;
+    rate_zero_text: string;
+    count_zero_text: string;
+  };
+  n_missing: Num;
+  n_outside: Num;
+  note: string;
+};
+
 export type Graficos = Head & {
   floor: number;
   model_label: string;
@@ -376,24 +406,7 @@ export type Graficos = Head & {
       detail_text: string;
     }[];
   } | null;
-  cmd: {
-    g_edges: number[];
-    c_edges: number[];
-    g_ticks: GraficosTick[];
-    c_ticks: GraficosTick[];
-    cells: {
-      gi: number;
-      ci: number;
-      n: Num;
-      errors: Num;
-      rate: Est;
-      below_floor: boolean;
-    }[];
-    cap: { rate: number | null; count: number | null };
-    n_missing: Num;
-    n_outside: Num;
-    note: string;
-  } | null;
+  cmd: Cmd | null;
 };
 
 export type FmtSample = { fn: string; args: (number | boolean)[]; text: string };

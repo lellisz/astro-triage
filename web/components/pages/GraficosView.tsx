@@ -2,13 +2,14 @@
 
 import { Suspense, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
+import { CmdMap, cmdRange } from "@/components/charts/CmdMap";
 import { ConfusionGrid } from "@/components/charts/ConfusionGrid";
 import { RateByBin } from "@/components/charts/RateByBin";
 import { ReliabilityPlot } from "@/components/charts/ReliabilityPlot";
 import { DataTable, type DataColumn } from "@/components/kit/DataTable";
 import { Panel } from "@/components/kit/Panel";
 import { graficosLabels as L } from "@/content/labels";
-import type { CalBin, Graficos, Meta, RateRow } from "@/lib/schema";
+import type { CalBin, Cmd, Graficos, Meta, RateRow } from "@/lib/schema";
 import { readState, type UiState } from "@/lib/ui-state";
 import graficosStyles from "./graficos.module.css";
 import styles from "./page.module.css";
@@ -217,6 +218,54 @@ function Confusion({ g, tech }: { g: Graficos; tech: boolean }) {
   );
 }
 
+function CmdSection({ cmd, tech }: { cmd: Cmd; tech: boolean }) {
+  const columns = columnsWith(
+    [
+      { key: "g", label: L.colGRange },
+      { key: "c", label: L.colColorRange },
+      { key: "rate", label: L.colRate, numeric: true },
+    ],
+    tech,
+    [
+      { key: "n", label: L.colObjects, numeric: true },
+      { key: "ci", label: L.colRateCi },
+    ],
+  );
+  const rows: Row[] = cmd.cells
+    .filter((c) => !c.below_floor && c.rate.point !== null)
+    .map((c) => {
+      const range = cmdRange(cmd, c);
+      return { g: range.g, c: range.c, rate: c.rate.text, n: c.n.text, ci: c.rate.ci_text };
+    });
+  const maps = [
+    { mode: "rate" as const, title: L.cmdChartRate, scale: L.cmdScaleRate },
+    ...(tech ? [{ mode: "count" as const, title: L.cmdChartCount, scale: L.cmdScaleCount }] : []),
+  ];
+  return (
+    <Panel id="graf-cmd" title={L.cmdTitle}>
+      {maps.map((m) => (
+        <Scroller key={m.mode} label={L.chartRegion}>
+          <CmdMap
+            id={`graf-cmd-${m.mode}`}
+            title={m.title}
+            cmd={cmd}
+            mode={m.mode}
+            xLabel={L.cmdX}
+            yLabel={L.cmdY}
+            scaleLabel={m.scale}
+            naText={L.notAvailable}
+          />
+        </Scroller>
+      ))}
+      <Legend items={[L.legendCmdBelowFloor]} />
+      <p className={styles.callout}>{cmd.note}</p>
+      <Numbers>
+        <DataTable caption={L.cmdChartRate} columns={columns} rows={rows} />
+      </Numbers>
+    </Panel>
+  );
+}
+
 function Body({ props, state }: { props: Props; state: UiState }) {
   const { graficos: g } = props;
   const toSeries = (s: { cls: string; label: string; rows: RateRow[] }) => ({
@@ -251,6 +300,7 @@ function Body({ props, state }: { props: Props; state: UiState }) {
         perClass
       />
       <Confusion g={g} tech={state.tech} />
+      {g.cmd === null ? null : <CmdSection cmd={g.cmd} tech={state.tech} />}
     </div>
   );
 }

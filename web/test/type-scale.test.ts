@@ -39,18 +39,18 @@ describe("escala do texto dos graficos SVG", () => {
       return m ? [{ file: f, w: Number(m[1]) }] : [];
     });
 
-  it("os 8 graficos declaram a largura do viewBox", () => {
-    expect(viewWidths.length).toBe(8);
+  it("os 9 graficos declaram a largura do viewBox", () => {
+    expect(viewWidths.length).toBe(9);
   });
 
-  // RateByBin (720) so existe em /graficos; as demais paginas nao o usam.
-  const GRAFICOS_ONLY = ["RateByBin.tsx"];
+  // RateByBin e CmdMap (720) so existem em /graficos; as demais paginas nao os usam.
+  const GRAFICOS_ONLY = ["RateByBin.tsx", "CmdMap.tsx"];
   const others = viewWidths.map((v) => v.file).filter((f) => !GRAFICOS_ONLY.includes(f));
   const pageCharts: [string, string, string[]][] = [
     ["overview", ".scroll svg", others],
     ["galaxies", ".scroll svg", others],
     ["compare", ".scroll svg", others],
-    ["graficos", ".scroll svg", ["RateByBin.tsx"]],
+    ["graficos", ".scroll svg", ["RateByBin.tsx", "CmdMap.tsx"]],
     ["graficos", ".scrollCal svg", ["ReliabilityPlot.tsx"]],
   ];
 
