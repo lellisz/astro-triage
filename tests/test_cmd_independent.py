@@ -306,7 +306,7 @@ def _is_dl(path: str) -> bool:
 
 
 def test_map_uses_lgbm_full_only_and_ignores_dl_columns(
-    monkeypatch: pytest.MonkeyPatch,
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     rel = _from_spec({(1, 1): (30, 3), (2, 2): (50, 5)})
     clean_cmd = _cmd(rel)
@@ -324,6 +324,13 @@ def test_map_uses_lgbm_full_only_and_ignores_dl_columns(
 
     monkeypatch.setattr(G.data_charts, "cmd_cells", spy)
     opened = _Opened(monkeypatch)
+    probe = tmp_path / "dl" / "predictions_mlp.txt"
+    probe.parent.mkdir()
+    probe.write_text("x", encoding="utf-8")
+    with open(probe, encoding="utf-8") as fh:  # the spy must see a real read, or the check below is vacuous
+        fh.read()
+    assert [p for p in opened.paths if _is_dl(p)] == [os.fspath(probe)]
+    opened.paths.clear()
     with_dl_cols = _cmd(rel_dl)
     assert n > 0
     assert seen_models == ["lgbm_full"]
@@ -463,6 +470,8 @@ def test_real_release_cells_partition_the_test_fold(
     ci = np.floor((c[inside] + 0.5) / 0.25).astype(int)
     counts = np.zeros((N_G, N_C), dtype=int)
     np.add.at(counts, (gi, ci), 1)
+    wrong = np.zeros((N_G, N_C), dtype=int)
+    np.add.at(wrong, (gi, ci), independent["wrong"].to_numpy()[inside].astype(int))
     n_test = len(independent)
     assert cmd["n_missing"]["value"] == int(miss.sum())
     assert cmd["n_outside"]["value"] == int((~miss & ~inside).sum())
@@ -475,6 +484,7 @@ def test_real_release_cells_partition_the_test_fold(
             hidden += n
         else:
             assert cell["below_floor"] is False and cell["n"]["value"] == n
+            assert cell["errors"]["value"] == int(wrong[cell["gi"], cell["ci"]])
             reportable += cell["n"]["value"]
     assert reportable + hidden + cmd["n_missing"]["value"] + cmd["n_outside"]["value"] == n_test
     assert reportable > 0 and int(counts.sum()) == reportable + hidden

@@ -193,6 +193,7 @@ describe("/graficos: mapa cor-magnitude", () => {
     const html = render("");
     const section = html.slice(html.indexOf('id="graf-cmd"'));
     expect(cmd.cells).toHaveLength(252);
+    expect(cmd.cells.every((c) => c.below_floor)).toBe(true);
     expect(count(section, "data-cell=")).toBe(252);
     expect(count(section, "data-below-floor")).toBe(cmd.cells.filter((c) => c.below_floor).length);
     expect(count(section, "data-point")).toBe(cmd.cells.length - count(section, "data-below-floor"));

@@ -43,14 +43,26 @@ describe("escala do texto dos graficos SVG", () => {
     expect(viewWidths.length).toBe(9);
   });
 
-  // RateByBin e CmdMap (720) so existem em /graficos; as demais paginas nao os usam.
-  const GRAFICOS_ONLY = ["RateByBin.tsx", "CmdMap.tsx"];
-  const others = viewWidths.map((v) => v.file).filter((f) => !GRAFICOS_ONLY.includes(f));
+  it("a descoberta acha os graficos exclusivos de /graficos", () => {
+    expect(graficosOnly.sort()).toEqual(["CmdMap.tsx", "RateByBin.tsx"]);
+  });
+
+  // Descoberta: grafico so de /graficos = importado por GraficosView.tsx e por nenhuma outra pagina.
+  const pagesDir = path.join(WEB, "components", "pages");
+  const importers = (file: string): string[] =>
+    fs
+      .readdirSync(pagesDir)
+      .filter((f) => f.endsWith(".tsx"))
+      .filter((f) => fs.readFileSync(path.join(pagesDir, f), "utf8").includes(`charts/${file.replace(/\.tsx$/, "")}"`));
+  const graficosOnly = viewWidths
+    .map((v) => v.file)
+    .filter((f) => importers(f).length === 1 && importers(f)[0] === "GraficosView.tsx");
+  const others = viewWidths.map((v) => v.file).filter((f) => !graficosOnly.includes(f));
   const pageCharts: [string, string, string[]][] = [
     ["overview", ".scroll svg", others],
     ["galaxies", ".scroll svg", others],
     ["compare", ".scroll svg", others],
-    ["graficos", ".scroll svg", ["RateByBin.tsx", "CmdMap.tsx"]],
+    ["graficos", ".scroll svg", graficosOnly],
     ["graficos", ".scrollCal svg", ["ReliabilityPlot.tsx"]],
   ];
 

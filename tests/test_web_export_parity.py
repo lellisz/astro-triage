@@ -380,7 +380,7 @@ def assert_cmd_parity(rel: D.Release, cmd: dict, floor: int) -> None:
     for i, label in enumerate(cmd["c_labels"]):
         assert label == f"{fmt.pt_num(c_edges[i], 2)}–{fmt.pt_num(c_edges[i + 1], 2)}"
     cap = cmd["cap"]
-    cap_digits = 2 if (cap["rate"] or 1) < graficos.SMALL_RATE else 1
+    cap_digits = 2 if cap["rate"] is not None and cap["rate"] < graficos.SMALL_RATE else 1
     assert cap["rate_text"] == (None if cap["rate"] is None else fmt.pt_pct(cap["rate"], cap_digits))
     assert cap["count_text"] == (None if cap["count"] is None else fmt.pt_int(cap["count"]))
     assert (cap["rate_zero_text"], cap["count_zero_text"]) == (fmt.pt_pct(0, 0), fmt.pt_int(0))

@@ -167,7 +167,7 @@ function RatePanel({
         </Scroller>
       ))}
       <Legend items={[L.legendBelowFloor, ...(tech ? [L.legendInterval] : [])]} />
-      <p className={styles.callout}>{note}</p>
+      {note ? <p className={styles.callout}>{note}</p> : null}
       <Numbers>
         <DataTable caption={chart} columns={columns} rows={rows} />
       </Numbers>

@@ -11,14 +11,15 @@ type RateByBinProps = {
   naText: string;
 };
 
-// Nao se chama VIEW_W de proposito: a varredura de escala de texto em type-scale.test.ts
-// conta os graficos por esse nome e a pagina que usar este grafico deve estende-la.
+// type-scale.test.ts descobre os graficos por VIEW_W ou VIEWBOX_W e checa o piso e o teto do SVG.
 const VIEWBOX_W = 720;
 const PLOT_X = 64;
 const PLOT_W = 560;
 const PLOT_Y = 12;
 const PLOT_H = 260;
-const LABEL_H = 76;
+// Faixa abaixo do eixo para o marcador "sem valor": fora do dominio 0..topo, nao sugere taxa.
+const NA_BAND = 18;
+const LABEL_H = 76 + NA_BAND;
 const VIEWBOX_H = PLOT_Y + PLOT_H + LABEL_H;
 const LABEL_X = PLOT_X + PLOT_W + 12;
 const MARK = 6;
@@ -149,9 +150,9 @@ export function RateByBin({ id, title, series, showCi, yLabel, naText }: RateByB
               className={styles.tick}
               data-bin-label=""
               textAnchor={rotate ? "end" : "middle"}
-              transform={rotate ? `translate(${x} ${baseY + 16}) rotate(-40)` : undefined}
+              transform={rotate ? `translate(${x} ${baseY + NA_BAND + 16}) rotate(-40)` : undefined}
               x={rotate ? undefined : x}
-              y={rotate ? undefined : baseY + 20}
+              y={rotate ? undefined : baseY + NA_BAND + 20}
             >
               {r.label}
             </text>
@@ -180,7 +181,7 @@ export function RateByBin({ id, title, series, showCi, yLabel, naText }: RateByB
               return (
                 <g key={`${r.label}-${i}`} data-row={`${s.key}-${i}`} data-below-floor="">
                   <title>{`${s.label}, ${r.label}: ${r.rate.text || naText}`}</title>
-                  <Marker shape={si} cx={x} cy={baseY} hollow />
+                  <Marker shape={si} cx={x} cy={baseY + NA_BAND / 2} hollow />
                 </g>
               );
             })}

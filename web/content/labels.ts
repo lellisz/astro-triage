@@ -352,7 +352,7 @@ export const graficosLabels = {
   tableRegion: "Tabela rolável",
   chartRegion: "Gráfico rolável na horizontal",
   legendTitle: "Legenda",
-  legendBelowFloor: "Marcador vazio: abaixo do piso, sem valor",
+  legendBelowFloor: "Marcador oco abaixo do eixo: abaixo do piso, sem valor",
   legendCmdBelowFloor: "Célula hachurada: abaixo do piso, sem valor",
   legendInterval: "Barras: intervalo de confiança, só no modo técnico",
   legendRaw: "Marcador oco: antes do ajuste de temperatura",

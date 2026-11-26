@@ -406,6 +406,7 @@ def test_real_release_invariants(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
         _check_content(doc, name)
     _check_sky(docs["sky"])
     _check_graficos(docs["graficos"])
+    assert docs["graficos"]["cmd"] is not None
     assert (out / real / "graficos.json").stat().st_size < GRAFICOS_MAX_BYTES
 
 
