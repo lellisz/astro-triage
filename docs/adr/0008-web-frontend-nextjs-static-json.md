@@ -185,9 +185,9 @@ Head  = { schema_version: 1, release: string, provisional: true, generated_at: s
 `sky_model.map_payload`, `data_sky.lat_band_table`, `top_error_regions`,
 `chance_share_of_pixels_with_error`, `sky_text.*`, `sky_map_html.color_cap`, `graticule` geometry):
 - `cards {n_regions, n_objects, n_below: Num, max_rate: Est, diverges: bool, diverge_note | null}`.
-- `texts {title, lead, how_rate, how_rate_hidden, how_count, map_lead, position_note,
+- `texts {title, lead, how_rate, how_rate_hidden, how_count, how_count_hidden, map_lead, position_note,
   neighbour_note, spread_note}`.
-- Emenda fase 2a (para revisão do owner): how_rate, how_rate_hidden e how_count são gerados pelo web_export em texto neutro, sem nome de cor; o texto do Streamlit (sky_text.how) não muda.
+- Emenda fase 2a (para revisão do owner): how_rate, how_rate_hidden, how_count e how_count_hidden são gerados pelo web_export em texto neutro, sem nome de cor; o texto do Streamlit (sky_text.how) não muda.
 - Emenda fase 2b (para revisão do owner): galaxies.json technical.missing_note é gerado pelo web_export em texto neutro, sem nome de cor e sem legenda de destaque (nenhum gráfico de /galaxias destaca taxa alta; a frase "Marcador em destaque = taxa acima de ..." foi removida, fica só a contagem de galáxias sem magnitude, vazia se não houver); html_galaxies_tech.missing_note_text não muda.
 - Emenda fase 2b (para revisão do owner): galaxies.json ganha `power_note: string | null` (compare_text.POWER_PHRASE quando alguma rede em networks é underpowered; null caso contrário).
 - Emenda fase 2b (para revisão do owner): galaxies.json ganha `networks_note: string | null` (html_dl.UNAVAILABLE_NOTE quando nenhuma rede tem célula e não há dl_error, como no Streamlit; null caso contrário).
@@ -202,11 +202,15 @@ Head  = { schema_version: 1, release: string, provisional: true, generated_at: s
 - `graticule {meridians: [[x, y], ...][], parallels: [[x, y], ...][], labels[] {x, y, text}}`
   (map units of `data_sky.mollweide`).
   Emenda fase 2a (para revisão do owner): graticule.labels[] ganha kind 'lat'|'lon' para posicionar o rótulo; nenhuma coordenada muda.
-- `regions[]` (one per test pixel): `{hp: int, x, y, band: "A"|"B"|"C", n: int, below_floor: bool,
-  errors: int | null, rate: number | null}`. `errors` and `rate` are `null` below the floor, so the
-  client cannot derive a withheld rate.
+- `regions[]` (one per test pixel): `{hp: int | null, x, y, band: "A"|"B"|"C", n: int | null,
+  below_floor: bool, errors: int | null, rate: number | null}`. Below the floor (`n <
+  rel.meta["floor"]["min_objects"]`, never typed) `hp`, `n`, `errors` and `rate` are all `null`; `x`,
+  `y`, `band` and `below_floor: true` stay, so the empty rings are still drawn. The per-region value
+  is withheld, but not every aggregate: see the residual risk in Amendment 2 (owner decision SEC-02,
+  2026-11-26).
 - `bands[3] {band, label, n_pixels, n: int, errors: int, rate: Est}`.
-- `top_regions[<=6] {hp, l, b, position_text, n, errors, rate: Est}`.
+- `top_regions[<=6] {hp, l, b, position_text, n, errors, rate: Est}`: only regions at or above the
+  floor (`data_sky.top_error_regions`), so `hp` and `n` are never null here.
 
 `galaxies.json` (sources: `data_galaxy_prior.load_galaxy_prior_block` for both rules,
 `galaxy_rows`, `galaxy_verdict`, `dl_galaxy_cells`, `needs_power_note`, `galaxy_error_rows`,
@@ -525,8 +529,9 @@ Release in force: `full_v0`; floor `min_objects = 100`, `min_pixels = 20`
 4. **Floor.** `floor = rel.meta["floor"]["min_objects"]` (never typed). For a bin or cell with
    `n < floor`: the value fields (`rate`, `freq`, `p_mean`, `share`) and `errors` are `null` with text
    "n/a" and `below_floor: true` (as `sky.json` regions, so a withheld rate cannot be derived). In the
-   1D charts (1, 2, 3) `n` stays visible, as in `galaxies.technical` and `sky.regions`. In the
-   confusion cells and the map cells, `n` is `null` too (the owner's wording: "cells").
+   1D charts (1, 2, 3) `n` stays visible, as in `galaxies.technical`. In the confusion cells and the
+   map cells, `n` is `null` too (the owner's wording: "cells"). `sky.regions` no longer keeps `n`
+   below the floor: see Amendment 2.
 5. **Intervals.** Every rate, observed frequency or row share carries a Wilson interval at
    `fmt.CI_LEVEL` (`data_galaxies.wilson_interval`, `data_galaxies.py:23-25`). The reliability bins
    stay the existing 10 equal-mass bins. Intervals are drawn only in technical mode; the table
@@ -693,3 +698,40 @@ authorised yet: it waits for an explicit yes). Q2: yes. Q3: STAR left out of the
 the explanatory note. Q4: the floor of 100 objects applies to each confusion cell. Q5: yes (error rate
 of all classes, 252 fixed cells, one layer). Q6: yes. ADR 0008 itself stays Proposed until the first
 public deploy (it becomes Accepted before that deploy).
+
+## Amendment 2 (2026-11-26): `sky.regions` withholds `n` and `hp` below the floor (SEC-02)
+
+**Decision (owner, 2026-11-26).** Below the floor (`rel.meta["floor"]["min_objects"]`, never typed)
+each region of `sky.json` `regions[]` leaves the exporter with `n: null` and `hp: null`, besides the
+`errors: null` and `rate: null` it already had. `x`, `y`, `band` and `below_floor: true` stay, so the
+empty rings are still drawn at the same place. This replaces the earlier rule that `n` stays visible
+in `sky.regions` (Appendix A and A1.2 item 4).
+
+**Reason.** The `n = 1` of a pixel says that a public object is in the test fold. Its position is on
+the map and its HEALPix index would name the pixel exactly, so the count and the index of a thin
+region identify a test object of a public catalogue. The floor exists for statistical reliability,
+but the owner prefers to withhold the count and the index where they are that thin.
+
+**Consequences.**
+- `web/lib/schema.ts` types `SkyRegion` as a union on `below_floor`: `hp` and `n` are `number` when
+  false and `null` when true. The map keys a withheld region by its index and omits `data-hp`; the
+  tooltip and the accessible description show the `notAvailable` label instead of `n`.
+- `top_regions` only holds regions at or above the floor, so it never carries a null `hp` or `n`;
+  a test asserts it.
+- `color_cap.count` and `cards.n_below` are aggregates and are unchanged. In count mode a withheld
+  region is drawn in the weakest shade (`MIN_OPACITY`), and the `how_count` text (Python,
+  `web_text.how`) says so. With "hide below the floor" on, `how_count_hidden` is shown instead,
+  without that sentence, as `how_rate_hidden` does for the rate mode.
+- Tests: no `below_floor` region with `n` or `hp`, and no reportable region with `n` below the floor
+  (`tests/test_web_export_invariants.py`, `tests/test_web_export_parity.py`).
+
+**Residual risk accepted by the owner (review REV-01, SEC-03).** The withholding is per region, not
+per aggregate. `bands[].n` and `bands[].errors` sum all regions, withheld ones included, so the
+total withheld per band can be derived by subtracting the visible regions. In the real `full_v0`
+export the three bands hold 233, 907 and 903 withheld objects and 6, 35 and 33 errors, spread over
+9, 32 and 29 withheld regions, so no single region is isolated. The subtraction would be exact only
+if a band had exactly one region below the floor; an invariant in
+`tests/test_web_export_invariants.py` fails in that case. Also, `x` and `y` are the pixel centre and
+determine `hp`, so the index is not secret; what is withheld is the count and the index as labelled
+values. The data are public catalogues, with no personal data, and only per-band aggregates leak. The
+owner accepts this.

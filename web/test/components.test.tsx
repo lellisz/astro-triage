@@ -14,7 +14,7 @@ import { SkyView } from "@/components/pages/SkyView";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { MapLegend } from "@/components/sky/MapLegend";
 import { MollweideMap } from "@/components/sky/MollweideMap";
-import { RegionTooltip } from "@/components/sky/RegionTooltip";
+import { RegionTooltip, regionDescription } from "@/components/sky/RegionTooltip";
 import { chartLabels, overviewLabels, skyLabels, skyMapLabels } from "@/content/labels";
 import { ptInt, ptPct } from "@/lib/fmt";
 import type { Est, Meta, Overview, Sky } from "@/lib/schema";
@@ -242,7 +242,8 @@ describe("A4 selo provisorio", () => {
   });
 });
 
-const tags = (html: string) => html.match(/<circle[^>]*data-hp="[^"]*"[^>]*>/g) ?? [];
+// Abaixo do piso a regiao nao tem hp (SEC-02): todo circle do mapa e uma regiao, com ou sem data-hp.
+const tags = (html: string) => html.match(/<circle[^>]*>/g) ?? [];
 const mapHtml = (
   regions: Sky["regions"],
   mode: "rate" | "count",
@@ -270,8 +271,31 @@ describe("A5 MollweideMap", () => {
     expect(below.length).toBeGreaterThan(0);
   });
 
-  it.each(["rate", "count"] as const)("%s: um circle[data-hp] por regiao", (mode) => {
+  it.each(["rate", "count"] as const)("%s: um circle por regiao", (mode) => {
     expect(tags(mapHtml(sky.regions, mode, false))).toHaveLength(sky.regions.length);
+  });
+
+  it.each(["rate", "count"] as const)("%s: data-hp so nas regioes acima do piso", (mode) => {
+    const t = tags(mapHtml(sky.regions, mode, false));
+    expect(t.filter((x) => x.includes("data-hp="))).toHaveLength(sky.regions.length - below.length);
+    for (const x of t.filter((y) => y.includes('data-below="true"'))) {
+      expect(x).not.toContain("data-hp");
+    }
+    expect(mapHtml(sky.regions, mode, false)).not.toContain("data-hp=\"null\"");
+  });
+
+  it("rate: anel vazio abaixo do piso sai sem n nem hp; tooltip e descricao dizem nao disponivel", () => {
+    const ring = tags(mapHtml(sky.regions, "rate", false)).filter((x) => x.includes('fill="none"'));
+    expect(ring).toHaveLength(below.length);
+    for (const x of ring) expect(x).not.toMatch(/data-(hp|n)=/);
+    const html = renderToStaticMarkup(
+      <RegionTooltip region={below[0]} bandLabel="B" labels={skyMapLabels} leftPct={10} topPct={10} />,
+    );
+    const objects = html.match(new RegExp(`${skyMapLabels.objects}</span><span>([^<]*)</span>`))!;
+    expect(objects[1]).toBe(skyMapLabels.notAvailable);
+    expect(regionDescription(below[0], "B", skyMapLabels)).toContain(
+      `${skyMapLabels.objects}: ${skyMapLabels.notAvailable}.`,
+    );
   });
 
   it.each(["rate", "count"] as const)("%s com hideBelow: len - abaixo do piso", (mode) => {
@@ -314,8 +338,8 @@ describe("A5 MollweideMap", () => {
   describe("variante: 2 abaixo do piso e color_cap.rate = null", () => {
     const regions: Sky["regions"] = sky.regions.map((r, i) =>
       i === 0 || i === 1
-        ? { ...r, below_floor: false, rate: r.rate ?? 0.5, errors: r.errors ?? 1 }
-        : { ...r, below_floor: true, rate: null, errors: null },
+        ? { ...r, below_floor: false, hp: r.hp ?? 900 + i, n: r.n ?? 9, rate: r.rate ?? 0.5, errors: r.errors ?? 1 }
+        : { ...r, below_floor: true, hp: null, n: null, rate: null, errors: null },
     );
     const cap: Sky["color_cap"] = { rate: null, count: sky.color_cap.count };
 

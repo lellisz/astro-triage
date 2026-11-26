@@ -114,21 +114,23 @@ export function MollweideMap({
           ))}
         </g>
         <g aria-hidden="true">
-          {drawn.map((r) => {
+          {drawn.map((r, i) => {
             const ring = mode === "rate" && r.below_floor;
+            // Abaixo do piso nao ha hp: a chave cai para o indice (a ordem de regions e fixa).
+            const key = r.hp ?? `i${i}`;
             const common = {
               cx: r.x,
               cy: -r.y,
               r: DOT_RADIUS,
-              "data-hp": r.hp,
+              "data-hp": r.hp ?? undefined,
               "data-below": r.below_floor ? "true" : undefined,
               onMouseEnter: () => setActive(r),
             };
             return ring ? (
-              <circle key={r.hp} {...common} className={styles.dotRing} fill="none" />
+              <circle key={key} {...common} className={styles.dotRing} fill="none" />
             ) : (
               <circle
-                key={r.hp}
+                key={key}
                 {...common}
                 className={styles.dotFilled}
                 fillOpacity={opacityFor(regionValue(r, mode), cap)}

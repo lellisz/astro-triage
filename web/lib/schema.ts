@@ -109,16 +109,15 @@ export type Overview = Head & {
   };
 };
 
+// Abaixo do piso o exportador deixa hp, n, errors e rate nulos (ADR 0008, decisao SEC-02).
 export type SkyRegion = {
-  hp: number;
   x: number;
   y: number;
   band: "A" | "B" | "C";
-  n: number;
-  below_floor: boolean;
-  errors: number | null;
-  rate: number | null;
-};
+} & (
+  | { below_floor: false; hp: number; n: number; errors: number | null; rate: number | null }
+  | { below_floor: true; hp: null; n: null; errors: null; rate: null }
+);
 
 export type Sky = Head & {
   cards: {
@@ -135,6 +134,7 @@ export type Sky = Head & {
     how_rate: string;
     how_rate_hidden: string;
     how_count: string;
+    how_count_hidden: string;
     map_lead: string;
     position_note: string;
     neighbour_note: string;

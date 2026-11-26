@@ -92,9 +92,13 @@ def cmd_note(n_missing: int, n_outside: int, floor: int) -> str:
 def how(by_rate: bool, n_hidden: int, floor: int, hidden_on_map: bool) -> str:
     """Same structure as ``sky_text.how``, with the colour reference replaced by grey level."""
     if not by_rate:
+        base = "quanto mais claro o ponto, mais objetos de teste a região tem. "
+        if hidden_on_map:
+            return base + "Anel vazio não aparece neste modo."
         return (
-            "quanto mais claro o ponto, mais objetos de teste a região tem. "
-            "Anel vazio não aparece neste modo."
+            base
+            + f"Regiões com menos de {fmt.pt_int(floor)} objetos não têm contagem exibida "
+            "e aparecem no tom mais fraco. Anel vazio não aparece neste modo."
         )
     few = f"{fmt.pt_int(n_hidden)} regiões com menos de {fmt.pt_int(floor)} objetos"
     tail = (

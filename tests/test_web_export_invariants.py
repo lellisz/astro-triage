@@ -76,14 +76,33 @@ def _check_content(doc: object, name: str) -> None:
             assert "ADR" not in key, f"{name}: 'ADR' in key at {path}"
 
 
-def _check_sky(sky: dict) -> None:
+def _check_sky(sky: dict, floor: int | None = None) -> None:
+    """Below the floor a region keeps x, y and band only (owner decision SEC-02, ADR 0008)."""
     regions = sky["regions"]
     for r in regions:
         if r["below_floor"] is True:
             assert r["errors"] is None and r["rate"] is None, r
+            assert r["n"] is None and r["hp"] is None, r
+        else:
+            assert r["n"] is not None and r["hp"] is not None, r
+            if floor is not None:
+                assert r["n"] >= floor, r
+    if floor is not None:
+        assert all(t["n"] >= floor for t in sky["top_regions"]), "top_regions below the floor"
     for path, _, value in _walk(sky):
         if isinstance(value, list):
             assert len(value) <= len(regions), f"{path} has {len(value)} items"
+
+
+def _check_sky_bands(sky: dict) -> None:
+    """SEC-03: bands[] sum every region, so a band with exactly one withheld region reveals it.
+
+    Applied to the real release only: the tiny synthetic release has one withheld region on purpose.
+    """
+    regions = sky["regions"]
+    for band in {r["band"] for r in regions}:
+        withheld = sum(1 for r in regions if r["band"] == band and r["below_floor"] is True)
+        assert withheld != 1, f"band {band}: a single region below the floor is derivable from bands[]"
 
 
 def _check_graficos(doc: dict) -> None:
@@ -240,9 +259,32 @@ def test_synthetic_export_invariants(export) -> None:
     docs = _read_all(_export_dir(export.out, RELEASE), RELEASE)
     for name, doc in docs.items():
         _check_content(doc, name)
-    _check_sky(docs["sky"])
+    _check_sky(docs["sky"], docs["meta"]["floor"]["min_objects"])
     assert len(docs["sky"]["regions"]) > 0
     _check_graficos(docs["graficos"])
+
+
+def test_sky_below_floor_region_with_n_or_hp_is_rejected() -> None:
+    """Falsifier (SEC-02): the checker must reject a withheld region that still shows n or hp."""
+    ok = {"hp": None, "n": None, "errors": None, "rate": None, "below_floor": True}
+    reportable = {"hp": 7, "n": 120, "errors": 3, "rate": 0.025, "below_floor": False}
+    _check_sky({"regions": [ok, reportable], "top_regions": [{"n": 120}]}, 100)
+    for bad in ({**ok, "n": 1}, {**ok, "hp": 7}, {**reportable, "n": 5}):
+        with pytest.raises(AssertionError):
+            _check_sky({"regions": [bad], "top_regions": []}, 100)
+    with pytest.raises(AssertionError):
+        _check_sky({"regions": [ok], "top_regions": [{"n": 99}]}, 100)
+
+
+def test_sky_band_with_one_withheld_region_is_rejected() -> None:
+    """Falsifier (SEC-03): exactly one withheld region in a band is exposed by the band totals."""
+    below = {"hp": None, "n": None, "errors": None, "rate": None, "below_floor": True}
+    above = {"hp": 7, "n": 120, "errors": 3, "rate": 0.025, "below_floor": False}
+    two = [{**below, "band": "A"}, {**below, "band": "A"}, {**above, "band": "A"}]
+    _check_sky_bands({"regions": two})
+    one = [{**below, "band": "A"}, {**above, "band": "A"}, {**above, "band": "B"}]
+    with pytest.raises(AssertionError, match="single region"):
+        _check_sky_bands({"regions": one})
 
 
 def test_graficos_below_floor_items_are_withheld() -> None:
@@ -404,7 +446,8 @@ def test_real_release_invariants(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     docs = _read_all(out / real, real)
     for name, doc in docs.items():
         _check_content(doc, name)
-    _check_sky(docs["sky"])
+    _check_sky(docs["sky"], docs["meta"]["floor"]["min_objects"])
+    _check_sky_bands(docs["sky"])
     _check_graficos(docs["graficos"])
     assert docs["graficos"]["cmd"] is not None
     assert (out / real / "graficos.json").stat().st_size < GRAFICOS_MAX_BYTES

@@ -290,9 +290,21 @@ def assert_parity(rel: D.Release) -> None:
     floor = int(rel.meta["floor"]["min_objects"])
     assert len(sky["regions"]) == len(stats) > 0
     for got, (_, row) in zip(sky["regions"], stats.iterrows(), strict=True):
-        assert got["hp"] == int(row["healpix_l5"])
-        assert got["n"] == int(row["n"])
         assert got["below_floor"] == (int(row["n"]) < floor)
+        if got["below_floor"]:
+            assert got["hp"] is None and got["n"] is None
+        else:
+            assert got["hp"] == int(row["healpix_l5"])
+            assert got["n"] == int(row["n"])
+    reportable = stats[stats["n"] >= floor]
+    top = data_sky.top_error_regions(stats, floor)
+    assert [t["hp"] for t in sky["top_regions"]] == [int(h) for h in top["healpix_l5"]]
+    assert {t["hp"] for t in sky["top_regions"]} <= {int(h) for h in reportable["healpix_l5"]}
+    assert all(t["n"] >= floor for t in sky["top_regions"])
+    # REV-02: with the below-floor regions hidden the count text must not describe them.
+    assert "tom mais fraco" in sky["texts"]["how_count"]
+    assert "tom mais" not in sky["texts"]["how_count_hidden"]
+    assert sky["texts"]["how_count_hidden"].startswith(sky["texts"]["how_count"][:40])
     assert sky["cards"]["n_regions"]["value"] == sky_model.cards(stats, rel.meta).n_regions
     # galaxies.blocks == load_galaxy_prior_block
     for rule in ("as_shipped", "prior_matched"):

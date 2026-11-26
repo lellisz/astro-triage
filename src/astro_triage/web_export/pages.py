@@ -465,13 +465,15 @@ def _regions(stats: pd.DataFrame, floor: int) -> list[dict]:
         rate_layer["rate"],
         strict=True,
     )
+    # Owner decision SEC-02 (2026-11-26): below the floor neither n nor hp leave the exporter,
+    # because n = 1 of a known pixel says that a public object is in the test fold.
     return [
         {
-            "hp": int(hp),
+            "hp": None if below else int(hp),
             "x": round(float(x), MAP_DIGITS),
             "y": round(float(y), MAP_DIGITS),
             "band": str(band),
-            "n": int(n),
+            "n": None if below else int(n),
             "below_floor": bool(below),
             "errors": None if below else int(errors),
             "rate": None if below else float(rate),
@@ -538,6 +540,7 @@ def sky(rel: D.Release, pixels: pd.DataFrame) -> dict:
             "how_rate": web_text.how(True, sc.n_below, floor, False),
             "how_rate_hidden": web_text.how(True, sc.n_below, floor, True),
             "how_count": web_text.how(False, sc.n_below, floor, False),
+            "how_count_hidden": web_text.how(False, sc.n_below, floor, True),
             "map_lead": sky_text.map_lead(stats, floor),
             "position_note": sky_text.POSITION_NOTE,
             "neighbour_note": method_notes.NEIGHBOUR_NOTE,

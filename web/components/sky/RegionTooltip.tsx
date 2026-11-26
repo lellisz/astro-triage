@@ -23,7 +23,8 @@ export function regionDescription(
     region.below_floor || region.rate === null
       ? `${labels.notAvailable} (${labels.belowFloor})`
       : ptPct(region.rate, 1);
-  return `${labels.band}: ${bandLabel}. ${labels.objects}: ${ptInt(region.n)}. ${labels.errors}: ${errors}. ${labels.rate}: ${rate}.`;
+  const objects = region.n === null ? labels.notAvailable : ptInt(region.n);
+  return `${labels.band}: ${bandLabel}. ${labels.objects}: ${objects}. ${labels.errors}: ${errors}. ${labels.rate}: ${rate}.`;
 }
 
 export function RegionTooltip({ region, bandLabel, labels, leftPct, topPct }: RegionTooltipProps) {
@@ -44,7 +45,7 @@ export function RegionTooltip({ region, bandLabel, labels, leftPct, topPct }: Re
       </div>
       <div className={styles.tooltipRow}>
         <span className={styles.tooltipKey}>{labels.objects}</span>
-        <span>{ptInt(region.n)}</span>
+        <span>{region.n === null ? labels.notAvailable : ptInt(region.n)}</span>
       </div>
       <div className={styles.tooltipRow}>
         <span className={styles.tooltipKey}>{labels.errors}</span>

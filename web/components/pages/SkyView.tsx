@@ -39,7 +39,14 @@ function Body({ props, tech }: { props: Props; tech: boolean }) {
   const [hide, setHide] = useState(false);
   const hideBelow = tech && hide;
   const cap = mode === "rate" ? colorCap.rate : colorCap.count;
-  const howText = mode === "count" ? texts.how_count : hideBelow ? texts.how_rate_hidden : texts.how_rate;
+  const howText =
+    mode === "count"
+      ? hideBelow
+        ? texts.how_count_hidden
+        : texts.how_count
+      : hideBelow
+        ? texts.how_rate_hidden
+        : texts.how_rate;
   const summary = `${texts.lead} ${L.below}: ${cards.n_below.text}. ${L.maxRate}: ${cards.max_rate.text}.`;
 
   const topRows = top.map((r) => ({
