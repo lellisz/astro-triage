@@ -64,6 +64,10 @@ function Marker({
 
 export function RateByBin({ id, title, series, showCi, yLabel, naText }: RateByBinProps) {
   const titleId = `${id}-title`;
+  const firstLabels = series[0]?.rows.map((r) => r.label).join("|") ?? "";
+  if (series.some((s) => s.rows.map((r) => r.label).join("|") !== firstLabels)) {
+    throw new Error("RateByBin: todas as series devem ter as mesmas faixas");
+  }
   const widest = series.reduce<RateRow[]>((acc, s) => (s.rows.length > acc.length ? s.rows : acc), []);
   const bins = widest.length;
   const band = bins > 0 ? PLOT_W / bins : PLOT_W;

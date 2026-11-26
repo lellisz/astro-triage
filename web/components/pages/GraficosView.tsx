@@ -125,6 +125,7 @@ function RatePanel({
   note,
   series,
   tech,
+  perClass = false,
 }: {
   id: string;
   title: string;
@@ -133,6 +134,7 @@ function RatePanel({
   note: string;
   series: { key: string; label: string; rows: RateRow[] }[];
   tech: boolean;
+  perClass?: boolean;
 }) {
   const columns = columnsWith(
     [
@@ -150,16 +152,19 @@ function RatePanel({
   const rows = series.flatMap((s) => rateRows(s.label, s.rows));
   return (
     <Panel id={id} title={title}>
-      <Scroller label={L.chartRegion}>
-        <RateByBin
-          id={`${id}-chart`}
-          title={chart}
-          series={series}
-          showCi={tech}
-          yLabel={L.errorY}
-          naText={L.notAvailable}
-        />
-      </Scroller>
+      {/* Faixas diferentes por classe (by-z): um grafico por classe, cada um com o seu eixo X. */}
+      {(perClass ? series.map((s) => [s]) : [series]).map((group) => (
+        <Scroller key={group.map((s) => s.key).join("-")} label={L.chartRegion}>
+          <RateByBin
+            id={perClass ? `${id}-chart-${group[0].key}` : `${id}-chart`}
+            title={perClass ? group[0].label : chart}
+            series={group}
+            showCi={tech}
+            yLabel={L.errorY}
+            naText={L.notAvailable}
+          />
+        </Scroller>
+      ))}
       <Legend items={[L.legendBelowFloor, ...(tech ? [L.legendInterval] : [])]} />
       <p className={styles.callout}>{note}</p>
       <Numbers>
@@ -243,6 +248,7 @@ function Body({ props, state }: { props: Props; state: UiState }) {
         note={g.error_by_z.star_note}
         series={g.error_by_z.series.map(toSeries)}
         tech={state.tech}
+        perClass
       />
       <Confusion g={g} tech={state.tech} />
     </div>

@@ -36,6 +36,13 @@ const render = (showCi: boolean) =>
   );
 
 describe("RateByBin", () => {
+  it("series com faixas diferentes lancam erro em vez de desenhar errado", () => {
+    const mixed = [SERIES[0], { ...SERIES[1], rows: [row("x", 0.3), row("y", 0.4), row("z", 0.1)] }];
+    expect(() =>
+      renderToStaticMarkup(<RateByBin id="r" title="Taxa" series={mixed} showCi={false} yLabel="Erro" naText="sem dado" />),
+    ).toThrow("RateByBin: todas as series devem ter as mesmas faixas");
+  });
+
   it("um marcador cheio por linha reportavel; abaixo do piso e vazado com o texto do JSON", () => {
     const html = render(false);
     expect(count(html, "data-point")).toBe(4);

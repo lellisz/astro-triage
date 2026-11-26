@@ -46,13 +46,26 @@ const NUMBER = /\d+(?:[.,]\d+)*%?/g;
 describe("/graficos: modo simples", () => {
   const html = render("");
 
-  it("quatro figuras, cada uma com alternativa em tabela", () => {
-    expect(count(html, "<figure")).toBe(4);
+  it("cinco figuras (o by-z tem uma por classe), cada uma com alternativa em tabela", () => {
+    expect(count(html, "<figure")).toBe(5);
     expect(count(html, "<details")).toBe(4);
     expect(count(html, "<table")).toBe(4 + 1);
     expect(count(html, "<th scope=\"col\"")).toBeGreaterThan(8);
     expect(count(html, "Ver os números")).toBe(4);
     expect(count(html, 'role="img"')).toBeGreaterThanOrEqual(3);
+  });
+
+  it("o by-z tem um grafico por classe, com os rotulos de faixa exatos do JSON da classe", () => {
+    const section = html.slice(html.indexOf('id="graf-by-z"'), html.indexOf('id="graf-confusion"'));
+    expect(count(section, "<figure")).toBe(graficos.error_by_z.series.length);
+    expect(graficos.error_by_z.series.length).toBe(2);
+    for (const s of graficos.error_by_z.series) {
+      const start = section.indexOf(`id="graf-by-z-chart-${s.cls}"`);
+      expect(start).toBeGreaterThan(-1);
+      const fig = section.slice(start, section.indexOf("</figure>", start));
+      const labels = [...fig.matchAll(/<text[^>]*data-bin-label[^>]*>([^<]*)<\/text>/g)].map((m) => decode(m[1]));
+      expect(labels).toEqual(s.rows.map((r) => r.label));
+    }
   });
 
   it("sem whiskers, sem curva crua e sem colunas tecnicas", () => {
@@ -88,7 +101,7 @@ describe("/graficos: modo simples", () => {
   });
 
   it("figuras rotuladas e tabelas reais", () => {
-    expect(count(html, "<figcaption")).toBe(3);
+    expect(count(html, "<figcaption")).toBe(4);
     expect(count(html, "aria-labelledby")).toBeGreaterThanOrEqual(7);
     expect(html).toContain("<caption>");
   });
@@ -105,8 +118,8 @@ describe("/graficos: modo tecnico", () => {
     expect(html).toContain("Objetos");
   });
 
-  it("as mesmas quatro figuras", () => {
-    expect(count(html, "<figure")).toBe(4);
+  it("as mesmas cinco figuras", () => {
+    expect(count(html, "<figure")).toBe(5);
     expect(count(html, "<details")).toBe(4);
   });
 });
