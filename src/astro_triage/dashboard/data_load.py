@@ -80,7 +80,7 @@ def read_release(root: Path, name: str, results: dict, report: dict) -> Release:
 
     feats = pd.read_parquet(
         root / "features.parquet",
-        columns=["source_id", "phot_g_mean_mag", "astrometric_params_solved"],
+        columns=["source_id", "phot_g_mean_mag", "astrometric_params_solved", "bp_rp"],
         filters=[("source_id", "in", ids.tolist())],
     )
     parts = [

@@ -244,7 +244,9 @@ INVARIANTS: edges never derived from data; no smoothing
 ```
 
 Also: `graficos.py` `_cmd` (all 252 cells; below floor n/errors/rate null; ticks text via
-`fmt.pt_num`; cap = max reportable rate and n); `web_text.cmd_note(n_missing, n_outside, floor)`;
+`fmt.pt_num`; `g_labels` (18) and `c_labels` (14) as "lo–hi" texts, 1 and 2 digits; cap = max
+reportable rate and n, with `rate_text`, `count_text`, `rate_zero_text`, `count_zero_text` from
+`fmt.pt_pct`/`fmt.pt_int`, so the front end formats no number of the map); `web_text.cmd_note(n_missing, n_outside, floor)`;
 synthetic features gain a deterministic `bp_rp` (no RNG draw, e.g. from `sid`); fixture regenerated;
 `web/components/charts/CmdMap.tsx` (SVG rects, grey opacity with `MIN_OPACITY` from
 `components/sky/scale.ts`, below-floor cells hatched with a pattern and no value, `<title>` per

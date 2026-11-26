@@ -636,9 +636,12 @@ graficos.json = Head(page "graficos") + {
                 rows[]: { system, label, cls, mean: Num(pct), low: number, high: number,
                           detail_text: string } },                     # G6 only; null before
   cmd: null | { g_edges: number[19], c_edges: number[15],
+                g_labels: string[18], c_labels: string[14],         # "lo–hi" per bin, fmt.pt_num
                 g_ticks[]: { value, text }, c_ticks[]: { value, text },
                 cells[252]: { gi: int, ci: int, n: Num, errors: Num, rate: Est, below_floor: bool },
-                cap: { rate: number | null, count: number | null },
+                cap: { rate: number | null, count: number | null,
+                       rate_text: string | null, count_text: string | null,
+                       rate_zero_text: string, count_zero_text: string },
                 n_missing: Num, n_outside: Num, note: string }         # G7 only; null before
 }
 ```

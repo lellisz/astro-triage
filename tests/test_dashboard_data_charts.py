@@ -29,6 +29,7 @@ def _release(n: int = 300, classes: tuple[str, ...] = CLASSES) -> D.Release:
             "healpix_l5": np.arange(n) % 5,
             "phot_g_mean_mag": rng.uniform(9.0, 23.5, size=n),
             "sdss_z": rng.uniform(-0.01, 3.5, size=n),
+            "bp_rp": np.linspace(-1.0, 3.5, n),
         }
     )
     for j, c in enumerate(CLASSES):
@@ -180,3 +181,62 @@ def test_g_edges_match_the_evaluation_histogram_of_full_v0():
         pytest.skip("ASTRO_DATA_ROOT sem interim/full_v0/eval/results.json")
     results = json.loads(path.read_text(encoding="utf-8"))
     assert list(C.G_EDGES) == results["histograms"]["g_mag_edges"]
+
+
+def _cmd_release(g: list[float], c: list[float], err: list[bool]) -> D.Release:
+    test = pd.DataFrame({"phot_g_mean_mag": g, "bp_rp": c, f"err_{MODEL}": err})
+    return D.Release("t", D.REPO_ROOT, {"meta": {}}, {}, pd.DataFrame(), test, 0)
+
+
+def test_cmd_edges_come_from_the_constants():
+    g, c = C.cmd_edges()
+    assert len(g) == 19 and len(c) == 15
+    assert (g[0], g[-1]) == (12.0, 21.0) and (c[0], c[-1]) == (-0.5, 3.0)
+    assert np.diff(g).tolist() == [0.5] * 18 and np.diff(c).tolist() == [0.25] * 14
+    assert (C.CMD_G, C.CMD_C) == ((12.0, 21.0, 0.5), (-0.5, 3.0, 0.25))
+
+
+def test_cmd_cells_are_half_open_and_cover_252_cells():
+    rel = _cmd_release(
+        [12.0, 12.4999, 12.5, 20.9999, 21.0, 11.9999],
+        [-0.5, 0.0, 0.25, 2.9999, 0.0, 0.0],
+        [True, False, True, True, True, True],
+    )
+    grid = C.cmd_cells(rel, MODEL)
+    cells = grid.cells
+    assert len(cells) == 252 and list(cells.columns) == [
+        "gi", "ci", "n", "errors", "rate", "ci_lo", "ci_hi",
+    ]  # fmt: skip
+    at = lambda gi, ci: cells[(cells["gi"] == gi) & (cells["ci"] == ci)].iloc[0]
+    assert (at(0, 0)["n"], at(0, 0)["errors"]) == (1, 1)  # G = 12.0, BP-RP = -0.5
+    assert (at(0, 2)["n"], at(0, 2)["errors"]) == (1, 0)  # G just below 12.5, BP-RP = 0.0
+    assert at(1, 3)["n"] == 1  # G = 12.5 opens the second row, BP-RP = 0.25 the fourth column
+    assert at(17, 13)["n"] == 1  # last cell, upper edges excluded
+    assert int(cells["n"].sum()) == 4
+    assert grid.n_outside == 2 and grid.n_missing == 0  # G = 21.0 and G just under 12.0
+
+
+def test_cmd_cells_count_missing_apart_and_keep_empty_cells_without_rate():
+    rel = _cmd_release([15.0, math.nan, 15.0, 15.0], [1.0, 1.0, math.nan, 3.5], [True] * 4)
+    grid = C.cmd_cells(rel, MODEL)
+    assert grid.n_missing == 2 and grid.n_outside == 1
+    assert int(grid.cells["n"].sum()) == 1
+    empty = grid.cells[grid.cells["n"] == 0]
+    assert len(empty) == 251
+    assert empty["rate"].isna().all() and empty["ci_lo"].isna().all()
+    full = grid.cells[grid.cells["n"] == 1].iloc[0]
+    assert (full["rate"], full["errors"]) == (1.0, 1)
+    assert (full["ci_lo"], full["ci_hi"]) == wilson_interval(1, 1)
+
+
+def test_cmd_cells_sum_with_totals_to_the_test_fold_and_ignore_the_data_range():
+    rel = _release()
+    grid = C.cmd_cells(rel, MODEL)
+    assert int(grid.cells["n"].sum()) + grid.n_missing + grid.n_outside == len(rel.test)
+    assert grid.n_outside > 0
+    assert int(grid.cells["errors"].sum()) <= int(rel.test[f"err_{MODEL}"].sum())
+    shifted = rel.test.assign(bp_rp=rel.test["bp_rp"] + 10.0)
+    other = D.Release("t", D.REPO_ROOT, {"meta": {}}, {}, pd.DataFrame(), shifted, 0)
+    assert int(C.cmd_cells(other, MODEL).cells["n"].sum()) == 0
+    with pytest.raises(AttributeError):
+        grid.n_missing = 0  # type: ignore[misc]

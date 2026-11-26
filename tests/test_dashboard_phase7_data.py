@@ -42,6 +42,7 @@ def fake_release(root: Path, nan_score: bool = True, dup: bool = False) -> Path:
             "source_id": ids,
             "phot_g_mean_mag": [15.0 + i for i in ids],
             "astrometric_params_solved": 31,
+            "bp_rp": [0.5 + 0.25 * i for i in ids],
             "junk": 0,
         }
     ).to_parquet(root / "features.parquet")
@@ -81,6 +82,7 @@ def test_read_release_columns_counts_and_unscored(tmp_path: Path) -> None:
         "true",
         "phot_g_mean_mag",
         "astrometric_params_solved",
+        "bp_rp",
     ]
     want += ["dsc_available"]
     for m in M:

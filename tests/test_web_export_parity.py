@@ -8,7 +8,9 @@ synthetic export and compares it with the versioned fixture the Next.js build re
 
 from __future__ import annotations
 
+import dataclasses
 import json
+import math
 import os
 from pathlib import Path
 
@@ -175,6 +177,15 @@ def _results_dl() -> dict:
     }
 
 
+def _bp_rp(sid: int) -> float:
+    """Deterministic colour: three columns, a gap (NaN) and a value off the grid, no RNG."""
+    if sid % 11 == 0:
+        return float("nan")
+    if sid % 13 == 0:
+        return 3.2
+    return 0.1 + 0.5 * ((sid // 2) % 3)
+
+
 def build_release(base: Path, name: str = NAME, *, dl: bool = True) -> Path:
     """Write a complete synthetic release under ``base/interim/<name>``; return its root."""
     root = base / "interim" / name
@@ -212,6 +223,7 @@ def build_release(base: Path, name: str = NAME, *, dl: bool = True) -> Path:
             "source_id": ids,
             "phot_g_mean_mag": mag,
             "astrometric_params_solved": 31,
+            "bp_rp": [_bp_rp(i) for i in ids],
         }
     ).to_parquet(root / "features.parquet")
     test_ids = [i for i, f in zip(ids, fold, strict=True) if f == "test"]
@@ -337,12 +349,51 @@ def _assert_rows(rows: list[dict], table: pd.DataFrame, floor: int) -> None:
             _same_est(got["rate"], r["rate"], r["ci_lo"], r["ci_hi"])
 
 
+def assert_cmd_parity(rel: D.Release, cmd: dict, floor: int) -> None:
+    """The 252 cells of the map equal ``cmd_cells``; below the floor nothing but the flag."""
+    grid = data_charts.cmd_cells(rel, graficos.MODEL)
+    g_edges, c_edges = data_charts.cmd_edges()
+    assert cmd["g_edges"] == g_edges.tolist() and cmd["c_edges"] == c_edges.tolist()
+    assert len(cmd["g_edges"]) == 19 and len(cmd["c_edges"]) == 15
+    assert len(cmd["cells"]) == len(grid.cells) == 252
+    assert cmd["n_missing"]["value"] == grid.n_missing
+    assert cmd["n_outside"]["value"] == grid.n_outside
+    for t in (*cmd["g_ticks"], *cmd["c_ticks"]):
+        assert t["text"] == fmt.pt_num(t["value"], 0 if t in cmd["g_ticks"] else 1)
+    reportable = []
+    for got, (_, want) in zip(cmd["cells"], grid.cells.iterrows(), strict=True):
+        assert (got["gi"], got["ci"]) == (want["gi"], want["ci"])
+        assert got["below_floor"] == (int(want["n"]) < floor)
+        if got["below_floor"]:
+            assert got["n"]["value"] is None and got["errors"]["value"] is None
+            assert (got["rate"]["point"], got["rate"]["lo"], got["rate"]["hi"]) == (None,) * 3
+        else:
+            reportable.append(got)
+            assert got["n"]["value"] == int(want["n"])
+            assert got["errors"]["value"] == int(want["errors"])
+            _same_est(got["rate"], want["rate"], want["ci_lo"], want["ci_hi"])
+    assert cmd["cap"]["count"] == max((c["n"]["value"] for c in reportable), default=None)
+    assert cmd["cap"]["rate"] == max((c["rate"]["point"] for c in reportable), default=None)
+    assert len(cmd["g_labels"]) == 18 and len(cmd["c_labels"]) == 14
+    for i, label in enumerate(cmd["g_labels"]):
+        assert label == f"{fmt.pt_num(g_edges[i], 1)}–{fmt.pt_num(g_edges[i + 1], 1)}"
+    for i, label in enumerate(cmd["c_labels"]):
+        assert label == f"{fmt.pt_num(c_edges[i], 2)}–{fmt.pt_num(c_edges[i + 1], 2)}"
+    cap = cmd["cap"]
+    cap_digits = 2 if (cap["rate"] or 1) < graficos.SMALL_RATE else 1
+    assert cap["rate_text"] == (None if cap["rate"] is None else fmt.pt_pct(cap["rate"], cap_digits))
+    assert cap["count_text"] == (None if cap["count"] is None else fmt.pt_int(cap["count"]))
+    assert (cap["rate_zero_text"], cap["count_zero_text"]) == (fmt.pt_pct(0, 0), fmt.pt_int(0))
+    assert int(grid.cells["n"].sum()) + grid.n_missing + grid.n_outside == len(rel.test)
+
+
 def assert_graficos_parity(rel: D.Release, docs: dict) -> None:
     """Every bin, rate row and confusion cell of graficos.json equals ``data_charts``."""
     doc = docs["graficos"]
     floor = int(rel.meta["floor"]["min_objects"])
     model = graficos.MODEL
-    assert doc["floor"] == floor and doc["ece"] is None and doc["cmd"] is None
+    assert doc["floor"] == floor and doc["ece"] is None
+    assert_cmd_parity(rel, doc["cmd"], floor)
     for series in doc["calibration"]["series"]:
         frame = data_charts.calibration_bins(rel, model)[series["cls"]]
         assert len(series["bins"]) == len(frame) > 0
@@ -407,6 +458,55 @@ def _results_dl_of(rel: D.Release) -> dict | None:
 
 def test_parity_on_synthetic_release(synthetic) -> None:
     assert_parity(synthetic)
+
+
+def _dense_release() -> D.Release:
+    """100 objects in one cell, 3 in another, 2 off the grid, 1 without colour (floor 5)."""
+    g = [15.2] * 100 + [18.7] * 3 + [15.2, 21.5, 15.2]
+    c = [0.6] * 100 + [1.4] * 3 + [3.6, 0.6, math.nan]
+    err = ([True] * 20 + [False] * 80) + [True, False, False] + [False] * 3
+    test = pd.DataFrame({"phot_g_mean_mag": g, "bp_rp": c, f"err_{graficos.MODEL}": err})
+    results = {"meta": {"floor": FLOOR}}
+    return D.Release("dense", ROOT, results, {}, pd.DataFrame(), test, 0)
+
+
+def test_cmd_block_of_a_dense_release_matches_the_grid_and_hides_small_cells() -> None:
+    rel = _dense_release()
+    cmd = export.clean(graficos._cmd(rel, FLOOR["min_objects"]))
+    assert_cmd_parity(rel, cmd, FLOOR["min_objects"])
+    shown = [c for c in cmd["cells"] if not c["below_floor"]]
+    assert len(shown) == 1 and shown[0]["n"]["value"] == 100
+    assert shown[0]["errors"]["value"] == 20 and shown[0]["rate"]["point"] == 0.2
+    assert (cmd["cap"]["rate"], cmd["cap"]["count"]) == (0.2, 100)
+    assert (cmd["cap"]["rate_text"], cmd["cap"]["count_text"]) == ("20,0%", "100")
+    assert (cmd["n_missing"]["value"], cmd["n_outside"]["value"]) == (1, 2)
+    three = next(c for c in cmd["cells"] if (c["gi"], c["ci"]) == (13, 7))
+    assert three["below_floor"] and three["n"]["value"] is None  # 3 objects, floor 5
+    assert three["errors"]["value"] is None and three["rate"]["point"] is None
+    assert "5" in cmd["note"]
+
+
+def test_cmd_json_has_no_per_object_data_and_stays_small(synthetic) -> None:
+    doc = export.clean(_docs(synthetic))["graficos"]
+    forbidden = {"source_id", "ra", "dec", "l", "b", "healpix_l5", "hp"}
+
+    def walk(node: object) -> None:
+        if isinstance(node, dict):
+            assert not forbidden & set(node)
+            for v in node.values():
+                walk(v)
+        elif isinstance(node, list):
+            assert len(node) <= 252
+            for v in node:
+                walk(v)
+
+    walk(doc)
+    assert len(json.dumps(doc["cmd"]).encode()) < 150 * 1024
+
+
+def test_graficos_without_bp_rp_has_no_map(synthetic) -> None:
+    rel = dataclasses.replace(synthetic, test=synthetic.test.drop(columns=["bp_rp"]))
+    assert graficos.graficos(rel)["cmd"] is None
 
 
 def test_parity_detects_a_changed_value(synthetic, monkeypatch) -> None:

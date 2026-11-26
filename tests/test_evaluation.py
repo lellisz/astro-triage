@@ -141,6 +141,7 @@ def make_data(
     else:
         feat["astrometric_params_solved"] = 95
     feat["phot_g_mean_mag"] = 15.0 + (np.arange(n) % 5)
+    feat["bp_rp"] = 0.5 + 0.25 * (np.arange(n) % 5)
 
     vt = lab["fold"].isin(["val", "test"]).to_numpy()
     preds = {}

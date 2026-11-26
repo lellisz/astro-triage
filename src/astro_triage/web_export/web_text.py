@@ -79,6 +79,16 @@ def missing_g_note(counts: Mapping[str, int]) -> str:
     )
 
 
+def cmd_note(n_missing: int, n_outside: int, floor: int) -> str:
+    """Floor rule of the colour-magnitude map and the two totals that are not on it."""
+    return (
+        f"Células com menos de {fmt.pt_int(floor)} objetos, vazias incluídas, não têm taxa "
+        "confiável e aparecem hachuradas, sem valor. Ficam fora do mapa "
+        f"{fmt.pt_int(n_missing)} objetos sem magnitude G ou sem cor BP-RP e "
+        f"{fmt.pt_int(n_outside)} fora da área desenhada."
+    )
+
+
 def how(by_rate: bool, n_hidden: int, floor: int, hidden_on_map: bool) -> str:
     """Same structure as ``sky_text.how``, with the colour reference replaced by grey level."""
     if not by_rate:

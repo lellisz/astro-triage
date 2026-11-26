@@ -2,18 +2,19 @@
 
 Reshapes ``dashboard.data_charts`` into the JSON of ADR 0008 (A1.8). The floor is applied here:
 a bin or cell under it has null values, and in the confusion cells ``n`` is null too.
-``ece`` and ``cmd`` stay null until their own tasks exist.
+``ece`` stays null until its own task exists; ``cmd`` is null when the release has no BP-RP.
 """
 
 from __future__ import annotations
 
 import math
+from itertools import pairwise
 from typing import Final
 
 import pandas as pd
 
 from astro_triage.dashboard import data as D
-from astro_triage.dashboard import data_charts
+from astro_triage.dashboard import data_charts, fmt
 from astro_triage.dashboard.charts_base import MODEL_PT
 from astro_triage.dashboard.data_release import CLASSES
 from astro_triage.dashboard.html_dl import class_label
@@ -134,6 +135,52 @@ def _confusion(rel: D.Release, floor: int) -> dict:
     }
 
 
+def _cmd(rel: D.Release, floor: int) -> dict:
+    """Colour-magnitude map: all 252 cells, the floor applied; ticks at whole magnitudes."""
+    grid = data_charts.cmd_cells(rel, MODEL)
+    g_edges, c_edges = data_charts.cmd_edges()
+    cells = []
+    for r in grid.cells.itertuples(index=False):
+        below = int(r.n) < floor
+        cells.append(
+            {
+                "gi": int(r.gi),
+                "ci": int(r.ci),
+                "n": num(None if below else int(r.n)),
+                "errors": num(None if below else int(r.errors)),
+                "rate": est(None, None, None)
+                if below
+                else _rate(r.rate, r.ci_lo, r.ci_hi),
+                "below_floor": below,
+            }
+        )
+    shown = [c for c in cells if not c["below_floor"]]
+    cap_rate = max((c["rate"]["point"] for c in shown), default=None)
+    cap_count = max((c["n"]["value"] for c in shown), default=None)
+    return {
+        "g_edges": [float(e) for e in g_edges],
+        "c_edges": [float(e) for e in c_edges],
+        "g_labels": [f"{fmt.pt_num(lo, 1)}–{fmt.pt_num(hi, 1)}" for lo, hi in pairwise(g_edges)],
+        "c_labels": [f"{fmt.pt_num(lo, 2)}–{fmt.pt_num(hi, 2)}" for lo, hi in pairwise(c_edges)],
+        "g_ticks": [{"value": float(e), "text": fmt.pt_num(e, 0)} for e in g_edges[::2]],
+        "c_ticks": [{"value": float(e), "text": fmt.pt_num(e, 1)} for e in c_edges[::2]],
+        "cells": cells,
+        "cap": {
+            "rate": cap_rate,
+            "count": cap_count,
+            "rate_text": None
+            if cap_rate is None
+            else fmt.pt_pct(cap_rate, 2 if cap_rate < SMALL_RATE else 1),
+            "count_text": None if cap_count is None else fmt.pt_int(cap_count),
+            "rate_zero_text": fmt.pt_pct(0, 0),
+            "count_zero_text": fmt.pt_int(0),
+        },
+        "n_missing": num(grid.n_missing),
+        "n_outside": num(grid.n_outside),
+        "note": web_text.cmd_note(grid.n_missing, grid.n_outside, floor),
+    }
+
+
 def graficos(rel: D.Release) -> dict:
     """graficos.json of a release; every number comes from ``data_charts``."""
     floor = int(rel.meta["floor"]["min_objects"])
@@ -156,5 +203,5 @@ def graficos(rel: D.Release) -> dict:
         "error_by_z": {"star_note": web_text.STAR_Z_NOTE, "series": by_z},
         "confusion": _confusion(rel, floor),
         "ece": None,
-        "cmd": None,
+        "cmd": _cmd(rel, floor) if "bp_rp" in rel.test.columns else None,
     }

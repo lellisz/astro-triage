@@ -97,13 +97,14 @@ def _check_graficos(doc: dict) -> None:
                 if field in value:
                     sub = value[field]
                     assert sub["value" if "value" in sub else "point"] is None, path
-            if "pred" in value:
-                assert value["n"]["value"] is None, f"{path}: n of a confusion cell"
+            if "pred" in value or "gi" in value:
+                assert value["n"]["value"] is None, f"{path}: n of a confusion or map cell"
             else:
                 assert value["n"]["value"] is not None, f"{path}: 1D charts keep n"
             for raw in ("raw_p_mean", "raw_freq"):
                 assert value.get(raw) is None, path
-    assert doc["page"] == "graficos" and doc["ece"] is None and doc["cmd"] is None
+    assert doc["page"] == "graficos" and doc["ece"] is None
+    assert doc["cmd"] is None or len(doc["cmd"]["cells"]) == GRAFICOS_MAX_ARRAY
 
 
 def _export_dir(out: Path, release: str) -> Path:
