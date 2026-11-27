@@ -1,0 +1,140 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="426" viewBox="0 0 440 426" role="img" aria-labelledby="dsc-diferencas-title" aria-describedby="dsc-diferencas-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="dsc-diferencas-title">Diferenças pareadas da medida F macro</title><desc id="dsc-diferencas-desc">LightGBM completo − Gaia DSC (allosmod): +0,100, IC 95%: +0,050 a +0,150; LightGBM completo − LightGBM sem indicadores de astrometria: +0,050, IC 95%: +0,000 a +0,100</desc>
+ <g id="dsc-diferencas-figure_1">
+  <g id="dsc-diferencas-patch_1">
+   <path d="M 0 426 
+L 440 426 
+L 440 0 
+L 0 0 
+z
+" style="fill: #141414"/>
+  </g>
+  <g id="dsc-diferencas-axes_1">
+   <g id="dsc-diferencas-line2d_1">
+    <path d="M 24 58 
+L 24 226 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="dsc-diferencas-line2d_2">
+    <path d="M 77.2 58 
+L 77.2 226 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="dsc-diferencas-line2d_3">
+    <path d="M 130.4 58 
+L 130.4 226 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="dsc-diferencas-line2d_4">
+    <path d="M 183.6 58 
+L 183.6 226 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="dsc-diferencas-line2d_5">
+    <path d="M 236.8 58 
+L 236.8 226 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="dsc-diferencas-line2d_6">
+    <path d="M 290 58 
+L 290 226 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="dsc-diferencas-line2d_7">
+    <path d="M 77.2 58 
+L 77.2 226 
+" style="fill: none; stroke-dasharray: 4,4; stroke-dashoffset: 0; stroke: #8c8c8c"/>
+   </g>
+   <g id="dsc-diferencas-line2d_8">
+    <path d="M 24 226 
+L 290 226 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="dsc-diferencas-line2d_9">
+    <path d="M 130.4 102 
+L 236.8 102 
+" style="fill: none; stroke: #a0a0a0; stroke-width: 3"/>
+   </g>
+   <g id="dsc-diferencas-line2d_10">
+    <path d="M 183.6 94 
+L 183.6 110 
+" style="fill: none; stroke: #eeeeee; stroke-width: 2.5"/>
+   </g>
+   <g id="dsc-diferencas-line2d_11">
+    <path d="M 77.2 192 
+L 183.6 192 
+" style="fill: none; stroke: #a0a0a0; stroke-width: 3"/>
+   </g>
+   <g id="dsc-diferencas-line2d_12">
+    <path d="M 130.4 184 
+L 130.4 200 
+" style="fill: none; stroke: #eeeeee; stroke-width: 2.5"/>
+   </g>
+   <g id="dsc-diferencas-text_1">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="22" transform="rotate(-0 16 22)">Diferenças pareadas da medida F macro</text>
+   </g>
+   <g id="dsc-diferencas-text_2">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="42" transform="rotate(-0 16 42)">população c_sdsc · prior P0</text>
+   </g>
+   <g id="dsc-diferencas-text_3">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="80" transform="rotate(-0 16 80)">LightGBM completo − Gaia DSC (allosmod)</text>
+   </g>
+   <g id="dsc-diferencas-text_4">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="150" transform="rotate(-0 16 150)">LightGBM completo − LightGBM sem indicadores de</text>
+   </g>
+   <g id="dsc-diferencas-text_5">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="170" transform="rotate(-0 16 170)">astrometria</text>
+   </g>
+   <g id="dsc-diferencas-text_6">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="24" y="248" transform="rotate(-0 24 248)">-0,05</text>
+   </g>
+   <g id="dsc-diferencas-text_7">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="77.2" y="248" transform="rotate(-0 77.2 248)">0,00</text>
+   </g>
+   <g id="dsc-diferencas-text_8">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="130.4" y="248" transform="rotate(-0 130.4 248)">+0,05</text>
+   </g>
+   <g id="dsc-diferencas-text_9">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="183.6" y="248" transform="rotate(-0 183.6 248)">+0,10</text>
+   </g>
+   <g id="dsc-diferencas-text_10">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="236.8" y="248" transform="rotate(-0 236.8 248)">+0,15</text>
+   </g>
+   <g id="dsc-diferencas-text_11">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="290" y="248" transform="rotate(-0 290 248)">+0,20</text>
+   </g>
+   <g id="dsc-diferencas-text_12">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="107" transform="rotate(-0 300 107)">+0,100</text>
+   </g>
+   <g id="dsc-diferencas-text_13">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="127" transform="rotate(-0 300 127)">+0,050 a +0,150</text>
+   </g>
+   <g id="dsc-diferencas-text_14">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="197" transform="rotate(-0 300 197)">+0,050</text>
+   </g>
+   <g id="dsc-diferencas-text_15">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="217" transform="rotate(-0 300 217)">+0,000 a +0,100</text>
+   </g>
+   <g id="dsc-diferencas-text_16">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="157" y="272" transform="rotate(-0 157 272)">Diferença de F macro (escala 0 a 1)</text>
+   </g>
+   <g id="dsc-diferencas-text_17">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="300" transform="rotate(-0 16 300)">n = 321 objetos pareados</text>
+   </g>
+   <g id="dsc-diferencas-text_18">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="320" transform="rotate(-0 16 320)">Traço horizontal: IC 95% pareado · traço vertical:</text>
+   </g>
+   <g id="dsc-diferencas-text_19">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="340" transform="rotate(-0 16 340)">estimativa</text>
+   </g>
+   <g id="dsc-diferencas-text_20">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="360" transform="rotate(-0 16 360)">Tracejado vertical: diferença zero</text>
+   </g>
+   <g id="dsc-diferencas-text_21">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="390" transform="rotate(-0 16 390)">PROVISÓRIO</text>
+   </g>
+   <g id="dsc-diferencas-text_22">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="410" transform="rotate(-0 16 410)">LightGBM e Gaia DSC · fixture_v0</text>
+   </g>
+  </g>
+ </g>
+</svg>

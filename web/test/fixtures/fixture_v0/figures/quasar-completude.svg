@@ -1,0 +1,193 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="552" viewBox="0 0 440 552" role="img" aria-labelledby="quasar-completude-title" aria-describedby="quasar-completude-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="quasar-completude-title">Completude de quasar por regra e prior</title><desc id="quasar-completude-desc">como entregue · P2: 90,0%, IC 95%: 88,0% a 92,0%; ajustada ao prior · P1: 80,0%, IC 95%: 78,0% a 82,0%; ajustada ao prior · P2: 80,0%, IC 95%: 78,0% a 82,0%; ajustada ao prior · P3 (parcial): 80,0%, IC 95%: 78,0% a 82,0%</desc>
+ <g id="quasar-completude-figure_1">
+  <g id="quasar-completude-patch_1">
+   <path d="M 0 552 
+L 440 552 
+L 440 0 
+L 0 0 
+z
+" style="fill: #141414"/>
+  </g>
+  <g id="quasar-completude-axes_1">
+   <g id="quasar-completude-patch_2">
+    <path d="M 12 90 
+L 428 90 
+L 428 142 
+L 12 142 
+L 12 90 
+z
+" style="fill: none; stroke: #b4b4b4; stroke-linejoin: miter"/>
+   </g>
+   <g id="quasar-completude-patch_3">
+    <path d="M 16 115 
+L 286 115 
+L 286 129 
+L 16 129 
+z
+" style="fill: #7a7a7a"/>
+   </g>
+   <g id="quasar-completude-patch_4">
+    <path d="M 16 171 
+L 256 171 
+L 256 185 
+L 16 185 
+z
+" style="fill: #7a7a7a"/>
+   </g>
+   <g id="quasar-completude-patch_5">
+    <path d="M 16 227 
+L 256 227 
+L 256 241 
+L 16 241 
+z
+" style="fill: #7a7a7a"/>
+   </g>
+   <g id="quasar-completude-patch_6">
+    <path d="M 16 283 
+L 256 283 
+L 256 297 
+L 16 297 
+L 16 283 
+z
+" style="fill: none; stroke-dasharray: 4,3; stroke-dashoffset: 0; stroke: #a0a0a0; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="quasar-completude-line2d_1">
+    <path d="M 16 88 
+L 16 312 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="quasar-completude-line2d_2">
+    <path d="M 91 88 
+L 91 312 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="quasar-completude-line2d_3">
+    <path d="M 166 88 
+L 166 312 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="quasar-completude-line2d_4">
+    <path d="M 241 88 
+L 241 312 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="quasar-completude-line2d_5">
+    <path d="M 316 88 
+L 316 312 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="quasar-completude-line2d_6">
+    <path d="M 16 312 
+L 316 312 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="quasar-completude-line2d_7">
+    <path d="M 280 122 
+L 292 122 
+" style="fill: none; stroke: #eeeeee; stroke-width: 1.5"/>
+   </g>
+   <g id="quasar-completude-line2d_8">
+    <path d="M 250 178 
+L 262 178 
+" style="fill: none; stroke: #eeeeee; stroke-width: 1.5"/>
+   </g>
+   <g id="quasar-completude-line2d_9">
+    <path d="M 250 234 
+L 262 234 
+" style="fill: none; stroke: #eeeeee; stroke-width: 1.5"/>
+   </g>
+   <g id="quasar-completude-line2d_10">
+    <path d="M 250 290 
+L 262 290 
+" style="fill: none; stroke: #eeeeee; stroke-width: 1.5"/>
+   </g>
+   <g id="quasar-completude-text_1">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="22" transform="rotate(-0 16 22)">Completude de quasar por regra e prior</text>
+   </g>
+   <g id="quasar-completude-text_2">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="42" transform="rotate(-0 16 42)">LightGBM completo · conjunto de teste · por regra e</text>
+   </g>
+   <g id="quasar-completude-text_3">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="62" transform="rotate(-0 16 62)">prior</text>
+   </g>
+   <g id="quasar-completude-text_4">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="16" y="334" transform="rotate(-0 16 334)">0%</text>
+   </g>
+   <g id="quasar-completude-text_5">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="91" y="334" transform="rotate(-0 91 334)">25%</text>
+   </g>
+   <g id="quasar-completude-text_6">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="166" y="334" transform="rotate(-0 166 334)">50%</text>
+   </g>
+   <g id="quasar-completude-text_7">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="241" y="334" transform="rotate(-0 241 334)">75%</text>
+   </g>
+   <g id="quasar-completude-text_8">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="316" y="334" transform="rotate(-0 316 334)">100%</text>
+   </g>
+   <g id="quasar-completude-text_9">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="106" transform="rotate(-0 16 106)">como entregue · P2</text>
+   </g>
+   <g id="quasar-completude-text_10">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="424" y="106" transform="rotate(-0 424 106)">88,0% a 92,0%</text>
+   </g>
+   <g id="quasar-completude-text_11">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="127" transform="rotate(-0 300 127)">90,0%</text>
+   </g>
+   <g id="quasar-completude-text_12">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="162" transform="rotate(-0 16 162)">ajustada ao prior · P1</text>
+   </g>
+   <g id="quasar-completude-text_13">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="424" y="162" transform="rotate(-0 424 162)">78,0% a 82,0%</text>
+   </g>
+   <g id="quasar-completude-text_14">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="270" y="183" transform="rotate(-0 270 183)">80,0%</text>
+   </g>
+   <g id="quasar-completude-text_15">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="218" transform="rotate(-0 16 218)">ajustada ao prior · P2</text>
+   </g>
+   <g id="quasar-completude-text_16">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="424" y="218" transform="rotate(-0 424 218)">78,0% a 82,0%</text>
+   </g>
+   <g id="quasar-completude-text_17">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="270" y="239" transform="rotate(-0 270 239)">80,0%</text>
+   </g>
+   <g id="quasar-completude-text_18">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="274" transform="rotate(-0 16 274)">ajustada ao prior · P3 (parcial)</text>
+   </g>
+   <g id="quasar-completude-text_19">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="424" y="274" transform="rotate(-0 424 274)">78,0% a 82,0%</text>
+   </g>
+   <g id="quasar-completude-text_20">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="270" y="295" transform="rotate(-0 270 295)">80,0%</text>
+   </g>
+   <g id="quasar-completude-text_21">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="166" y="358" transform="rotate(-0 166 358)">Completude de quasar (%)</text>
+   </g>
+   <g id="quasar-completude-text_22">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="386" transform="rotate(-0 16 386)">n = 45 objetos no teste</text>
+   </g>
+   <g id="quasar-completude-text_23">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="406" transform="rotate(-0 16 406)">Traço sobre a barra: IC 95% (bootstrap, 100</text>
+   </g>
+   <g id="quasar-completude-text_24">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="426" transform="rotate(-0 16 426)">reamostragens)</text>
+   </g>
+   <g id="quasar-completude-text_25">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="446" transform="rotate(-0 16 446)">Contorno: estado padrão (como entregue · P2) · barra</text>
+   </g>
+   <g id="quasar-completude-text_26">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="466" transform="rotate(-0 16 466)">tracejada: parcial</text>
+   </g>
+   <g id="quasar-completude-text_27">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="486" transform="rotate(-0 16 486)">P3 vale só para parte do céu (bandas B e C)</text>
+   </g>
+   <g id="quasar-completude-text_28">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="516" transform="rotate(-0 16 516)">PROVISÓRIO</text>
+   </g>
+   <g id="quasar-completude-text_29">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="536" transform="rotate(-0 16 536)">LightGBM completo · fixture_v0</text>
+   </g>
+  </g>
+ </g>
+</svg>

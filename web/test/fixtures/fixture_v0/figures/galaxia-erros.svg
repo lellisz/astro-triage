@@ -1,0 +1,144 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="552" viewBox="0 0 440 552" role="img" aria-labelledby="galaxia-erros-title" aria-describedby="galaxia-erros-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="galaxia-erros-title">Taxa de erro por grupo de galáxias</title><desc id="galaxia-erros-desc">Todas as galáxias: 80,0%, IC 95%: 54,8% a 93,0%, n = 15; As mais brilhantes: n/a, n/a, n = n/a; As mais próximas: n/a, n/a, n = n/a; As mais distantes: n/a, n/a, n = n/a</desc>
+ <g id="galaxia-erros-figure_1">
+  <g id="galaxia-erros-patch_1">
+   <path d="M 0 552 
+L 440 552 
+L 440 0 
+L 0 0 
+z
+" style="fill: #141414"/>
+  </g>
+  <g id="galaxia-erros-axes_1">
+   <g id="galaxia-erros-patch_2">
+    <path d="M 16 115 
+L 256 115 
+L 256 129 
+L 16 129 
+z
+" style="fill: #7a7a7a"/>
+   </g>
+   <g id="galaxia-erros-line2d_1">
+    <path d="M 16 88 
+L 16 312 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="galaxia-erros-line2d_2">
+    <path d="M 91 88 
+L 91 312 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="galaxia-erros-line2d_3">
+    <path d="M 166 88 
+L 166 312 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="galaxia-erros-line2d_4">
+    <path d="M 241 88 
+L 241 312 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="galaxia-erros-line2d_5">
+    <path d="M 316 88 
+L 316 312 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="galaxia-erros-line2d_6">
+    <path d="M 16 312 
+L 316 312 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="galaxia-erros-line2d_7">
+    <path d="M 180.443654 122 
+L 294.857352 122 
+" style="fill: none; stroke: #eeeeee; stroke-width: 1.5"/>
+   </g>
+   <g id="galaxia-erros-text_1">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="22" transform="rotate(-0 16 22)">Taxa de erro por grupo de galáxias</text>
+   </g>
+   <g id="galaxia-erros-text_2">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="42" transform="rotate(-0 16 42)">LightGBM completo · classe de maior probabilidade</text>
+   </g>
+   <g id="galaxia-erros-text_3">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="62" transform="rotate(-0 16 62)">(regra como entregue)</text>
+   </g>
+   <g id="galaxia-erros-text_4">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="16" y="334" transform="rotate(-0 16 334)">0%</text>
+   </g>
+   <g id="galaxia-erros-text_5">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="91" y="334" transform="rotate(-0 91 334)">25%</text>
+   </g>
+   <g id="galaxia-erros-text_6">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="166" y="334" transform="rotate(-0 166 334)">50%</text>
+   </g>
+   <g id="galaxia-erros-text_7">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="241" y="334" transform="rotate(-0 241 334)">75%</text>
+   </g>
+   <g id="galaxia-erros-text_8">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="316" y="334" transform="rotate(-0 316 334)">100%</text>
+   </g>
+   <g id="galaxia-erros-text_9">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="106" transform="rotate(-0 16 106)">Todas as galáxias · n = 15</text>
+   </g>
+   <g id="galaxia-erros-text_10">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="424" y="106" transform="rotate(-0 424 106)">54,8% a 93,0%</text>
+   </g>
+   <g id="galaxia-erros-text_11">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="302.857352" y="127" transform="rotate(-0 302.857352 127)">80,0%</text>
+   </g>
+   <g id="galaxia-erros-text_12">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="162" transform="rotate(-0 16 162)">As mais brilhantes · n = n/a</text>
+   </g>
+   <g id="galaxia-erros-text_13">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="424" y="162" transform="rotate(-0 424 162)">n/a</text>
+   </g>
+   <g id="galaxia-erros-text_14">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="184" transform="rotate(-0 16 184)">n/a</text>
+   </g>
+   <g id="galaxia-erros-text_15">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="218" transform="rotate(-0 16 218)">As mais próximas · n = n/a</text>
+   </g>
+   <g id="galaxia-erros-text_16">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="424" y="218" transform="rotate(-0 424 218)">n/a</text>
+   </g>
+   <g id="galaxia-erros-text_17">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="240" transform="rotate(-0 16 240)">n/a</text>
+   </g>
+   <g id="galaxia-erros-text_18">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="274" transform="rotate(-0 16 274)">As mais distantes · n = n/a</text>
+   </g>
+   <g id="galaxia-erros-text_19">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="424" y="274" transform="rotate(-0 424 274)">n/a</text>
+   </g>
+   <g id="galaxia-erros-text_20">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="296" transform="rotate(-0 16 296)">n/a</text>
+   </g>
+   <g id="galaxia-erros-text_21">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="166" y="358" transform="rotate(-0 166 358)">Taxa de erro (%)</text>
+   </g>
+   <g id="galaxia-erros-text_22">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="386" transform="rotate(-0 16 386)">Traço sobre a barra: IC 95% · n: galáxias no grupo</text>
+   </g>
+   <g id="galaxia-erros-text_23">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="406" transform="rotate(-0 16 406)">As faixas listadas são pequenas (veja o n de cada</text>
+   </g>
+   <g id="galaxia-erros-text_24">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="426" transform="rotate(-0 16 426)">uma); a taxa de todas as galáxias é calculada sobre o</text>
+   </g>
+   <g id="galaxia-erros-text_25">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="446" transform="rotate(-0 16 446)">conjunto inteiro, por isso as duas não se contradizem.</text>
+   </g>
+   <g id="galaxia-erros-text_26">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="466" transform="rotate(-0 16 466)">Faixas com menos de 5 objetos não têm taxa</text>
+   </g>
+   <g id="galaxia-erros-text_27">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="486" transform="rotate(-0 16 486)">confiável e aparecem como n/a.</text>
+   </g>
+   <g id="galaxia-erros-text_28">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="516" transform="rotate(-0 16 516)">PROVISÓRIO</text>
+   </g>
+   <g id="galaxia-erros-text_29">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="536" transform="rotate(-0 16 536)">LightGBM completo · fixture_v0</text>
+   </g>
+  </g>
+ </g>
+</svg>

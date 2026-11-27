@@ -1,0 +1,203 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="604" viewBox="0 0 440 604" role="img" aria-labelledby="taxa-por-z-qso-title" aria-describedby="taxa-por-z-qso-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="taxa-por-z-qso-title">Taxa de erro por faixa de redshift: Quasar</title><desc id="taxa-por-z-qso-desc">Quasar: 0,5–1 80,0% (37,6% a 96,4%), 1–1,5 62,5% (30,6% a 86,3%)</desc>
+ <g id="taxa-por-z-qso-figure_1">
+  <g id="taxa-por-z-qso-patch_1">
+   <path d="M 0 604 
+L 440 604 
+L 440 0 
+L 0 0 
+z
+" style="fill: #141414"/>
+  </g>
+  <g id="taxa-por-z-qso-axes_1">
+   <g id="taxa-por-z-qso-line2d_1">
+    <path d="M 64 312 
+L 326 312 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_2">
+    <path d="M 64 252 
+L 326 252 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_3">
+    <path d="M 64 192 
+L 326 192 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_4">
+    <path d="M 64 132 
+L 326 132 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_5">
+    <path d="M 64 72 
+L 326 72 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_6">
+    <path d="M 64 312 
+L 326 312 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_7">
+    <path d="M 64 72 
+L 64 312 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_8">
+    <path d="M 82.714286 312 
+L 82.714286 316 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_9">
+    <path d="M 120.142857 312 
+L 120.142857 316 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_10">
+    <path d="M 157.571429 312 
+L 157.571429 316 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_11">
+    <path d="M 195 312 
+L 195 316 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_12">
+    <path d="M 232.428571 312 
+L 232.428571 316 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_13">
+    <path d="M 269.857143 312 
+L 269.857143 316 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_14">
+    <path d="M 307.285714 312 
+L 307.285714 316 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_15">
+    <path d="M 120.142857 221.871689 
+L 120.142857 80.693786 
+" style="fill: none; stroke: #d6d6d6; stroke-width: 1.5"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_16">
+    <path d="M 157.571429 238.621825 
+L 157.571429 104.842629 
+" style="fill: none; stroke: #d6d6d6; stroke-width: 1.5"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_17">
+    <path d="M 120.142857 120 
+L 157.571429 162 
+" style="fill: none; stroke: #d6d6d6; stroke-width: 2"/>
+   </g>
+   <g id="taxa-por-z-qso-line2d_18">
+    <path d="M 160.571429 162 
+L 333 157 
+" style="fill: none; stroke: #8c8c8c"/>
+   </g>
+   <g id="taxa-por-z-qso-text_1">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="22" transform="rotate(-0 16 22)">Taxa de erro por faixa de redshift: Quasar</text>
+   </g>
+   <g id="taxa-por-z-qso-text_2">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="42" transform="rotate(-0 16 42)">LightGBM completo · conjunto de teste · Quasar</text>
+   </g>
+   <g id="taxa-por-z-qso-text_3">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="56" y="317" transform="rotate(-0 56 317)">0%</text>
+   </g>
+   <g id="taxa-por-z-qso-text_4">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="56" y="257" transform="rotate(-0 56 257)">25%</text>
+   </g>
+   <g id="taxa-por-z-qso-text_5">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="56" y="197" transform="rotate(-0 56 197)">50%</text>
+   </g>
+   <g id="taxa-por-z-qso-text_6">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="56" y="137" transform="rotate(-0 56 137)">75%</text>
+   </g>
+   <g id="taxa-por-z-qso-text_7">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="56" y="77" transform="rotate(-0 56 77)">100%</text>
+   </g>
+   <g id="taxa-por-z-qso-text_8">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="86.61077" y="322" transform="rotate(-90 86.61077 322)">&lt; 0,5</text>
+   </g>
+   <g id="taxa-por-z-qso-text_9">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="86.61077" y="306" transform="rotate(-90 86.61077 306)">n/a</text>
+   </g>
+   <g id="taxa-por-z-qso-text_10">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="124.039342" y="322" transform="rotate(-90 124.039342 322)">0,5–1</text>
+   </g>
+   <g id="taxa-por-z-qso-text_11">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="161.467913" y="322" transform="rotate(-90 161.467913 322)">1–1,5</text>
+   </g>
+   <g id="taxa-por-z-qso-text_12">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="198.896484" y="322" transform="rotate(-90 198.896484 322)">1,5–2</text>
+   </g>
+   <g id="taxa-por-z-qso-text_13">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="198.896484" y="306" transform="rotate(-90 198.896484 306)">n/a</text>
+   </g>
+   <g id="taxa-por-z-qso-text_14">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="236.325056" y="322" transform="rotate(-90 236.325056 322)">2–2,5</text>
+   </g>
+   <g id="taxa-por-z-qso-text_15">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="236.325056" y="306" transform="rotate(-90 236.325056 306)">n/a</text>
+   </g>
+   <g id="taxa-por-z-qso-text_16">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="273.753627" y="322" transform="rotate(-90 273.753627 322)">2,5–3</text>
+   </g>
+   <g id="taxa-por-z-qso-text_17">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="273.753627" y="306" transform="rotate(-90 273.753627 306)">n/a</text>
+   </g>
+   <g id="taxa-por-z-qso-text_18">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="311.182199" y="322" transform="rotate(-90 311.182199 322)">≥ 3</text>
+   </g>
+   <g id="taxa-por-z-qso-text_19">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="311.182199" y="306" transform="rotate(-90 311.182199 306)">n/a</text>
+   </g>
+   <g id="taxa-por-z-qso-text_20">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #6db3ff" x="120.142857" y="111" transform="rotate(-0 120.142857 111)">80,0%</text>
+   </g>
+   <g id="taxa-por-z-qso-text_21">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="336" y="162" transform="rotate(-0 336 162)">Quasar</text>
+   </g>
+   <g id="taxa-por-z-qso-text_22">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="336" y="180" transform="rotate(-0 336 180)">62,5%</text>
+   </g>
+   <g id="taxa-por-z-qso-text_23">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="195" y="389.191406" transform="rotate(-0 195 389.191406)">Redshift espectroscópico z (adimensional)</text>
+   </g>
+   <g id="taxa-por-z-qso-text_24">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="23.89707" y="192" transform="rotate(-90 23.89707 192)">Taxa de erro (%)</text>
+   </g>
+   <g id="taxa-por-z-qso-text_25">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="417.191406" transform="rotate(-0 16 417.191406)">n por faixa com valor: 5 a 8 objetos</text>
+   </g>
+   <g id="taxa-por-z-qso-text_26">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="437.191406" transform="rotate(-0 16 437.191406)">Barras verticais: IC 95% · linha interrompida: faixa</text>
+   </g>
+   <g id="taxa-por-z-qso-text_27">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="457.191406" transform="rotate(-0 16 457.191406)">abaixo do piso (n/a)</text>
+   </g>
+   <g id="taxa-por-z-qso-text_28">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="477.191406" transform="rotate(-0 16 477.191406)">Estrelas ficam fora do gráfico por redshift: o z</text>
+   </g>
+   <g id="taxa-por-z-qso-text_29">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="497.191406" transform="rotate(-0 16 497.191406)">espectroscópico de uma estrela é uma velocidade</text>
+   </g>
+   <g id="taxa-por-z-qso-text_30">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="517.191406" transform="rotate(-0 16 517.191406)">radial perto de zero, não uma distância.</text>
+   </g>
+   <g id="taxa-por-z-qso-text_31">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="547.191406" transform="rotate(-0 16 547.191406)">PROVISÓRIO</text>
+   </g>
+   <g id="taxa-por-z-qso-text_32">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="567.191406" transform="rotate(-0 16 567.191406)">LightGBM completo · fixture_v0</text>
+   </g>
+   <g id="taxa-por-z-qso-text_33">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="587.191406" transform="rotate(-0 16 587.191406)">Piso de 5 objetos por faixa</text>
+   </g>
+  </g>
+ </g>
+</svg>

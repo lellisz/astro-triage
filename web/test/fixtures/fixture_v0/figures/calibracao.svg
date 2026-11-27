@@ -1,0 +1,304 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="646" viewBox="0 0 440 646" role="img" aria-labelledby="calibracao-title" aria-describedby="calibracao-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="calibracao-title">Diagrama de confiabilidade</title><desc id="calibracao-desc">Estrela: 4,6% / 60,0% (23,1% a 88,2%); Galáxia: 6,5% / 40,0% (11,8% a 76,9%); Quasar: 5,2% / 40,0% (11,8% a 76,9%)</desc>
+ <g id="calibracao-figure_1">
+  <g id="calibracao-patch_1">
+   <path d="M 0 646 
+L 440 646 
+L 440 0 
+L 0 0 
+z
+" style="fill: #141414"/>
+  </g>
+  <g id="calibracao-axes_1">
+   <g id="calibracao-line2d_1">
+    <path d="M 72 68 
+L 72 404 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="calibracao-line2d_2">
+    <path d="M 72 404 
+L 408 404 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="calibracao-line2d_3">
+    <path d="M 156 68 
+L 156 404 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="calibracao-line2d_4">
+    <path d="M 72 320 
+L 408 320 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="calibracao-line2d_5">
+    <path d="M 240 68 
+L 240 404 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="calibracao-line2d_6">
+    <path d="M 72 236 
+L 408 236 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="calibracao-line2d_7">
+    <path d="M 324 68 
+L 324 404 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="calibracao-line2d_8">
+    <path d="M 72 152 
+L 408 152 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="calibracao-line2d_9">
+    <path d="M 408 68 
+L 408 404 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="calibracao-line2d_10">
+    <path d="M 72 68 
+L 408 68 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="calibracao-line2d_11">
+    <path d="M 72 404 
+L 408 404 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="calibracao-line2d_12">
+    <path d="M 72 68 
+L 72 404 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="calibracao-line2d_13">
+    <path d="M 72 404 
+L 408 68 
+" style="fill: none; stroke-dasharray: 4,4; stroke-dashoffset: 0; stroke: #8c8c8c"/>
+   </g>
+   <g id="calibracao-line2d_14">
+    <path d="M 76.78401 404 
+L 76.78401 258.013892 
+" style="fill: none; stroke: #7a7a7a; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_15">
+    <path d="M 89.390225 364.47942 
+L 89.390225 145.523359 
+" style="fill: none; stroke: #7a7a7a; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_16">
+    <path d="M 97.371371 364.47942 
+L 97.371371 145.523359 
+" style="fill: none; stroke: #7a7a7a; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_17">
+    <path d="M 111.743073 391.828699 
+L 111.743073 194.179636 
+" style="fill: none; stroke: #7a7a7a; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_18">
+    <path d="M 135.015477 364.47942 
+L 135.015477 145.523359 
+" style="fill: none; stroke: #7a7a7a; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_19">
+    <path d="M 76.78401 404 
+L 89.390225 269.6 
+L 97.371371 269.6 
+L 111.743073 336.8 
+L 135.015477 269.6 
+" style="fill: none; stroke-dasharray: 2,3; stroke-dashoffset: 0; stroke: #7a7a7a"/>
+   </g>
+   <g id="calibracao-line2d_20">
+    <path d="M 76.78401 404 
+L 89.390225 269.6 
+L 97.371371 269.6 
+L 111.743073 336.8 
+L 135.015477 269.6 
+" style="fill: none; stroke-dasharray: 8,3,2,3; stroke-dashoffset: 0; stroke: #7a7a7a; stroke-width: 2"/>
+   </g>
+   <g id="calibracao-line2d_21">
+    <path d="M 93.719878 364.47942 
+L 93.719878 145.523359 
+" style="fill: none; stroke: #a0a0a0; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_22">
+    <path d="M 125.454515 364.47942 
+L 125.454515 145.523359 
+" style="fill: none; stroke: #a0a0a0; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_23">
+    <path d="M 146.919648 326.476641 
+L 146.919648 107.52058 
+" style="fill: none; stroke: #a0a0a0; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_24">
+    <path d="M 161.617266 391.828699 
+L 161.617266 194.179636 
+" style="fill: none; stroke: #a0a0a0; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_25">
+    <path d="M 184.766609 277.820364 
+L 184.766609 80.171301 
+" style="fill: none; stroke: #a0a0a0; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_26">
+    <path d="M 93.719878 269.6 
+L 125.454515 269.6 
+L 146.919648 202.4 
+L 161.617266 336.8 
+L 184.766609 135.2 
+" style="fill: none; stroke-dasharray: 2,3; stroke-dashoffset: 0; stroke: #a0a0a0"/>
+   </g>
+   <g id="calibracao-line2d_27">
+    <path d="M 93.719878 269.6 
+L 125.454515 269.6 
+L 146.919648 202.4 
+L 161.617266 336.8 
+L 184.766609 135.2 
+" style="fill: none; stroke-dasharray: 6,4; stroke-dashoffset: 0; stroke: #a0a0a0; stroke-width: 2"/>
+   </g>
+   <g id="calibracao-line2d_28">
+    <path d="M 87.429392 326.476641 
+L 87.429392 107.52058 
+" style="fill: none; stroke: #d6d6d6; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_29">
+    <path d="M 102.730973 364.47942 
+L 102.730973 145.523359 
+" style="fill: none; stroke: #d6d6d6; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_30">
+    <path d="M 127.152052 364.47942 
+L 127.152052 145.523359 
+" style="fill: none; stroke: #d6d6d6; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_31">
+    <path d="M 154.982255 391.828699 
+L 154.982255 194.179636 
+" style="fill: none; stroke: #d6d6d6; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_32">
+    <path d="M 185.039616 391.828699 
+L 185.039616 194.179636 
+" style="fill: none; stroke: #d6d6d6; stroke-width: 1.5"/>
+   </g>
+   <g id="calibracao-line2d_33">
+    <path d="M 87.429392 202.4 
+L 102.730973 269.6 
+L 127.152052 269.6 
+L 154.982255 336.8 
+L 185.039616 336.8 
+" style="fill: none; stroke-dasharray: 2,3; stroke-dashoffset: 0; stroke: #d6d6d6"/>
+   </g>
+   <g id="calibracao-line2d_34">
+    <path d="M 87.429392 202.4 
+L 102.730973 269.6 
+L 127.152052 269.6 
+L 154.982255 336.8 
+L 185.039616 336.8 
+" style="fill: none; stroke: #d6d6d6; stroke-width: 2"/>
+   </g>
+   <g id="calibracao-line2d_35">
+    <path d="M 85.429392 200.4 
+L 78.429392 193.4 
+" style="fill: none; stroke: #8c8c8c"/>
+   </g>
+   <g id="calibracao-line2d_36">
+    <path d="M 91.719878 267.6 
+L 84.719878 260.6 
+" style="fill: none; stroke: #8c8c8c"/>
+   </g>
+   <g id="calibracao-line2d_37">
+    <path d="M 87.390225 267.6 
+L 80.390225 260.6 
+" style="fill: none; stroke: #8c8c8c"/>
+   </g>
+   <g id="calibracao-text_1">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="22" transform="rotate(-0 16 22)">Diagrama de confiabilidade</text>
+   </g>
+   <g id="calibracao-text_2">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="42" transform="rotate(-0 16 42)">LightGBM completo · conjunto de teste</text>
+   </g>
+   <g id="calibracao-text_3">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="72" y="426" transform="rotate(-0 72 426)">0%</text>
+   </g>
+   <g id="calibracao-text_4">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="64" y="409" transform="rotate(-0 64 409)">0%</text>
+   </g>
+   <g id="calibracao-text_5">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="156" y="426" transform="rotate(-0 156 426)">25%</text>
+   </g>
+   <g id="calibracao-text_6">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="64" y="325" transform="rotate(-0 64 325)">25%</text>
+   </g>
+   <g id="calibracao-text_7">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="240" y="426" transform="rotate(-0 240 426)">50%</text>
+   </g>
+   <g id="calibracao-text_8">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="64" y="241" transform="rotate(-0 64 241)">50%</text>
+   </g>
+   <g id="calibracao-text_9">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="324" y="426" transform="rotate(-0 324 426)">75%</text>
+   </g>
+   <g id="calibracao-text_10">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="64" y="157" transform="rotate(-0 64 157)">75%</text>
+   </g>
+   <g id="calibracao-text_11">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="408" y="426" transform="rotate(-0 408 426)">100%</text>
+   </g>
+   <g id="calibracao-text_12">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="64" y="73" transform="rotate(-0 64 73)">100%</text>
+   </g>
+   <g id="calibracao-text_13">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="403" y="394" transform="rotate(-0 403 394)">Calibração perfeita</text>
+   </g>
+   <g id="calibracao-text_14">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #eeeeee" x="75.429392" y="173.4" transform="rotate(-0 75.429392 173.4)">Estrela</text>
+   </g>
+   <g id="calibracao-text_15">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #6db3ff" x="75.429392" y="190.4" transform="rotate(-0 75.429392 190.4)">4,6% / 60,0%</text>
+   </g>
+   <g id="calibracao-text_16">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #eeeeee" x="81.719878" y="240.6" transform="rotate(-0 81.719878 240.6)">Galáxia</text>
+   </g>
+   <g id="calibracao-text_17">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #6db3ff" x="81.719878" y="257.6" transform="rotate(-0 81.719878 257.6)">6,5% / 40,0%</text>
+   </g>
+   <g id="calibracao-text_18">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #eeeeee" x="77.390225" y="240.6" transform="rotate(-0 77.390225 240.6)">Quasar</text>
+   </g>
+   <g id="calibracao-text_19">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #6db3ff" x="77.390225" y="257.6" transform="rotate(-0 77.390225 257.6)">5,2% / 40,0%</text>
+   </g>
+   <g id="calibracao-text_20">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="240" y="452" transform="rotate(-0 240 452)">Probabilidade média prevista (%)</text>
+   </g>
+   <g id="calibracao-text_21">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="24.19707" y="236" transform="rotate(-90 24.19707 236)">Frequência observada (%)</text>
+   </g>
+   <g id="calibracao-text_22">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="480" transform="rotate(-0 16 480)">n = 4 a 5 objetos por faixa</text>
+   </g>
+   <g id="calibracao-text_23">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="500" transform="rotate(-0 16 500)">10 faixas · total 45 objetos no teste</text>
+   </g>
+   <g id="calibracao-text_24">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="520" transform="rotate(-0 16 520)">Barras: IC 95% · valor: prevista / observada</text>
+   </g>
+   <g id="calibracao-text_25">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="540" transform="rotate(-0 16 540)">Tracejado fino: pontos antes do ajuste de</text>
+   </g>
+   <g id="calibracao-text_26">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="560" transform="rotate(-0 16 560)">temperatura</text>
+   </g>
+   <g id="calibracao-text_27">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="590" transform="rotate(-0 16 590)">PROVISÓRIO</text>
+   </g>
+   <g id="calibracao-text_28">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="610" transform="rotate(-0 16 610)">LightGBM completo · fixture_v0</text>
+   </g>
+   <g id="calibracao-text_29">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="630" transform="rotate(-0 16 630)">Piso de 5 objetos por faixa</text>
+   </g>
+  </g>
+ </g>
+</svg>
