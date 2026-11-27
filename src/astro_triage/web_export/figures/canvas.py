@@ -179,9 +179,11 @@ Op = Callable[[Axes], None]
 class Canvas:
     """Records drawing operations in viewBox pixels; ``render`` returns the final SVG text."""
 
-    def __init__(self, fid: str, title: str, subtitle: str) -> None:
+    def __init__(self, fid: str, title: str, subtitle: str, simple: bool = False) -> None:
         self.fid = fid
         self.title = title
+        # Simple mode (lay reader): no notes and no source line; an empty subtitle draws no line.
+        self.simple = simple
         self.ops: list[Op] = []
         self.y: float = 2
         for ln in wrap(title, W - 2 * M, size=17, bold=True):
@@ -244,6 +246,8 @@ class Canvas:
         self.ops.append(draw)
 
     def notes(self, lines: list[str], gap: float = 28) -> None:
+        if self.simple:
+            return
         self.y += gap
         first = True
         for s in lines:
@@ -254,6 +258,8 @@ class Canvas:
                 first = False
 
     def source(self, source: str, release: str, floor_line: str | None) -> None:
+        if self.simple:
+            return
         self.y += 8
         for s in [f"{source} · {release}"] + ([floor_line] if floor_line else []):
             for ln in wrap(s, W - 2 * M):

@@ -1,0 +1,234 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="390" viewBox="0 0 640 390" role="img" aria-labelledby="taxa-por-g-simples-title" aria-describedby="taxa-por-g-simples-desc" stroke-linejoin="round" stroke-linecap="butt" style="width:100%;min-width:640px;max-width:800px;height:auto"><title id="taxa-por-g-simples-title">Taxa de erro por brilho do objeto</title><desc id="taxa-por-g-simples-desc">Estrela: ≥ 22 61,5%; Galáxia: ≥ 22 76,9%; Quasar: ≥ 22 69,2%</desc>
+ <g id="taxa-por-g-simples-figure_1">
+  <g id="taxa-por-g-simples-patch_1">
+   <path d="M 0 390 
+L 640 390 
+L 640 0 
+L 0 0 
+L 0 390 
+z
+" style="fill: none"/>
+  </g>
+  <g id="taxa-por-g-simples-axes_1">
+   <g id="taxa-por-g-simples-line2d_1">
+    <path d="M 79.339844 292 
+L 490 292 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_2">
+    <path d="M 79.339844 232 
+L 490 232 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_3">
+    <path d="M 79.339844 172 
+L 490 172 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_4">
+    <path d="M 79.339844 112 
+L 490 112 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_5">
+    <path d="M 79.339844 52 
+L 490 52 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_6">
+    <path d="M 79.339844 292 
+L 490 292 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_7">
+    <path d="M 79.339844 52 
+L 79.339844 292 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_8">
+    <path d="M 94.006278 292 
+L 94.006278 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_9">
+    <path d="M 123.339146 292 
+L 123.339146 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_10">
+    <path d="M 152.672015 292 
+L 152.672015 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_11">
+    <path d="M 182.004883 292 
+L 182.004883 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_12">
+    <path d="M 211.337751 292 
+L 211.337751 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_13">
+    <path d="M 240.670619 292 
+L 240.670619 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_14">
+    <path d="M 270.003488 292 
+L 270.003488 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_15">
+    <path d="M 299.336356 292 
+L 299.336356 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_16">
+    <path d="M 328.669224 292 
+L 328.669224 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_17">
+    <path d="M 358.002093 292 
+L 358.002093 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_18">
+    <path d="M 387.334961 292 
+L 387.334961 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_19">
+    <path d="M 416.667829 292 
+L 416.667829 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_20">
+    <path d="M 446.000698 292 
+L 446.000698 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_21">
+    <path d="M 475.333566 292 
+L 475.333566 296 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_22">
+    <path d="M 470.333566 107.384615 
+L 480.333566 107.384615 
+" style="fill: none; stroke: #d6d6d6; stroke-width: 2"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_23">
+    <path d="M 470.333566 61.230769 
+L 480.333566 61.230769 
+" style="fill: none; stroke-dasharray: 6,4; stroke-dashoffset: 0; stroke: #a0a0a0; stroke-width: 2"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_24">
+    <path d="M 470.333566 84.307692 
+L 480.333566 84.307692 
+" style="fill: none; stroke-dasharray: 8,3,2,3; stroke-dashoffset: 0; stroke: #7a7a7a; stroke-width: 2"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_25">
+    <path d="M 478.333566 107.384615 
+L 497 132.230769 
+" style="fill: none; stroke: #8c8c8c"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_26">
+    <path d="M 478.333566 61.230769 
+L 497 56.230769 
+" style="fill: none; stroke: #8c8c8c"/>
+   </g>
+   <g id="taxa-por-g-simples-line2d_27">
+    <path d="M 478.333566 84.307692 
+L 497 94.230769 
+" style="fill: none; stroke: #8c8c8c"/>
+   </g>
+   <g id="taxa-por-g-simples-text_1">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="22" transform="rotate(-0 16 22)">Taxa de erro por brilho do objeto</text>
+   </g>
+   <g id="taxa-por-g-simples-text_2">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="71.339844" y="297" transform="rotate(-0 71.339844 297)">0%</text>
+   </g>
+   <g id="taxa-por-g-simples-text_3">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="71.339844" y="237" transform="rotate(-0 71.339844 237)">20%</text>
+   </g>
+   <g id="taxa-por-g-simples-text_4">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="71.339844" y="177" transform="rotate(-0 71.339844 177)">40%</text>
+   </g>
+   <g id="taxa-por-g-simples-text_5">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="71.339844" y="117" transform="rotate(-0 71.339844 117)">60%</text>
+   </g>
+   <g id="taxa-por-g-simples-text_6">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="71.339844" y="57" transform="rotate(-0 71.339844 57)">80%</text>
+   </g>
+   <g id="taxa-por-g-simples-text_7">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="97.902762" y="302" transform="rotate(-90 97.902762 302)">&lt; 10</text>
+   </g>
+   <g id="taxa-por-g-simples-text_8">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="127.235631" y="302" transform="rotate(-90 127.235631 302)">10–11</text>
+   </g>
+   <g id="taxa-por-g-simples-text_9">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="156.568499" y="302" transform="rotate(-90 156.568499 302)">11–12</text>
+   </g>
+   <g id="taxa-por-g-simples-text_10">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="185.901367" y="302" transform="rotate(-90 185.901367 302)">12–13</text>
+   </g>
+   <g id="taxa-por-g-simples-text_11">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="215.234235" y="302" transform="rotate(-90 215.234235 302)">13–14</text>
+   </g>
+   <g id="taxa-por-g-simples-text_12">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="244.567104" y="302" transform="rotate(-90 244.567104 302)">14–15</text>
+   </g>
+   <g id="taxa-por-g-simples-text_13">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="273.899972" y="302" transform="rotate(-90 273.899972 302)">15–16</text>
+   </g>
+   <g id="taxa-por-g-simples-text_14">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="303.23284" y="302" transform="rotate(-90 303.23284 302)">16–17</text>
+   </g>
+   <g id="taxa-por-g-simples-text_15">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="332.565709" y="302" transform="rotate(-90 332.565709 302)">17–18</text>
+   </g>
+   <g id="taxa-por-g-simples-text_16">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="361.898577" y="302" transform="rotate(-90 361.898577 302)">18–19</text>
+   </g>
+   <g id="taxa-por-g-simples-text_17">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="391.231445" y="302" transform="rotate(-90 391.231445 302)">19–20</text>
+   </g>
+   <g id="taxa-por-g-simples-text_18">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="420.564314" y="302" transform="rotate(-90 420.564314 302)">20–21</text>
+   </g>
+   <g id="taxa-por-g-simples-text_19">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="449.897182" y="302" transform="rotate(-90 449.897182 302)">21–22</text>
+   </g>
+   <g id="taxa-por-g-simples-text_20">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="479.23005" y="302" transform="rotate(-90 479.23005 302)">≥ 22</text>
+   </g>
+   <g id="taxa-por-g-simples-text_21">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="500" y="137.230769" transform="rotate(-0 500 137.230769)">Estrela</text>
+   </g>
+   <g id="taxa-por-g-simples-text_22">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="500" y="155.230769" transform="rotate(-0 500 155.230769)">61,5%</text>
+   </g>
+   <g id="taxa-por-g-simples-text_23">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="500" y="61.230769" transform="rotate(-0 500 61.230769)">Galáxia</text>
+   </g>
+   <g id="taxa-por-g-simples-text_24">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="500" y="79.230769" transform="rotate(-0 500 79.230769)">76,9%</text>
+   </g>
+   <g id="taxa-por-g-simples-text_25">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="500" y="99.230769" transform="rotate(-0 500 99.230769)">Quasar</text>
+   </g>
+   <g id="taxa-por-g-simples-text_26">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="500" y="117.230769" transform="rotate(-0 500 117.230769)">69,2%</text>
+   </g>
+   <g id="taxa-por-g-simples-text_27">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="284.669922" y="373.675" transform="rotate(-0 284.669922 373.675)">Magnitude G (do mais brilhante ao mais fraco)</text>
+   </g>
+   <g id="taxa-por-g-simples-text_28">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="21.89707" y="172" transform="rotate(-90 21.89707 172)">Taxa de erro (%)</text>
+   </g>
+  </g>
+ </g>
+</svg>

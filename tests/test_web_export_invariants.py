@@ -440,7 +440,7 @@ def test_compare_with_malformed_dl_results_is_error(
     assert doc["answer_text"] is None and doc["grid"] is None
 
 
-COMPARE_FIGURES = {"pureza-sistemas", "decisao-diferencas"}
+COMPARE_FIGURES = {"pureza-sistemas", "pureza-sistemas-simples", "decisao-diferencas"}
 
 
 @pytest.mark.parametrize("status", ["unavailable", "error"])

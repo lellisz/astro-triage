@@ -1,11 +1,15 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { Suspense, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 import { MplFigure } from "@/components/charts/MplFigure";
 import { DataTable, type DataColumn } from "@/components/kit/DataTable";
 import { Panel } from "@/components/kit/Panel";
 import { Tabs, type TabItem } from "@/components/kit/Tabs";
 import { compareLabels as L } from "@/content/labels";
 import type { Figures } from "@/lib/figures";
-import type { Compare } from "@/lib/schema";
+import type { Compare, Meta } from "@/lib/schema";
+import { readState } from "@/lib/ui-state";
 import cmp from "./compare.module.css";
 import styles from "./page.module.css";
 
@@ -102,7 +106,7 @@ function Verdicts({ c }: { c: Ok }) {
   );
 }
 
-function Purity({ c, figures }: { c: Ok; figures: Figures }) {
+function Purity({ c, figures, tech }: { c: Ok; figures: Figures; tech: boolean }) {
   return (
     <>
       <h3 className={cmp.subTitle}>{L.absolutePurity}</h3>
@@ -111,7 +115,7 @@ function Purity({ c, figures }: { c: Ok; figures: Figures }) {
         {L.purityRange} <strong>({L.notCi})</strong>
       </p>
       <Scroller label={L.purityRegion}>
-        <MplFigure id="pureza-sistemas" figures={figures} />
+        <MplFigure id={tech ? "pureza-sistemas" : "pureza-sistemas-simples"} figures={figures} />
       </Scroller>
       <ul className={cmp.details}>
         {c.purity.map((p) => (
@@ -124,14 +128,16 @@ function Purity({ c, figures }: { c: Ok; figures: Figures }) {
   );
 }
 
-function Diffs({ c, figures }: { c: Ok; figures: Figures }) {
+function Diffs({ c, figures, tech }: { c: Ok; figures: Figures; tech: boolean }) {
   return (
     <>
       <h3 className={cmp.subTitle}>{L.diffsTitle}</h3>
       <p className={styles.muted}>{L.diffsHint}</p>
-      <Scroller label={L.diffsRegion}>
-        <MplFigure id="decisao-diferencas" figures={figures} />
-      </Scroller>
+      {tech ? (
+        <Scroller label={L.diffsRegion}>
+          <MplFigure id="decisao-diferencas" figures={figures} />
+        </Scroller>
+      ) : null}
       {c.descriptive.length > 0 ? (
         <DataTable
           caption={L.descriptiveChart}
@@ -188,11 +194,11 @@ function Notes({ c }: { c: Ok }) {
   );
 }
 
-function Available({ c, figures }: { c: Ok; figures: Figures }) {
+function Available({ c, figures, tech }: { c: Ok; figures: Figures; tech: boolean }) {
   const tabs: TabItem[] = [
     { key: "vereditos", label: L.tabVerdicts, content: <Verdicts c={c} /> },
-    { key: "pureza", label: L.tabPurity, content: <Purity c={c} figures={figures} /> },
-    { key: "diferencas", label: L.tabDiffs, content: <Diffs c={c} figures={figures} /> },
+    { key: "pureza", label: L.tabPurity, content: <Purity c={c} figures={figures} tech={tech} /> },
+    { key: "diferencas", label: L.tabDiffs, content: <Diffs c={c} figures={figures} tech={tech} /> },
     { key: "metodo", label: L.tabMethod, content: <Notes c={c} /> },
   ];
   return (
@@ -221,6 +227,21 @@ function Missing({ c }: { c: Unavailable }) {
   );
 }
 
-export function CompareView({ compare, figures }: { compare: Compare; figures: Figures }) {
-  return compare.status === "ok" ? <Available c={compare} figures={figures} /> : <Missing c={compare} />;
+type Props = { meta: Meta; compare: Compare; figures: Figures };
+
+function Body({ props, tech }: { props: Props; tech: boolean }) {
+  const { compare, figures } = props;
+  return compare.status === "ok" ? <Available c={compare} figures={figures} tech={tech} /> : <Missing c={compare} />;
+}
+
+function WithUrlState(props: Props) {
+  return <Body props={props} tech={readState(useSearchParams(), props.meta).tech} />;
+}
+
+export function CompareView(props: Props) {
+  return (
+    <Suspense fallback={<Body props={props} tech={props.meta.default_state.tech} />}>
+      <WithUrlState {...props} />
+    </Suspense>
+  );
 }

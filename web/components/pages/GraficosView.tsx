@@ -73,9 +73,11 @@ function Calibration({ g, tech, figures }: { g: Graficos; tech: boolean; figures
   );
   return (
     <Panel id="graf-calibration" title={L.calibrationTitle}>
-      <Scroller label={L.chartRegion} narrow>
-        <MplFigure id="calibracao" figures={figures} />
-      </Scroller>
+      {tech ? (
+        <Scroller label={L.chartRegion} narrow>
+          <MplFigure id="calibracao" figures={figures} />
+        </Scroller>
+      ) : null}
       <p className={styles.callout}>{cal.networks_note}</p>
       <Numbers>
         <DataTable caption={L.calibrationChart} columns={columns} rows={rows} />
@@ -172,7 +174,7 @@ function Confusion({ g, tech, figures }: { g: Graficos; tech: boolean; figures: 
   return (
     <Panel id="graf-confusion" title={L.confusionTitle}>
       <Scroller label={L.chartRegion}>
-        <MplFigure id="confusao" figures={figures} />
+        <MplFigure id={tech ? "confusao" : "confusao-simples"} figures={figures} />
       </Scroller>
       <Numbers>
         <DataTable caption={L.confusionCaption} columns={columns} rows={rows} />
@@ -202,9 +204,12 @@ function CmdSection({ cmd, tech, figures }: { cmd: Cmd; tech: boolean; figures: 
     });
   return (
     <Panel id="graf-cmd" title={L.cmdTitle}>
-      <Scroller label={L.chartRegion}>
-        <MplFigure id="cmd-taxa" figures={figures} />
-      </Scroller>
+      {/* Modo simples: sem as figuras do mapa (nem a legenda da hachura); fica a tabela. */}
+      {tech ? (
+        <Scroller label={L.chartRegion}>
+          <MplFigure id="cmd-taxa" figures={figures} />
+        </Scroller>
+      ) : null}
       {/* A contagem por celula nao tem figura matplotlib: continua no componente React. */}
       {tech ? (
         <Scroller label={L.chartRegion}>
@@ -220,7 +225,7 @@ function CmdSection({ cmd, tech, figures }: { cmd: Cmd; tech: boolean; figures: 
           />
         </Scroller>
       ) : null}
-      <Legend items={[L.legendCmdBelowFloor]} />
+      {tech ? <Legend items={[L.legendCmdBelowFloor]} /> : null}
       <p className={styles.callout}>{cmd.note}</p>
       <Numbers>
         <DataTable caption={L.cmdChartRate} columns={columns} rows={rows} />
@@ -251,7 +256,7 @@ function Body({ props, state }: { props: Props; state: UiState }) {
         note={g.error_by_g.missing_note}
         series={g.error_by_g.series.map(toSeries)}
         tech={state.tech}
-        figureIds={["taxa-por-g"]}
+        figureIds={[state.tech ? "taxa-por-g" : "taxa-por-g-simples"]}
         figures={figures}
       />
       <RatePanel
@@ -262,7 +267,7 @@ function Body({ props, state }: { props: Props; state: UiState }) {
         note={g.error_by_z.star_note}
         series={g.error_by_z.series.map(toSeries)}
         tech={state.tech}
-        figureIds={g.error_by_z.series.map((s) => zFigureId(s.cls))}
+        figureIds={state.tech ? g.error_by_z.series.map((s) => zFigureId(s.cls)) : []}
         figures={figures}
       />
       <Confusion g={g} tech={state.tech} figures={figures} />

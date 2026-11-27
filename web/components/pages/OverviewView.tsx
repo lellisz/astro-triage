@@ -10,6 +10,7 @@ import { Panel } from "@/components/kit/Panel";
 import { SkyThumb } from "@/components/sky/SkyThumb";
 import { OverviewTechnical } from "./OverviewTechnical";
 import { chartLabels, overviewLabels as L, routes } from "@/content/labels";
+import { quasarSummaryFigureId } from "@/lib/figure-ids";
 import type { Figures } from "@/lib/figures";
 import type { Meta, Overview, OverviewHeadline, Sky } from "@/lib/schema";
 import { readState, withState, type UiState } from "@/lib/ui-state";
@@ -126,15 +127,25 @@ function Body({ props, state }: { props: Props; state: UiState }) {
               />
             </div>
           ) : null}
-        <Panel id="ov-bars" title={L.barsTitle} subtitle={L.barsSub}>
+        <Panel
+          id="ov-bars"
+          title={state.tech ? L.barsTitle : L.barsTitleSimple}
+          subtitle={state.tech ? L.barsSub : L.barsSubSimple}
+        >
           <div
             className={`${overviewStyles.charts} ${overviewStyles.scroll}`}
             role="region"
             aria-label={L.chartsRegion}
             tabIndex={0}
           >
-            <MplFigure id="quasar-pureza" figures={figures} />
-            <MplFigure id="quasar-completude" figures={figures} />
+            {state.tech ? (
+              <>
+                <MplFigure id="quasar-pureza" figures={figures} />
+                <MplFigure id="quasar-completude" figures={figures} />
+              </>
+            ) : selected ? (
+              <MplFigure id={quasarSummaryFigureId(selected.rule, selected.prior)} figures={figures} />
+            ) : null}
           </div>
           {selected ? (
             <p className={overviewStyles.partialNote} data-selected-row="">

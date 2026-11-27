@@ -409,7 +409,7 @@ describe("A4 Comparacao: unavailable/error e 3 cartoes", () => {
     ["unavailable", null],
     ["error", "Falha controlada ao ler o resultado."],
   ] as const)("%s: estado claro, sem digito, sem cartoes, sem grafico", (status, err) => {
-    const html = renderToStaticMarkup(<CompareView figures={FIGS} compare={down(status, err)} />);
+    const html = renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={down(status, err)} />);
     const text = textOf(html);
     expect(text).toContain(compareLabels.unavailable);
     expect(text).toContain(compareLabels.unavailableHint);
@@ -428,7 +428,7 @@ describe("A4 Comparacao: unavailable/error e 3 cartoes", () => {
 
   it("status error com sobras de purity/grid no objeto: nenhum numero vaza", () => {
     const leaky = { ...compare, status: "error", error_text: "Falha controlada." } as unknown as Compare;
-    const html = renderToStaticMarkup(<CompareView figures={FIGS} compare={leaky} />);
+    const html = renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={leaky} />);
     const text = textOf(html);
     expect(text).not.toMatch(/\d/);
     expect(html).not.toContain("data-system");
@@ -441,7 +441,7 @@ describe("A4 Comparacao: unavailable/error e 3 cartoes", () => {
     { ...ok.purity[1], system: "ftt_full", net: "FTT", label: "FT-Transformer completo", median: 0.5, low: 0.4, high: 0.6 },
     ok.purity[0],
   ];
-  const html3 = renderToStaticMarkup(<CompareView figures={FIGS} compare={three} />);
+  const html3 = renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={three} />);
 
   it("ok com 3 sistemas: 3 cartoes, exatamente um de referencia, referencia primeiro", () => {
     const cards = [...html3.matchAll(/<li class="([^"]*)" data-system="([^"]+)"/g)];
@@ -457,13 +457,16 @@ describe("A4 Comparacao: unavailable/error e 3 cartoes", () => {
   it("rede sem par no JSON mostra a frase de par ausente, nunca vazio", () => {
     const noPair = clone(three);
     noPair.pairs = noPair.pairs.filter((p) => p.net !== "FTT");
-    const t = textOf(renderToStaticMarkup(<CompareView figures={FIGS} compare={noPair} />));
+    const t = textOf(renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={noPair} />));
     expect(t).toContain(compareLabels.pairMissing);
   });
 });
 
 describe("A5 Comparacao: faixa min-max rotulada 'nao e IC'", () => {
-  const html = renderToStaticMarkup(<CompareView figures={FIGS} compare={ok} />);
+  // A faixa min-max (figura pureza-sistemas) e do modo tecnico.
+  nav.search = "tecnico=1";
+  const html = renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={ok} />);
+  nav.search = "";
   const panel = (() => {
     const m = html.match(/<div role="tabpanel" id="[^"]*-panel-pureza"[\s\S]*?(?=<div role="tabpanel"|$)/);
     if (!m) throw new Error("painel de pureza ausente");
@@ -498,7 +501,7 @@ describe("A5 Comparacao: faixa min-max rotulada 'nao e IC'", () => {
 
 describe("A6 Comparacao: abas", () => {
   nav.search = "";
-  const html = renderToStaticMarkup(<CompareView figures={FIGS} compare={ok} />);
+  const html = renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={ok} />);
 
   it("markup: 4 abas, cada aria-controls aponta para um tabpanel existente e vice-versa", () => {
     const tabs = [...html.matchAll(/<button[^>]*role="tab"[^>]*>/g)].map((m) => m[0]);
@@ -612,7 +615,10 @@ describe("A7 Comparacao: forest plot de diferencas", () => {
     { pair: "FTT", role: "desc", cls: "GALAXY", d: 0, lo: 0, hi: 0, diff: NA_EST, text: "t" },
     { pair: "FTT", role: "desc", cls: "QSO", d: 0.02, lo: 0.01, hi: 0.03, diff: { point: 0.02, lo: 0.01, hi: 0.03, text: "+0,0200", ci_text: "IC 95%: +0,0100 a +0,0300" }, text: "t" },
   ];
-  const html = renderToStaticMarkup(<CompareView figures={FIGS} compare={v} />);
+  // A figura de decisao e a faixa min-max sao do modo tecnico.
+  nav.search = "tecnico=1";
+  const html = renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={v} />);
+  nav.search = "";
 
   it("decisao: a figura decisao-diferencas aparece uma vez", () => {
     expect(count(html, 'data-figure="decisao-diferencas"')).toBe(1);
@@ -643,7 +649,7 @@ describe("A7 Comparacao: forest plot de diferencas", () => {
       pair: k % 2 ? "FTT" : "MLP",
       diff: { ...v.descriptive[0].diff, ci_text: `IC-${k}` },
     }));
-    const h14 = renderToStaticMarkup(<CompareView figures={FIGS} compare={many} />);
+    const h14 = renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={many} />);
     expect(h14).not.toContain('id="cmp-descriptive"');
     const t = [...h14.matchAll(/<table[^>]*>[\s\S]*?<\/table>/g)].map((m) => m[0]).find((x) => x.includes("IC-0"))!;
     expect(count(t.match(/<tbody>([\s\S]*?)<\/tbody>/)![1], "<tr>")).toBe(14);
@@ -651,7 +657,9 @@ describe("A7 Comparacao: forest plot de diferencas", () => {
   });
 
   it("sem itens descritivos: mensagem, sem segundo grafico", () => {
-    const h2 = renderToStaticMarkup(<CompareView figures={FIGS} compare={ok} />);
+    nav.search = "tecnico=1";
+    const h2 = renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={ok} />);
+    nav.search = "";
     expect(h2).not.toContain('id="cmp-descriptive"');
     expect(textOf(h2)).toContain(compareLabels.noDescriptive);
     expect(count(h2, 'data-figure="decisao-diferencas"')).toBe(1);
@@ -843,7 +851,7 @@ describe("Graficos: barra sem regra nem prior, com modo tecnico", () => {
 describe("Tarefa 30: status do protocolo dentro do Resultado da Comparacao", () => {
   it("'em proposta' aparece dentro de #cmp-result quando protocol_accepted e false", () => {
     expect(ok.protocol_accepted).toBe(false);
-    const res = textOf(panel(renderToStaticMarkup(<CompareView figures={FIGS} compare={ok} />), "cmp-result"));
+    const res = textOf(panel(renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={ok} />), "cmp-result"));
     expect(res).toContain("em proposta");
     expect(res).toContain(compareLabels.protocolProposed);
   });
@@ -851,12 +859,12 @@ describe("Tarefa 30: status do protocolo dentro do Resultado da Comparacao", () 
   it("aceito e desconhecido mudam o texto do painel; 'em proposta' some", () => {
     const acc = clone(ok);
     acc.protocol_accepted = true;
-    const a = textOf(panel(renderToStaticMarkup(<CompareView figures={FIGS} compare={acc} />), "cmp-result"));
+    const a = textOf(panel(renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={acc} />), "cmp-result"));
     expect(a).toContain(compareLabels.protocolAccepted);
     expect(a).not.toContain("em proposta");
     const unk = clone(ok);
     unk.protocol_accepted = null;
-    const u = textOf(panel(renderToStaticMarkup(<CompareView figures={FIGS} compare={unk} />), "cmp-result"));
+    const u = textOf(panel(renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={unk} />), "cmp-result"));
     expect(u).toContain(compareLabels.protocolUnknown);
     expect(u).not.toContain("em proposta");
   });

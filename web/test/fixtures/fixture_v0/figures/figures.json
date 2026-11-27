@@ -15,6 +15,11 @@
    "caption": "Matriz de confusão. LightGBM completo · conjunto de teste · fração de cada linha. fixture_v0.",
    "title": "Matriz de confusão"
   },
+  "confusao-simples": {
+   "aria_label": "Para cada tipo real, o que o modelo respondeu: Estrela, resposta Estrela: 40,0%; Estrela, resposta Galáxia: 40,0%; Estrela, resposta Quasar: n/a; Galáxia, resposta Estrela: 46,7%; Galáxia, resposta Galáxia: n/a; Galáxia, resposta Quasar: 33,3%; Quasar, resposta Estrela: 46,7%; Quasar, resposta Galáxia: n/a; Quasar, resposta Quasar: n/a",
+   "caption": "Para cada tipo real, o que o modelo respondeu. fixture_v0.",
+   "title": "Para cada tipo real, o que o modelo respondeu"
+  },
   "decisao-diferencas": {
    "aria_label": "Diferenças nas células da decisão: MLP − LightGBM, Quasar: +10,00 p.p. (IC 95% +5,00 a +15,00), δ 2,00 p.p., vitória; FTT − LightGBM, Quasar: +10,00 p.p. (IC 95% +5,00 a +15,00), δ 2,00 p.p., vitória; MLP − LightGBM, Galáxia: +0,10 p.p. (IC 95% -1,00 a +1,00), δ 2,00 p.p., sem diferença detectável; FTT − LightGBM, Galáxia: +10,00 p.p. (IC 95% +5,00 a +15,00), δ 2,00 p.p., vitória",
    "caption": "Diferenças nas células da decisão. Regra · prior: P2 · C* = 0,80 (ponto fixo da comparação com as redes; a barra de ajustes não o muda). fixture_v0.",
@@ -29,6 +34,11 @@
    "aria_label": "Taxa de erro por grupo de galáxias: Todas as galáxias: 80,0%, IC 95%: 54,8% a 93,0%, n = 15; mais brilhantes: n/a, n/a, n = n/a; redshift quase nulo: n/a, n/a, n = n/a; maior redshift: n/a, n/a, n = n/a",
    "caption": "Taxa de erro por grupo de galáxias. LightGBM completo · classe de maior probabilidade (regra como entregue). fixture_v0.",
    "title": "Taxa de erro por grupo de galáxias"
+  },
+  "galaxia-erros-simples": {
+   "aria_label": "Erro por grupo de galáxias: Todas as galáxias: 80,0%; mais brilhantes: n/a",
+   "caption": "Erro por grupo de galáxias. fixture_v0.",
+   "title": "Erro por grupo de galáxias"
   },
   "ganho-lgbm-full": {
    "aria_label": "Ganho por atributo: LightGBM completo: f_b: 60,0%; f_a: 40,0%",
@@ -45,6 +55,11 @@
    "caption": "Pureza absoluta por sistema, no ponto fixo. Regra · prior: P2 · C* = 0,80 (ponto fixo da comparação com as redes; a barra de ajustes não o muda). fixture_v0.",
    "title": "Pureza absoluta por sistema, no ponto fixo"
   },
+  "pureza-sistemas-simples": {
+   "aria_label": "Modelo clássico vs redes neurais: acerto em quasares: LightGBM: 40,00%; MLP completo: 45,00%",
+   "caption": "Modelo clássico vs redes neurais: acerto em quasares. fixture_v0.",
+   "title": "Modelo clássico vs redes neurais: acerto em quasares"
+  },
   "quasar-completude": {
    "aria_label": "Completude de quasar por regra e prior: como entregue · P2: 90,0%, IC 95%: 88,0% a 92,0%; ajustada ao prior · P1: 80,0%, IC 95%: 78,0% a 82,0%; ajustada ao prior · P2: 80,0%, IC 95%: 78,0% a 82,0%; ajustada ao prior · P3 (parcial): 80,0%, IC 95%: 78,0% a 82,0%",
    "caption": "Completude de quasar por regra e prior. LightGBM completo · conjunto de teste · por regra e prior. fixture_v0.",
@@ -55,10 +70,35 @@
    "caption": "Pureza de quasar por regra e prior. LightGBM completo · conjunto de teste · por regra e prior. fixture_v0.",
    "title": "Pureza de quasar por regra e prior"
   },
+  "quasar-resumo-as-shipped-p2": {
+   "aria_label": "Quasares: quanto o modelo acerta: Dos que o modelo chamou de quasar, quantos eram: 31,0%; Dos quasares reais, quantos encontrou: 90,0%",
+   "caption": "Quasares: quanto o modelo acerta. fixture_v0.",
+   "title": "Quasares: quanto o modelo acerta"
+  },
+  "quasar-resumo-prior-matched-p1": {
+   "aria_label": "Quasares: quanto o modelo acerta: Dos que o modelo chamou de quasar, quantos eram: 40,0%; Dos quasares reais, quantos encontrou: 80,0%",
+   "caption": "Quasares: quanto o modelo acerta. fixture_v0.",
+   "title": "Quasares: quanto o modelo acerta"
+  },
+  "quasar-resumo-prior-matched-p2": {
+   "aria_label": "Quasares: quanto o modelo acerta: Dos que o modelo chamou de quasar, quantos eram: 50,0%; Dos quasares reais, quantos encontrou: 80,0%",
+   "caption": "Quasares: quanto o modelo acerta. fixture_v0.",
+   "title": "Quasares: quanto o modelo acerta"
+  },
+  "quasar-resumo-prior-matched-p3": {
+   "aria_label": "Quasares: quanto o modelo acerta: Dos que o modelo chamou de quasar, quantos eram: 60,0%; Dos quasares reais, quantos encontrou: 80,0%",
+   "caption": "Quasares: quanto o modelo acerta. fixture_v0.",
+   "title": "Quasares: quanto o modelo acerta"
+  },
   "taxa-por-g": {
    "aria_label": "Taxa de erro por faixa de magnitude G: Estrela: ≥ 22 61,5% (35,5% a 82,3%); Galáxia: ≥ 22 76,9% (49,7% a 91,8%); Quasar: ≥ 22 69,2% (42,4% a 87,3%)",
    "caption": "Taxa de erro por faixa de magnitude G. LightGBM completo · conjunto de teste · por classe. fixture_v0.",
    "title": "Taxa de erro por faixa de magnitude G"
+  },
+  "taxa-por-g-simples": {
+   "aria_label": "Taxa de erro por brilho do objeto: Estrela: ≥ 22 61,5%; Galáxia: ≥ 22 76,9%; Quasar: ≥ 22 69,2%",
+   "caption": "Taxa de erro por brilho do objeto. fixture_v0.",
+   "title": "Taxa de erro por brilho do objeto"
   },
   "taxa-por-z-galaxy": {
    "aria_label": "Taxa de erro por faixa de redshift: Galáxia: Galáxia: ",

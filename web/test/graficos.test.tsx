@@ -49,20 +49,21 @@ const NUMBER = /\d+(?:[.,]\d+)*%?/g;
 describe("/graficos: modo simples", () => {
   const html = render("");
 
-  it("seis figuras matplotlib (o by-z tem uma por classe), cada uma com alternativa em tabela", () => {
+  it("duas figuras matplotlib simples, cada uma com alternativa em tabela", () => {
     const ids = [...html.matchAll(/data-figure="([^"]+)"/g)].map((m) => m[1]);
-    expect(ids).toEqual(graficosFigureIds(graficos));
-    expect(ids).toEqual(["calibracao", "taxa-por-g", "taxa-por-z-galaxy", "taxa-por-z-qso", "confusao", "cmd-taxa"]);
-    expect(count(html, "<figure")).toBe(6);
+    expect(ids).toEqual(["taxa-por-g-simples", "confusao-simples"]);
+    for (const id of ids) expect(graficosFigureIds(graficos)).toContain(id);
+    expect(count(html, "<figure")).toBe(2);
     expect(count(html, "<details")).toBe(5);
     expect(count(html, "<table")).toBe(5);
     expect(count(html, "<th scope=\"col\"")).toBeGreaterThan(8);
     expect(count(html, "Ver os números")).toBe(5);
-    expect(count(html, 'role="img"')).toBeGreaterThanOrEqual(3);
+    expect(count(html, 'role="img"')).toBeGreaterThanOrEqual(2);
   });
 
-  it("o by-z tem uma figura por classe, dentro da secao by-z", () => {
-    const section = html.slice(html.indexOf('id="graf-by-z"'), html.indexOf('id="graf-confusion"'));
+  it("no modo tecnico o by-z tem uma figura por classe, dentro da secao by-z", () => {
+    const tech = render("tecnico=1");
+    const section = tech.slice(tech.indexOf('id="graf-by-z"'), tech.indexOf('id="graf-confusion"'));
     expect(graficos.error_by_z.series.length).toBe(2);
     expect(count(section, "<figure")).toBe(graficos.error_by_z.series.length);
     for (const s of graficos.error_by_z.series) {
@@ -70,12 +71,17 @@ describe("/graficos: modo simples", () => {
     }
   });
 
-  it("IC sempre visivel (Tarefa 34): as figuras com IC sao as mesmas com tecnico=false e tecnico=1", () => {
+  it("figuras com IC so no modo tecnico; o modo simples usa as versoes simples", () => {
     const tech = render("tecnico=1");
     for (const id of ["calibracao", "taxa-por-g", "confusao"]) {
       const svg = FIGS[id].svg.slice(0, 200);
-      expect(html, id).toContain(svg);
+      expect(html, id).not.toContain(svg);
       expect(tech, id).toContain(svg);
+    }
+    for (const id of ["taxa-por-g-simples", "confusao-simples"]) {
+      const svg = FIGS[id].svg.slice(0, 200);
+      expect(html, id).toContain(svg);
+      expect(tech, id).not.toContain(svg);
     }
   });
 
@@ -112,7 +118,7 @@ describe("/graficos: modo simples", () => {
   it("figuras rotuladas e tabelas reais", () => {
     // As figuras matplotlib nao repetem titulo e fonte numa <figcaption>: tudo esta no SVG.
     expect(count(html, "<figcaption")).toBe(0);
-    expect(count(html, "<figure")).toBe(6);
+    expect(count(html, "<figure")).toBe(2);
     expect(count(html, "aria-labelledby")).toBeGreaterThanOrEqual(7);
     expect(html.match(/<table[^>]*aria-labelledby="/g)).toHaveLength(5);
   });
@@ -196,13 +202,13 @@ describe("/graficos: abaixo do piso mostra o texto NA do JSON", () => {
 describe("/graficos: mapa cor-magnitude", () => {
   const cmd = graficos.cmd!;
 
-  it("a fixture traz as 252 celulas, todas abaixo do piso: figura cmd-taxa e legenda da hachura", () => {
-    const html = render("");
+  it("a fixture traz as 252 celulas, todas abaixo do piso: figura cmd-taxa e legenda da hachura (tecnico)", () => {
+    const html = render("tecnico=1");
     const section = html.slice(html.indexOf('id="graf-cmd"'));
     expect(cmd.cells).toHaveLength(252);
     expect(cmd.cells.every((c) => c.below_floor)).toBe(true);
     expect(section).toContain('data-figure="cmd-taxa"');
-    expect(count(section, "<figure")).toBe(1);
+    expect(count(section, "data-figure=")).toBe(1); // the count map (React) is the other <figure>
     expect(textOf(section)).toContain("Célula hachurada");
   });
 
@@ -246,7 +252,8 @@ describe("/graficos: mapa cor-magnitude", () => {
     const html = render("", data);
     expect(html).not.toContain('id="graf-cmd');
     expect(textOf(html)).not.toContain("Mapa cor-magnitude");
-    expect(count(html, "<figure")).toBe(5);
+    expect(count(html, "<figure")).toBe(2);
+    expect(count(render("tecnico=1", data), "<figure")).toBe(5);
   });
 
   it("nenhuma chave por objeto no JSON versionado e o tamanho e pequeno", () => {

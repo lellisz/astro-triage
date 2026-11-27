@@ -42,6 +42,15 @@ EXPECTED_IDS = {
     "ganho-lgbm-full",
     "ganho-lgbm-noind",
     "pureza-sistemas",
+    # simple mode (lay reader): one quasar summary per meta.states item
+    "taxa-por-g-simples",
+    "confusao-simples",
+    "quasar-resumo-as-shipped-p2",
+    "quasar-resumo-prior-matched-p1",
+    "quasar-resumo-prior-matched-p2",
+    "quasar-resumo-prior-matched-p3",
+    "galaxia-erros-simples",
+    "pureza-sistemas-simples",
 }
 
 
@@ -123,7 +132,7 @@ def test_malformed_chart_json_leaves_no_half_set(tmp_path):
 
 
 # ---------------------------------------------------------------- 1. ids
-def test_1_generates_exactly_the_14_ids_plus_manifest(gen):
+def test_1_generates_exactly_the_22_ids_plus_manifest(gen):
     names = {p.name for p in gen.iterdir()}
     assert names == {f"{i}.svg" for i in EXPECTED_IDS} | {"figures.json"}
     manifest = json.loads((gen / "figures.json").read_text(encoding="utf-8"))
@@ -356,6 +365,13 @@ def _source_values(p: dict[str, dict]) -> dict[str, list[str]]:
         "ganho-lgbm-full": [i["gain"]["text"] for i in models["lgbm-full"]["importance"]],
         "ganho-lgbm-noind": [i["gain"]["text"] for i in models["lgbm-noind"]["importance"]],
         "pureza-sistemas": [_pt(r["median"] * 100, 2) + "%" for r in c["purity"]],
+        "taxa-por-g-simples": rates([r for s in g["error_by_g"]["series"] for r in s["rows"]]),
+        "confusao-simples": [cell["share"]["text"] for r in g["confusion"]["rows"] for cell in r["cells"]
+                             if not cell["below_floor"] and _rep(cell["share"])],
+        **{f"quasar-resumo-{r['rule']}-{r['prior']}".replace("_", "-").lower():
+           [r["purity"]["text"], r["completeness"]["text"]] for r in o["rows"]},
+        "galaxia-erros-simples": [r["rate"]["text"] for r in ga["error_rows"] if _rep(r["rate"])],
+        "pureza-sistemas-simples": [_pt(r["median"] * 100, 2) + "%" for r in c["purity"]],
     }
 
 
@@ -419,7 +435,7 @@ BARE_NUM = re.compile(r"^[+\-−]?\d+(?:,\d+)?%?$")
 SEG = re.compile(r'<path d="M ([\d.]+) ([\d.]+) \s*L ([\d.]+) ([\d.]+) \s*" style="([^"]*)"')
 
 # Figures that must have a numeric axis (lines, calibration, heat map and every bar chart).
-AXIS_FIGS = EXPECTED_IDS - {"confusao"}
+AXIS_FIGS = EXPECTED_IDS - {"confusao", "confusao-simples"}
 
 
 def _ptbr(t: str) -> float:
@@ -628,7 +644,7 @@ def test_int01c_compare_not_ok_drops_compare_figures(tmp_path, status, capsys):
     from astro_triage.web_export.figures.__main__ import main as fig_main
 
     ok_status, ts_ids = _ts_compare_ids()
-    assert ok_status == "ok" and ts_ids == {"pureza-sistemas", "decisao-diferencas"}
+    assert ok_status == "ok" and ts_ids == {"pureza-sistemas", "pureza-sistemas-simples", "decisao-diferencas"}
     data = _copy_fixture(tmp_path)
     _edit(data, "compare", _compare_unavailable(status))
     assert fig_main(["--release", REL, "--data", str(data), "--out", str(tmp_path / "out")]) == 0

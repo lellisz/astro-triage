@@ -36,8 +36,8 @@ describe("criterio 8: MplFigure renderiza a partir de figures.json da fixture", 
     vi.stubEnv("ASTRO_WEB_DATA", FIX_ROOT);
   });
 
-  it("a fixture tem as 14 figuras", () => {
-    expect(Object.keys(manifest.figures)).toHaveLength(14);
+  it("a fixture tem as 22 figuras (14 tecnicas e 8 simples)", () => {
+    expect(Object.keys(manifest.figures)).toHaveLength(22);
   });
 
   it.each(Object.keys(manifest.figures))("%s: figure, aria-label e SVG, sem legenda repetida", (id) => {

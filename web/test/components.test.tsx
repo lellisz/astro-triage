@@ -237,10 +237,16 @@ describe("A3 Visao geral", () => {
     }
     expect(on).toMatch(/href="\/graficos\/?(\?[^"]*)?"[^>]*>[^<]*Calibra/);
     expect(on).toContain(overviewLabels.calibrationLink);
-    for (const html of [off, on]) {
-      expect(html).toContain('data-figure="quasar-pureza"');
-      expect(html).toContain('data-figure="quasar-completude"');
+    // Modo simples: so o resumo do estado selecionado; as duas figuras por regra e prior sao tecnicas.
+    const summary = `data-figure="quasar-resumo-${meta.default_state.rule}-${meta.default_state.prior}"`
+      .replace(/_/g, "-")
+      .toLowerCase();
+    for (const marker of ['data-figure="quasar-pureza"', 'data-figure="quasar-completude"']) {
+      expect(off, marker).not.toContain(marker);
+      expect(on, marker).toContain(marker);
     }
+    expect(off).toContain(summary);
+    expect(on).not.toContain(summary);
     expect(off).not.toContain(overviewLabels.techTitle);
     expect(on).toContain(overviewLabels.techTitle);
     // tecnico=0 explicito tambem e modo simples

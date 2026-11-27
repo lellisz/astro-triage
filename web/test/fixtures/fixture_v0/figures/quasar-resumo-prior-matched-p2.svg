@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="222" viewBox="0 0 640 222" role="img" aria-labelledby="quasar-resumo-prior-matched-p2-title" aria-describedby="quasar-resumo-prior-matched-p2-desc" stroke-linejoin="round" stroke-linecap="butt" style="width:100%;min-width:640px;max-width:800px;height:auto"><title id="quasar-resumo-prior-matched-p2-title">Quasares: quanto o modelo acerta</title><desc id="quasar-resumo-prior-matched-p2-desc">Dos que o modelo chamou de quasar, quantos eram: 50,0%; Dos quasares reais, quantos encontrou: 80,0%</desc>
+ <g id="quasar-resumo-prior-matched-p2-figure_1">
+  <g id="quasar-resumo-prior-matched-p2-patch_1">
+   <path d="M 0 222 
+L 640 222 
+L 640 0 
+L 0 0 
+L 0 222 
+z
+" style="fill: none"/>
+  </g>
+  <g id="quasar-resumo-prior-matched-p2-axes_1">
+   <g id="quasar-resumo-prior-matched-p2-patch_2">
+    <path d="M 16 75 
+L 265 75 
+L 265 89 
+L 16 89 
+z
+" style="fill: #7a7a7a"/>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-patch_3">
+    <path d="M 16 131 
+L 414.4 131 
+L 414.4 145 
+L 16 145 
+z
+" style="fill: #7a7a7a"/>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-line2d_1">
+    <path d="M 16 48 
+L 16 160 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-line2d_2">
+    <path d="M 140.5 48 
+L 140.5 160 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-line2d_3">
+    <path d="M 265 48 
+L 265 160 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-line2d_4">
+    <path d="M 389.5 48 
+L 389.5 160 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-line2d_5">
+    <path d="M 514 48 
+L 514 160 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-line2d_6">
+    <path d="M 16 160 
+L 514 160 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-text_1">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="22" transform="rotate(-0 16 22)">Quasares: quanto o modelo acerta</text>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-text_2">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="16" y="182" transform="rotate(-0 16 182)">0%</text>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-text_3">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="140.5" y="182" transform="rotate(-0 140.5 182)">25%</text>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-text_4">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="265" y="182" transform="rotate(-0 265 182)">50%</text>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-text_5">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="389.5" y="182" transform="rotate(-0 389.5 182)">75%</text>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-text_6">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="514" y="182" transform="rotate(-0 514 182)">100%</text>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-text_7">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="66" transform="rotate(-0 16 66)">Dos que o modelo chamou de quasar, quantos eram</text>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-text_8">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="273" y="87" transform="rotate(-0 273 87)">50,0%</text>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-text_9">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="122" transform="rotate(-0 16 122)">Dos quasares reais, quantos encontrou</text>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-text_10">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="422.4" y="143" transform="rotate(-0 422.4 143)">80,0%</text>
+   </g>
+   <g id="quasar-resumo-prior-matched-p2-text_11">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="265" y="206" transform="rotate(-0 265 206)">Porcentagem (%)</text>
+   </g>
+  </g>
+ </g>
+</svg>

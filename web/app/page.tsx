@@ -20,7 +20,7 @@ export default function OverviewPage() {
         accuracyNote={overview.accuracy_note}
         technical={overview.technical}
         sky={sky}
-        figures={loadFigures(overviewFigureIds(overview.technical))}
+        figures={loadFigures(overviewFigureIds(overview.technical, meta.states))}
       />
     </>
   );

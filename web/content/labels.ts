@@ -89,6 +89,8 @@ export const overviewLabels = {
   unavailable: "Esta combinação de regra e prior não está disponível nesta versão dos dados.",
   barsTitle: "Pureza e completude nas condições avaliadas",
   barsSub: "Comparação da regra e dos priors de referência",
+  barsTitleSimple: "Quanto o modelo acerta quasares",
+  barsSubSimple: "Resultado na condição selecionada",
   purityChart: "Pureza de quasar",
   completenessChart: "Completude de quasar",
   chartsRegion: "Gráficos de pureza e completude, rolável na horizontal",

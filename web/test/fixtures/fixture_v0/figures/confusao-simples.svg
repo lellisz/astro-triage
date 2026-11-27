@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="268" viewBox="0 0 640 268" role="img" aria-labelledby="confusao-simples-title" aria-describedby="confusao-simples-desc" stroke-linejoin="round" stroke-linecap="butt" style="width:100%;min-width:640px;max-width:800px;height:auto"><title id="confusao-simples-title">Para cada tipo real, o que o modelo respondeu</title><desc id="confusao-simples-desc">Estrela, resposta Estrela: 40,0%; Estrela, resposta Galáxia: 40,0%; Estrela, resposta Quasar: n/a; Galáxia, resposta Estrela: 46,7%; Galáxia, resposta Galáxia: n/a; Galáxia, resposta Quasar: 33,3%; Quasar, resposta Estrela: 46,7%; Quasar, resposta Galáxia: n/a; Quasar, resposta Quasar: n/a</desc>
+ <g id="confusao-simples-figure_1">
+  <g id="confusao-simples-patch_1">
+   <path d="M 0 268 
+L 640 268 
+L 640 0 
+L 0 0 
+L 0 268 
+z
+" style="fill: none"/>
+  </g>
+  <g id="confusao-simples-axes_1">
+   <g id="confusao-simples-patch_2">
+    <path d="M 97.760156 85 
+L 271.506771 85 
+L 271.506771 139 
+L 97.760156 139 
+z
+" style="fill: #d6d6d6; fill-opacity: 0.128"/>
+   </g>
+   <g id="confusao-simples-patch_3">
+    <path d="M 273.506771 85 
+L 447.253385 85 
+L 447.253385 139 
+L 273.506771 139 
+z
+" style="fill: #d6d6d6; fill-opacity: 0.128"/>
+   </g>
+   <g id="confusao-simples-patch_4">
+    <path d="M 449.253385 85 
+L 623 85 
+L 623 139 
+L 449.253385 139 
+L 449.253385 85 
+z
+" style="fill: none"/>
+   </g>
+   <g id="confusao-simples-patch_5">
+    <path d="M 97.760156 141 
+L 271.506771 141 
+L 271.506771 195 
+L 97.760156 195 
+z
+" style="fill: #d6d6d6; fill-opacity: 0.149333"/>
+   </g>
+   <g id="confusao-simples-patch_6">
+    <path d="M 273.506771 141 
+L 447.253385 141 
+L 447.253385 195 
+L 273.506771 195 
+L 273.506771 141 
+z
+" style="fill: none"/>
+   </g>
+   <g id="confusao-simples-patch_7">
+    <path d="M 449.253385 141 
+L 623 141 
+L 623 195 
+L 449.253385 195 
+z
+" style="fill: #d6d6d6; fill-opacity: 0.106667"/>
+   </g>
+   <g id="confusao-simples-patch_8">
+    <path d="M 97.760156 197 
+L 271.506771 197 
+L 271.506771 251 
+L 97.760156 251 
+z
+" style="fill: #d6d6d6; fill-opacity: 0.149333"/>
+   </g>
+   <g id="confusao-simples-patch_9">
+    <path d="M 273.506771 197 
+L 447.253385 197 
+L 447.253385 251 
+L 273.506771 251 
+L 273.506771 197 
+z
+" style="fill: none"/>
+   </g>
+   <g id="confusao-simples-patch_10">
+    <path d="M 449.253385 197 
+L 623 197 
+L 623 251 
+L 449.253385 251 
+L 449.253385 197 
+z
+" style="fill: none"/>
+   </g>
+   <g id="confusao-simples-text_1">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="22" transform="rotate(-0 16 22)">Para cada tipo real, o que o modelo respondeu</text>
+   </g>
+   <g id="confusao-simples-text_2">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="360.380078" y="52" transform="rotate(-0 360.380078 52)">Resposta do modelo</text>
+   </g>
+   <g id="confusao-simples-text_3">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="74" transform="rotate(-0 16 74)">Tipo real</text>
+   </g>
+   <g id="confusao-simples-text_4">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #eeeeee" x="184.633464" y="74" transform="rotate(-0 184.633464 74)">Estrela</text>
+   </g>
+   <g id="confusao-simples-text_5">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #eeeeee" x="360.380078" y="74" transform="rotate(-0 360.380078 74)">Galáxia</text>
+   </g>
+   <g id="confusao-simples-text_6">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #eeeeee" x="536.126693" y="74" transform="rotate(-0 536.126693 74)">Quasar</text>
+   </g>
+   <g id="confusao-simples-text_7">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="117" transform="rotate(-0 16 117)">Estrela</text>
+   </g>
+   <g id="confusao-simples-text_8">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #6db3ff" x="184.633464" y="118" transform="rotate(-0 184.633464 118)">40,0%</text>
+   </g>
+   <g id="confusao-simples-text_9">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #6db3ff" x="360.380078" y="118" transform="rotate(-0 360.380078 118)">40,0%</text>
+   </g>
+   <g id="confusao-simples-text_10">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="536.126693" y="118" transform="rotate(-0 536.126693 118)">n/a</text>
+   </g>
+   <g id="confusao-simples-text_11">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="173" transform="rotate(-0 16 173)">Galáxia</text>
+   </g>
+   <g id="confusao-simples-text_12">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #6db3ff" x="184.633464" y="174" transform="rotate(-0 184.633464 174)">46,7%</text>
+   </g>
+   <g id="confusao-simples-text_13">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="360.380078" y="174" transform="rotate(-0 360.380078 174)">n/a</text>
+   </g>
+   <g id="confusao-simples-text_14">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #6db3ff" x="536.126693" y="174" transform="rotate(-0 536.126693 174)">33,3%</text>
+   </g>
+   <g id="confusao-simples-text_15">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="229" transform="rotate(-0 16 229)">Quasar</text>
+   </g>
+   <g id="confusao-simples-text_16">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #6db3ff" x="184.633464" y="230" transform="rotate(-0 184.633464 230)">46,7%</text>
+   </g>
+   <g id="confusao-simples-text_17">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="360.380078" y="230" transform="rotate(-0 360.380078 230)">n/a</text>
+   </g>
+   <g id="confusao-simples-text_18">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="536.126693" y="230" transform="rotate(-0 536.126693 230)">n/a</text>
+   </g>
+  </g>
+ </g>
+</svg>

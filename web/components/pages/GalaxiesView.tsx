@@ -149,7 +149,7 @@ function Body({ props, state }: { props: Props; state: UiState }) {
 
       <Panel id="gal-errors" title={L.errorsTitle} subtitle={L.errorsSub}>
         <Scroller label={L.errorsRegion}>
-          <MplFigure id="galaxia-erros" figures={figures} />
+          <MplFigure id={state.tech ? "galaxia-erros" : "galaxia-erros-simples"} figures={figures} />
         </Scroller>
         <p className={galaxiesStyles.errorsNote}>{g.error_rows_note}</p>
       </Panel>

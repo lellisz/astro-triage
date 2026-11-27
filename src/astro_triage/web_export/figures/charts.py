@@ -6,6 +6,7 @@ from collections.abc import Callable, Mapping
 from dataclasses import dataclass
 from typing import Any, Final
 
+from astro_triage.web_export.figures import FigureError
 from astro_triage.web_export.figures.canvas import (
     ACCENT,
     LINE,
@@ -42,7 +43,7 @@ class Figure:
 
 
 def _done(cv: Canvas, subtitle: str, desc: str, release: str) -> Figure:
-    caption = f"{cv.title}. {subtitle}. {release}."
+    caption = ". ".join(s for s in (cv.title, subtitle, release) if s) + "."
     return Figure(cv.fid, cv.title, caption, f"{cv.title}: {desc}", cv.render(desc))
 
 
@@ -189,15 +190,15 @@ def calibration(p: Pages) -> Figure:
 
 # 2 ---------------------------------------------------------------- rate by bin
 def _rate(p: Pages, fid: str, title: str, sub: str, series: list[dict[str, Any]], xlabel: str,
-          extra: list[str]) -> Figure:
+          extra: list[str], simple: bool = False) -> Figure:
     g, rel = p["graficos"], p["meta"]["release"]
-    cv = Canvas(fid, title, sub)
+    cv = Canvas(fid, title, sub, simple=simple)
     rows0 = series[0]["rows"]
 
     def rep(r: Mapping[str, Any]) -> bool:
         return _rep(r["rate"], r["below_floor"])
 
-    top = _top([r["rate"]["hi"] if r["rate"]["hi"] is not None else r["rate"]["point"]
+    top = _top([r["rate"]["hi"] if not simple and r["rate"]["hi"] is not None else r["rate"]["point"]
                 for s in series for r in s["rows"] if rep(r)])
     ticks, step = nice_ticks(0, top, 4)
     top = ticks[-1]
@@ -222,7 +223,7 @@ def _rate(p: Pages, fid: str, title: str, sub: str, series: list[dict[str, Any]]
     for i, r in enumerate(rows0):
         cv.line(xc(i), base, xc(i), base + 4, "axis")
         cv.vtext(xc(i), base + 10, r["label"], "tk", "end")
-        if not any(rep(s["rows"][i]) for s in series):
+        if not simple and not any(rep(s["rows"][i]) for s in series):
             cv.vtext(xc(i), base - 6, "n/a", "tk", "start")
     wanted, ends = [], {}
     dodge = (-3, 0, 3) if len(series) > 1 else (0,)
@@ -233,7 +234,7 @@ def _rate(p: Pages, fid: str, title: str, sub: str, series: list[dict[str, Any]]
         for i, r in enumerate(s["rows"]):
             if rep(r):
                 cur.append((i, r))
-                if r["rate"]["lo"] is not None:
+                if not simple and r["rate"]["lo"] is not None:
                     x = xc(i) + dodge[si]
                     cv.line(x, y_(r["rate"]["lo"]), x, y_(r["rate"]["hi"]), f"ci{k}")
             elif cur:
@@ -275,8 +276,9 @@ def _rate(p: Pages, fid: str, title: str, sub: str, series: list[dict[str, Any]]
     ])
     cv.source(g["model_label"], rel, f"Piso de {pt_int(g['floor'])} objetos por faixa")
     desc = "; ".join(
-        f"{s['label']}: " + ", ".join(f"{r['label']} {r['rate']['text']} ({_ci(r['rate']['ci_text'])})"
-                                       for r in s["rows"] if rep(r))
+        f"{s['label']}: " + ", ".join(
+            f"{r['label']} {r['rate']['text']}" + ("" if simple else f" ({_ci(r['rate']['ci_text'])})")
+            for r in s["rows"] if rep(r))
         for s in series
     )
     return _done(cv, sub, desc, rel)
@@ -288,6 +290,13 @@ def rate_by_g(p: Pages) -> Figure:
     sub = f"{g['model_label']} · conjunto de teste · por classe"
     return _rate(p, "taxa-por-g", "Taxa de erro por faixa de magnitude G", sub, eg["series"],
                  "Magnitude G (mag)", [])
+
+
+def rate_by_g_simple(p: Pages) -> Figure:
+    # No arrow glyph in the axis title: the figure tests forbid "→" in every SVG.
+    return _rate(p, "taxa-por-g-simples", "Taxa de erro por brilho do objeto", "",
+                 p["graficos"]["error_by_g"]["series"], "Magnitude G (do mais brilhante ao mais fraco)", [],
+                 simple=True)
 
 
 def _rate_by_z(cls: str, fid: str) -> Callable[[Pages], Figure]:
@@ -349,6 +358,39 @@ def confusion(p: Pages) -> Figure:
     ])
     cv.source(g["model_label"], rel, f"Célula com menos de {pt_int(g['floor'])} objetos: n/a")
     return _done(cv, sub, "; ".join(desc), rel)
+
+
+def confusion_simple(p: Pages) -> Figure:
+    g, rel = p["graficos"], p["meta"]["release"]
+    conf = g["confusion"]
+    classes = conf["classes"]
+    lab = {c["cls"]: c["label"] for c in classes}
+    cv = Canvas("confusao-simples", "Para cada tipo real, o que o modelo respondeu", "", simple=True)
+    row_head = "Tipo real"
+    lw = max([tw(row_head)] + [tw(c["label"], bold=True) for c in classes]) + 16
+    x0 = M + lw
+    cw = (W - M - x0) / len(classes)
+    cv.y += 30
+    cv.text(x0 + cw * len(classes) / 2, cv.y, "Resposta do modelo", "s", "middle")
+    cv.y += 22
+    cv.text(M, cv.y, row_head, "s")
+    for j, c in enumerate(classes):
+        cv.text(x0 + cw * (j + 0.5), cv.y, c["label"], "nm", "middle")
+    ch = 56
+    desc = []
+    y = cv.y + 10
+    for r in conf["rows"]:
+        cv.text(M, y + ch / 2 + 5, lab[r["true"]], "nm")
+        for j, c in enumerate(r["cells"]):
+            x = x0 + j * cw
+            ok = _rep(c["share"], c["below_floor"])
+            alpha = min(max(c["share"]["point"] or 0, 0), 1) * 0.32 if ok else 0
+            cv.rect(x + 1, y + 1, cw - 2, ch - 2, fill=SERIES[0], alpha=alpha)
+            cv.text(x + cw / 2, y + ch / 2 + 6, c["share"]["text"], "big" if ok else "n", "middle")
+            desc.append(f"{lab[r['true']]}, resposta {lab[c['pred']]}: {c['share']['text']}")
+        y += ch
+    cv.y = y
+    return _done(cv, "", "; ".join(desc), rel)
 
 
 # 4 ---------------------------------------------------------------- colour-magnitude map
@@ -437,7 +479,7 @@ class _Bar:
     extra: str = ""
 
 
-def _hbars(cv: Canvas, bars: list[_Bar], top: float, axis: str) -> None:
+def _hbars(cv: Canvas, bars: list[_Bar], top: float, axis: str, simple: bool = False) -> None:
     pw, rh = W - 2 * M - 110, 56
 
     def x_(v: float) -> float:
@@ -454,7 +496,8 @@ def _hbars(cv: Canvas, bars: list[_Bar], top: float, axis: str) -> None:
     for i, b in enumerate(bars):
         y = y0 + i * rh + 18
         cv.text(M, y, b.name + (f" · {b.extra}" if b.extra else ""), "nm" if b.bold else "s")
-        cv.text(W - M, y, _ci(b.est["ci_text"]), "n", "end")
+        if not simple:
+            cv.text(W - M, y, _ci(b.est["ci_text"]), "n", "end")
         e = b.est
         if e["point"] is None:
             cv.text(M, y + 22, e["text"], "n")
@@ -465,9 +508,10 @@ def _hbars(cv: Canvas, bars: list[_Bar], top: float, axis: str) -> None:
             cv.rect(M, y + 9, x_(e["point"]) - M, 14, edge=SERIES[1], lw=1.5, dashes=(4, 3))
         else:
             cv.rect(M, y + 9, x_(e["point"]) - M, 14, fill=SERIES[2])
-        if e["lo"] is not None:
+        if not simple and e["lo"] is not None:
             cv.line(x_(e["lo"]), y + 16, x_(e["hi"]), y + 16, "cil")
-        vx = max(x_(e["point"]), x_(e["hi"] if e["hi"] is not None else 0)) + 8
+        hi = e["hi"] if not simple and e["hi"] is not None else 0
+        vx = max(x_(e["point"]), x_(hi)) + 8
         cv.text(vx, y + 21, e["text"], "val")
     cv.text(M + pw / 2, bottom + 46, axis, "s", "middle")
     cv.y = bottom + 46
@@ -499,6 +543,30 @@ def _quasar(pick: str, fid: str, title: str, axis: str) -> Callable[[Pages], Fig
     return build
 
 
+def _plain(est: Mapping[str, Any]) -> dict[str, Any]:
+    """The estimate without its interval, for the simple figures."""
+    return {**est, "lo": None, "hi": None, "ci_text": ""}
+
+
+def quasar_summary_id(rule: str, prior: str) -> str:
+    return f"quasar-resumo-{rule}-{prior}".replace("_", "-").lower()
+
+
+def _quasar_summary(rule: str, prior: str) -> Callable[[Pages], Figure]:
+    def build(p: Pages) -> Figure:
+        rel = p["meta"]["release"]
+        row = next(r for r in p["overview"]["rows"] if (r["rule"], r["prior"]) == (rule, prior))
+        cv = Canvas(quasar_summary_id(rule, prior), "Quasares: quanto o modelo acerta", "", simple=True)
+        bars = [
+            _Bar("Dos que o modelo chamou de quasar, quantos eram", _plain(row["purity"])),
+            _Bar("Dos quasares reais, quantos encontrou", _plain(row["completeness"])),
+        ]
+        _hbars(cv, bars, 1.0, "Porcentagem (%)", simple=True)
+        return _done(cv, "", "; ".join(f"{b.name}: {b.est['text']}" for b in bars), rel)
+
+    return build
+
+
 def galaxy_errors(p: Pages) -> Figure:
     ga, meta, g = p["galaxies"], p["meta"], p["graficos"]
     rel = meta["release"]
@@ -515,6 +583,21 @@ def galaxy_errors(p: Pages) -> Figure:
     desc = "; ".join(f"{r['label']}: {r['rate']['text']}, {r['rate']['ci_text']}, n = {r['n']['text']}"
                      for r in rows)
     return _done(cv, sub, desc, rel)
+
+
+def galaxy_errors_simple(p: Pages) -> Figure:
+    rel = p["meta"]["release"]
+    # Owner's decision (2026-11-27): the redshift bands stay in the technical figure only.
+    # The order is fixed by galaxy_error_rows (all, brightest, nearest, farthest); the band labels
+    # vary with the data, so the filter is by position.
+    every = p["galaxies"]["error_rows"]
+    if len(every) != 4:
+        raise FigureError(f"galaxies.error_rows: esperadas 4 linhas, vieram {len(every)}")
+    rows = every[:2]
+    cv = Canvas("galaxia-erros-simples", "Erro por grupo de galáxias", "", simple=True)
+    bars = [_Bar(r["label"], _plain(r["rate"])) for r in rows]
+    _hbars(cv, bars, _top([r["rate"]["point"] or 0 for r in rows]), "Taxa de erro (%)", simple=True)
+    return _done(cv, "", "; ".join(f"{r['label']}: {r['rate']['text']}" for r in rows), rel)
 
 
 # 6, 10 ----------------------------------------------------------- interval rows
@@ -693,6 +776,18 @@ def purity_range(p: Pages) -> Figure:
     return _done(cv, sub, "; ".join(f"{r['label']}: {r['detail_text']}" for r in pur), rel)
 
 
+def purity_simple(p: Pages) -> Figure:
+    rel = p["meta"]["release"]
+    pur = p["compare"]["purity"]
+    cv = Canvas("pureza-sistemas-simples", "Modelo clássico vs redes neurais: acerto em quasares", "",
+                simple=True)
+    # Same median text as the technical figure; bars start at zero, so no "axis does not start at zero" note.
+    bars = [_Bar(r["label"], {"point": r["median"], "lo": None, "hi": None, "text": pt_pct(r["median"], 2),
+                              "ci_text": ""}) for r in pur]
+    _hbars(cv, bars, 1.0, "Acerto em quasares (%)", simple=True)
+    return _done(cv, "", "; ".join(f"{b.name}: {b.est['text']}" for b in bars), rel)
+
+
 def _models(p: Pages) -> list[Callable[[Pages], Figure]]:
     return [_importance(i) for i in range(len(p["overview"]["technical"]["models"]))]
 
@@ -704,13 +799,17 @@ def builders(p: Pages) -> list[Callable[[Pages], Figure]]:
     cmp_ok = p["compare"]["status"] == "ok"
     # Same rule as web/lib/figure-ids.ts: "cmd-taxa" exists only when graficos.cmd is not null.
     cmd_ok = p["graficos"]["cmd"] is not None
+    # Same rule as web/lib/figure-ids.ts: one simple quasar summary per item of meta.states.
+    summaries = [_quasar_summary(s["rule"], s["prior"]) for s in p["meta"]["states"]]
     return [
-        calibration, rate_by_g, *zs, confusion, *([cmd_map] if cmd_ok else []),
+        calibration, rate_by_g, rate_by_g_simple, *zs, confusion, confusion_simple,
+        *([cmd_map] if cmd_ok else []),
         _quasar("purity", "quasar-pureza", "Pureza de quasar por regra e prior", "Pureza de quasar (%)"),
         _quasar("completeness", "quasar-completude", "Completude de quasar por regra e prior",
                 "Completude de quasar (%)"),
-        galaxy_errors, dsc_diffs, *([decision_diffs] if cmp_ok else []), *_models(p),
-        *([purity_range] if cmp_ok else []),
+        *summaries, galaxy_errors, galaxy_errors_simple, dsc_diffs,
+        *([decision_diffs] if cmp_ok else []), *_models(p),
+        *([purity_range, purity_simple] if cmp_ok else []),
     ]
 
 

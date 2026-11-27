@@ -12,7 +12,7 @@ export default function CompareDlPage() {
   return (
     <>
       <PageHeader eyebrow={eyebrow} title={title} lead={lead} showStateChip={false} meta={meta} />
-      <CompareView compare={compare} figures={loadFigures(compareFigureIds(compare))} />
+      <CompareView meta={meta} compare={compare} figures={loadFigures(compareFigureIds(compare))} />
     </>
   );
 }
