@@ -3,18 +3,18 @@
 import { Suspense, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { CmdMap, cmdRange } from "@/components/charts/CmdMap";
-import { ConfusionGrid } from "@/components/charts/ConfusionGrid";
-import { RateByBin } from "@/components/charts/RateByBin";
-import { ReliabilityPlot } from "@/components/charts/ReliabilityPlot";
+import { MplFigure } from "@/components/charts/MplFigure";
 import { DataTable, type DataColumn } from "@/components/kit/DataTable";
 import { Panel } from "@/components/kit/Panel";
 import { graficosLabels as L } from "@/content/labels";
-import type { CalBin, Cmd, Graficos, Meta, RateRow } from "@/lib/schema";
+import { zFigureId } from "@/lib/figure-ids";
+import type { Figures } from "@/lib/figures";
+import type { Cmd, Graficos, Meta, RateRow } from "@/lib/schema";
 import { readState, type UiState } from "@/lib/ui-state";
 import graficosStyles from "./graficos.module.css";
 import styles from "./page.module.css";
 
-type Props = { meta: Meta; graficos: Graficos };
+type Props = { meta: Meta; graficos: Graficos; figures: Figures };
 type Row = Record<string, string>;
 
 function Scroller({ label, children, narrow = false }: { label: string; children: ReactNode; narrow?: boolean }) {
@@ -44,23 +44,11 @@ function Legend({ items }: { items: string[] }) {
   );
 }
 
-function calPoint(b: CalBin) {
-  return {
-    p_mean: b.p_mean.value,
-    freq: b.freq.point,
-    n: b.n.value ?? 0,
-    freq_lo: b.freq.lo,
-    freq_hi: b.freq.hi,
-    raw_p_mean: b.raw_p_mean,
-    raw_freq: b.raw_freq,
-  };
-}
-
 function columnsWith(base: readonly DataColumn[], tech: boolean, extra: readonly DataColumn[]) {
   return tech ? [...base, ...extra] : base;
 }
 
-function Calibration({ g, tech }: { g: Graficos; tech: boolean }) {
+function Calibration({ g, tech, figures }: { g: Graficos; tech: boolean; figures: Figures }) {
   const { calibration: cal } = g;
   const columns = columnsWith(
     [
@@ -86,18 +74,7 @@ function Calibration({ g, tech }: { g: Graficos; tech: boolean }) {
   return (
     <Panel id="graf-calibration" title={L.calibrationTitle}>
       <Scroller label={L.chartRegion} narrow>
-        <ReliabilityPlot
-          id="graf-calibration-chart"
-          title={L.calibrationChart}
-          series={cal.series.map((s) => ({ cls: s.cls, label: s.label, points: s.bins.map(calPoint) }))}
-          xLabel={L.calibrationX}
-          yLabel={L.calibrationY}
-          diagonalLabel={L.legendDiagonal}
-          intervals
-          raw={tech}
-          intervalLabel={L.legendInterval}
-          rawLabel={L.legendRaw}
-        />
+        <MplFigure id="calibracao" figures={figures} />
       </Scroller>
       <p className={styles.callout}>{cal.networks_note}</p>
       <Numbers>
@@ -126,7 +103,8 @@ function RatePanel({
   note,
   series,
   tech,
-  perClass = false,
+  figureIds,
+  figures,
 }: {
   id: string;
   title: string;
@@ -135,7 +113,8 @@ function RatePanel({
   note: string;
   series: { key: string; label: string; rows: RateRow[] }[];
   tech: boolean;
-  perClass?: boolean;
+  figureIds: string[];
+  figures: Figures;
 }) {
   const columns = columnsWith(
     [
@@ -153,20 +132,11 @@ function RatePanel({
   const rows = series.flatMap((s) => rateRows(s.label, s.rows));
   return (
     <Panel id={id} title={title}>
-      {/* Faixas diferentes por classe (by-z): um grafico por classe, cada um com o seu eixo X. */}
-      {(perClass ? series.map((s) => [s]) : [series]).map((group) => (
-        <Scroller key={group.map((s) => s.key).join("-")} label={L.chartRegion}>
-          <RateByBin
-            id={perClass ? `${id}-chart-${group[0].key}` : `${id}-chart`}
-            title={perClass ? group[0].label : chart}
-            series={group}
-            showCi
-            yLabel={L.errorY}
-            naText={L.notAvailable}
-          />
+      {figureIds.map((fid) => (
+        <Scroller key={fid} label={L.chartRegion}>
+          <MplFigure id={fid} figures={figures} />
         </Scroller>
       ))}
-      <Legend items={[L.legendBelowFloor, L.legendInterval]} />
       {note ? <p className={styles.callout}>{note}</p> : null}
       <Numbers>
         <DataTable caption={chart} columns={columns} rows={rows} />
@@ -175,7 +145,7 @@ function RatePanel({
   );
 }
 
-function Confusion({ g, tech }: { g: Graficos; tech: boolean }) {
+function Confusion({ g, tech, figures }: { g: Graficos; tech: boolean; figures: Figures }) {
   const { confusion: conf } = g;
   const labelOf = (cls: string): string => conf.classes.find((c) => c.cls === cls)?.label ?? cls;
   const columns = columnsWith(
@@ -201,16 +171,9 @@ function Confusion({ g, tech }: { g: Graficos; tech: boolean }) {
   );
   return (
     <Panel id="graf-confusion" title={L.confusionTitle}>
-      <figure aria-label={L.confusionTitle}>
-        <ConfusionGrid
-          caption={L.confusionCaption}
-          classes={conf.classes}
-          rows={conf.rows}
-          showCi
-          trueLabel={L.confusionTrue}
-          predLabel={L.confusionPred}
-        />
-      </figure>
+      <Scroller label={L.chartRegion}>
+        <MplFigure id="confusao" figures={figures} />
+      </Scroller>
       <Numbers>
         <DataTable caption={L.confusionCaption} columns={columns} rows={rows} />
       </Numbers>
@@ -218,7 +181,7 @@ function Confusion({ g, tech }: { g: Graficos; tech: boolean }) {
   );
 }
 
-function CmdSection({ cmd, tech }: { cmd: Cmd; tech: boolean }) {
+function CmdSection({ cmd, tech, figures }: { cmd: Cmd; tech: boolean; figures: Figures }) {
   const columns = columnsWith(
     [
       { key: "g", label: L.colGRange },
@@ -237,26 +200,26 @@ function CmdSection({ cmd, tech }: { cmd: Cmd; tech: boolean }) {
       const range = cmdRange(cmd, c);
       return { g: range.g, c: range.c, rate: c.rate.text, n: c.n.text, ci: c.rate.ci_text };
     });
-  const maps = [
-    { mode: "rate" as const, title: L.cmdChartRate, scale: L.cmdScaleRate },
-    ...(tech ? [{ mode: "count" as const, title: L.cmdChartCount, scale: L.cmdScaleCount }] : []),
-  ];
   return (
     <Panel id="graf-cmd" title={L.cmdTitle}>
-      {maps.map((m) => (
-        <Scroller key={m.mode} label={L.chartRegion}>
+      <Scroller label={L.chartRegion}>
+        <MplFigure id="cmd-taxa" figures={figures} />
+      </Scroller>
+      {/* A contagem por celula nao tem figura matplotlib: continua no componente React. */}
+      {tech ? (
+        <Scroller label={L.chartRegion}>
           <CmdMap
-            id={`graf-cmd-${m.mode}`}
-            title={m.title}
+            id="graf-cmd-count"
+            title={L.cmdChartCount}
             cmd={cmd}
-            mode={m.mode}
+            mode="count"
             xLabel={L.cmdX}
             yLabel={L.cmdY}
-            scaleLabel={m.scale}
+            scaleLabel={L.cmdScaleCount}
             naText={L.notAvailable}
           />
         </Scroller>
-      ))}
+      ) : null}
       <Legend items={[L.legendCmdBelowFloor]} />
       <p className={styles.callout}>{cmd.note}</p>
       <Numbers>
@@ -267,7 +230,7 @@ function CmdSection({ cmd, tech }: { cmd: Cmd; tech: boolean }) {
 }
 
 function Body({ props, state }: { props: Props; state: UiState }) {
-  const { graficos: g } = props;
+  const { graficos: g, figures } = props;
   const toSeries = (s: { cls: string; label: string; rows: RateRow[] }) => ({
     key: s.cls,
     label: s.label,
@@ -279,7 +242,7 @@ function Body({ props, state }: { props: Props; state: UiState }) {
         <p className={styles.answer}>{g.scope_text}</p>
         <p className={styles.muted}>{g.floor_text}</p>
       </div>
-      <Calibration g={g} tech={state.tech} />
+      <Calibration g={g} tech={state.tech} figures={figures} />
       <RatePanel
         id="graf-by-g"
         title={L.errorByGTitle}
@@ -288,6 +251,8 @@ function Body({ props, state }: { props: Props; state: UiState }) {
         note={g.error_by_g.missing_note}
         series={g.error_by_g.series.map(toSeries)}
         tech={state.tech}
+        figureIds={["taxa-por-g"]}
+        figures={figures}
       />
       <RatePanel
         id="graf-by-z"
@@ -297,10 +262,11 @@ function Body({ props, state }: { props: Props; state: UiState }) {
         note={g.error_by_z.star_note}
         series={g.error_by_z.series.map(toSeries)}
         tech={state.tech}
-        perClass
+        figureIds={g.error_by_z.series.map((s) => zFigureId(s.cls))}
+        figures={figures}
       />
-      <Confusion g={g} tech={state.tech} />
-      {g.cmd === null ? null : <CmdSection cmd={g.cmd} tech={state.tech} />}
+      <Confusion g={g} tech={state.tech} figures={figures} />
+      {g.cmd === null ? null : <CmdSection cmd={g.cmd} tech={state.tech} figures={figures} />}
     </div>
   );
 }

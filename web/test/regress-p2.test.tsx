@@ -1,16 +1,15 @@
-// Regressoes da ADR 0008 Fase 2a (P2-T11): REV-P2-01, TST-03, REV-P2-21..24, TST-02.
+// Regressoes da ADR 0008 Fase 2a (P2-T11): TST-03, REV-P2-21..24, TST-02.
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
-import { OverviewView } from "@/components/pages/OverviewView";
 import { SkyView } from "@/components/pages/SkyView";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { MapLegend } from "@/components/sky/MapLegend";
 import { MollweideMap } from "@/components/sky/MollweideMap";
 import { skyMapLabels } from "@/content/labels";
-import type { Meta, Overview, Sky } from "@/lib/schema";
+import type { Meta, Sky } from "@/lib/schema";
 
 const nav = vi.hoisted(() => ({ search: "" }));
 vi.mock("next/navigation", () => ({
@@ -24,36 +23,11 @@ const FIX = path.join(WEB, "test", "fixtures", "fixture_v0");
 const load = <T,>(name: string): T =>
   JSON.parse(fs.readFileSync(path.join(FIX, `${name}.json`), "utf-8")) as T;
 const meta = load<Meta>("meta");
-const overview = load<Overview>("overview");
 const sky = load<Sky>("sky");
 
 const esc = (s: string) =>
   s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 const stripTags = (s: string) => s.replace(/<[^>]*>/g, "").replace(/<!-- -->/g, "");
-
-describe("REV-P2-01: rotulo do grafico segue o par regra/prior, nao o indice", () => {
-  const props = {
-    rows: overview.rows,
-    accuracyNote: overview.accuracy_note,
-    technical: overview.technical,
-  };
-  const labelOf = (html: string, key: string) =>
-    stripTags(html.match(new RegExp(`data-row="${key}"[^>]*>\\s*<text[^>]*>([\\s\\S]*?)</text>`))![1]);
-
-  it("states em ordem invertida: cada data-row mantem o rotulo do seu par", () => {
-    nav.search = "";
-    const reversed: Meta = { ...meta, states: [...meta.states].reverse() };
-    expect(reversed.states[0].label).not.toBe(meta.states[0].label);
-    for (const m of [meta, reversed]) {
-      const html = renderToStaticMarkup(<OverviewView {...props} meta={m} />);
-      for (const r of overview.rows) {
-        const want = meta.states.find((s) => s.rule === r.rule && s.prior === r.prior)!.label;
-        const got = labelOf(html, `${r.rule}-${r.prior}`);
-        expect(got.includes(esc(want)) || got.includes(want), `${r.rule}-${r.prior}`).toBe(true);
-      }
-    }
-  });
-});
 
 describe("TST-03: rotulos do graticule usam o kind do JSON", () => {
   const render = (labels: Sky["graticule"]["labels"]) =>

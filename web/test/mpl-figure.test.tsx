@@ -6,7 +6,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { MplFigure, loadFigure } from "@/components/charts/MplFigure";
+import { MplFigure } from "@/components/charts/MplFigure";
+import { loadFigure, loadFigures } from "@/lib/figures";
 
 const WEB = fileURLToPath(new URL("..", import.meta.url));
 const FIX_ROOT = path.join(WEB, "test", "fixtures");
@@ -41,7 +42,7 @@ describe("criterio 8: MplFigure renderiza a partir de figures.json da fixture", 
 
   it.each(Object.keys(manifest.figures))("%s: figure, figcaption, aria-label e SVG", (id) => {
     const e = manifest.figures[id];
-    const html = renderToStaticMarkup(<MplFigure id={id} />);
+    const html = renderToStaticMarkup(<MplFigure id={id} figures={loadFigures([id])} />);
     expect(html.startsWith("<figure")).toBe(true);
     const open = html.slice(0, html.indexOf(">") + 1);
     expect(open).toContain(`aria-label="${esc(e.aria_label)}"`);
@@ -118,7 +119,7 @@ describe("criterio 9: MplFigure recusa SVG perigoso", () => {
   ])("%s", (_name, svg, why) => {
     withSvg(svg, () => {
       expect(() => loadFigure("fig")).toThrow(why);
-      expect(() => renderToStaticMarkup(<MplFigure id="fig" />)).toThrow(why);
+      expect(() => renderToStaticMarkup(<MplFigure id="fig" figures={loadFigures(["fig"])} />)).toThrow(why);
     });
   });
 

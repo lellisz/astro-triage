@@ -525,3 +525,183 @@ def test_rev04_calibration_seal_formats_the_floor_with_pt_int(tmp_path):
     texts = " ".join(t for _, t in _texts(svg))
     assert "Piso de 1.000 objetos por faixa" in texts
     assert "menos de 1" not in texts
+
+
+# ---------------------------------------------------------------- INT-01 regressions
+# Each test below fails against HEAD's charts.py (before the INT-01 fix); see the envelope.
+def _edit(data: Path, page: str, change) -> None:
+    f = data / REL / f"{page}.json"
+    doc = json.loads(f.read_text(encoding="utf-8"))
+    change(doc)
+    f.write_text(json.dumps(doc), encoding="utf-8")
+
+
+def _blank_series(doc: dict) -> None:
+    for b in doc["calibration"]["series"][2]["bins"]:  # Quasar: no reportable bin at all
+        b["below_floor"] = True
+        b["p_mean"] = {"value": None, "text": "n/a"}
+        b["freq"] = {"point": None, "lo": None, "hi": None, "text": "n/a", "ci_text": "n/a"}
+        b["raw_p_mean"] = None
+        b["raw_freq"] = None
+
+
+def test_int01a_calibration_series_without_reportable_bin_is_left_out(tmp_path, svgs):
+    base = {t for _, t in _texts(svgs["calibracao"])}
+    assert "Quasar" in base and "Estrela" in base  # the label is drawn when the series has data
+    data = _copy_fixture(tmp_path)
+    _edit(data, "graficos", _blank_series)
+    write_figures(data, tmp_path / "out", REL)
+    svg = (tmp_path / "out" / REL / "figures" / "calibracao.svg").read_text(encoding="utf-8")
+    texts = {t for _, t in _texts(svg)}
+    assert "Quasar" not in texts
+    assert "Estrela" in texts and "Galáxia" in texts
+
+
+def _dsc_zero_width(doc: dict) -> None:
+    for d in doc["technical"]["dsc"]["paired_diffs"]:
+        d["est"].update(point=0.0, lo=0.0, hi=0.0, text="+0,000", ci_text="IC 95%: +0,000 a +0,000")
+
+
+def _dsc_no_row(doc: dict) -> None:
+    for d in doc["technical"]["dsc"]["paired_diffs"]:
+        d["est"].update(point=None, lo=None, hi=None, text="n/a", ci_text="n/a")
+
+
+def _purity_zero_width(doc: dict) -> None:
+    for r in doc["purity"]:
+        r.update(low=0.4, high=0.4, median=0.4)
+
+
+@pytest.mark.parametrize(
+    "page,change,fid",
+    [
+        ("overview", _dsc_zero_width, "dsc-diferencas"),
+        ("overview", _dsc_no_row, "dsc-diferencas"),
+        ("compare", _purity_zero_width, "pureza-sistemas"),
+    ],
+    ids=["dsc-all-zero", "dsc-no-reportable-row", "purity-hi-eq-lo"],
+)
+def test_int01b_zero_width_interval_axis_draws(tmp_path, page, change, fid):
+    import xml.etree.ElementTree as ET
+
+    data = _copy_fixture(tmp_path)
+    _edit(data, page, change)
+    write_figures(data, tmp_path / "out", REL)  # before the fix: FigureError (math domain error)
+    svg = (tmp_path / "out" / REL / "figures" / f"{fid}.svg").read_text(encoding="utf-8")
+    ET.fromstring(svg)
+    assert not any(re.search(r"\b(nan|inf)\b", t, re.IGNORECASE) for _, t in _texts(svg))
+    assert not re.search(r'="[^"]*\b(nan|inf)\b', svg, re.IGNORECASE)  # no NaN/inf coordinate
+    assert _axes(svg), "no numeric axis"  # a real axis, not a collapsed one
+    assert not _axis_problems(svg), _axis_problems(svg)
+
+
+def _compare_unavailable(status: str):
+    def change(doc: dict) -> None:
+        keep = {"schema_version", "release", "provisional", "generated_at", "page", "freeze_exists"}
+        for k in list(doc):
+            if k not in keep:
+                doc[k] = None
+        doc["status"] = status
+        doc["error_text"] = "falha ao ler" if status == "error" else None
+
+    return change
+
+
+def _ts_compare_ids() -> tuple[str, set[str]]:
+    ts = (ROOT / "web" / "lib" / "figure-ids.ts").read_text(encoding="utf-8")
+    m = re.search(r'compareFigureIds[^{]*\{\s*return c\.status === "(\w+)" \? \[([^\]]*)\] : \[\];', ts)
+    assert m, "compareFigureIds changed shape: update this test"
+    return m.group(1), set(re.findall(r'"([^"]+)"', m.group(2)))
+
+
+@pytest.mark.parametrize("status", ["unavailable", "error"])
+def test_int01c_compare_not_ok_drops_compare_figures(tmp_path, status, capsys):
+    from astro_triage.web_export.figures.__main__ import main as fig_main
+
+    ok_status, ts_ids = _ts_compare_ids()
+    assert ok_status == "ok" and ts_ids == {"pureza-sistemas", "decisao-diferencas"}
+    data = _copy_fixture(tmp_path)
+    _edit(data, "compare", _compare_unavailable(status))
+    assert fig_main(["--release", REL, "--data", str(data), "--out", str(tmp_path / "out")]) == 0
+    figs = tmp_path / "out" / REL / "figures"
+    manifest = json.loads((figs / "figures.json").read_text(encoding="utf-8"))
+    assert set(manifest["figures"]) == EXPECTED_IDS - ts_ids
+    assert {p.name for p in figs.iterdir()} == {f"{i}.svg" for i in EXPECTED_IDS - ts_ids} | {"figures.json"}
+
+
+def _set(path: tuple, value):
+    def change(doc: dict) -> None:
+        node = doc
+        for k in path[:-1]:
+            node = node[k]
+        node[path[-1]] = value
+
+    return change
+
+
+def _drop(path: tuple):
+    def change(doc: dict) -> None:
+        node = doc
+        for k in path[:-1]:
+            node = node[k]
+        del node[path[-1]]
+
+    return change
+
+
+@pytest.mark.parametrize(
+    "page,change",
+    [
+        ("graficos", _drop(("calibration",))),
+        ("graficos", _set(("calibration", "series"), 7)),
+        ("graficos", _set(("calibration", "series", 0, "bins", 0, "p_mean"), "4,6%")),
+        ("compare", _drop(("status",))),
+        ("compare", _set(("grid",), 7)),
+        ("overview", _drop(("technical", "dsc", "paired_diffs"))),
+    ],
+    ids=["no-calibration", "series-int", "p_mean-str", "no-status", "grid-int", "no-paired-diffs"],
+)
+def test_int01d_truly_malformed_json_still_fails(tmp_path, page, change):
+    data = _copy_fixture(tmp_path)
+    _edit(data, page, change)
+    with pytest.raises(FigureError):
+        write_figures(data, tmp_path / "out", REL)
+    assert not (tmp_path / "out").exists()
+
+
+# ---------------------------------------------------------------- REV-01 regressions
+# graficos.cmd is null when the release has no CMD map: cmd-taxa must be left out, not crash.
+def _ts_cmd_rule() -> str:
+    ts = (ROOT / "web" / "lib" / "figure-ids.ts").read_text(encoding="utf-8")
+    m = re.search(r'graficosFigureIds[\s\S]*?\.\.\.\(g\.cmd (===|!==) null \? \[([^\]]*)\] : \[([^\]]*)\]\)', ts)
+    assert m, "graficosFigureIds changed shape: update this test"
+    op, when_null, otherwise = m.groups()
+    if op == "!==":
+        when_null, otherwise = otherwise, when_null
+    assert re.findall(r'"([^"]+)"', when_null) == [], "TS draws cmd-taxa when g.cmd is null"
+    ids = re.findall(r'"([^"]+)"', otherwise)
+    assert len(ids) == 1, ids
+    return ids[0]
+
+
+def test_rev01_ts_cmd_rule_matches_the_python_export():
+    assert _ts_cmd_rule() == "cmd-taxa"
+
+
+def test_rev01_cmd_null_drops_cmd_taxa(tmp_path):
+    cmd_id = _ts_cmd_rule()
+    data = _copy_fixture(tmp_path)
+    _edit(data, "graficos", _set(("cmd",), None))
+    write_figures(data, tmp_path / "out", REL)  # before the fix: FigureError (cmd is None)
+    figs = tmp_path / "out" / REL / "figures"
+    manifest = json.loads((figs / "figures.json").read_text(encoding="utf-8"))
+    assert set(manifest["figures"]) == EXPECTED_IDS - {cmd_id}
+    assert {p.name for p in figs.iterdir()} == {f"{i}.svg" for i in EXPECTED_IDS - {cmd_id}} | {
+        "figures.json"
+    }
+
+
+def test_rev01_cmd_present_keeps_cmd_taxa(gen):
+    # counter-proof: the fixture has a CMD map, so the figure is drawn
+    assert json.loads((FIX / "graficos.json").read_text(encoding="utf-8"))["cmd"] is not None
+    assert (gen / f"{_ts_cmd_rule()}.svg").is_file()

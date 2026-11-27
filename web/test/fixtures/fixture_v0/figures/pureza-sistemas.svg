@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="440" height="506" viewBox="0 0 440 506" role="img" aria-labelledby="pureza-sistemas-title" aria-describedby="pureza-sistemas-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="pureza-sistemas-title">Pureza absoluta por sistema, no ponto fixo</title><desc id="pureza-sistemas-desc">LightGBM: mediana de 5 sementes 40,00%; mínimo a máximo 30,00% a 50,00% (não é IC); MLP completo: mediana de 5 sementes 45,00%; mínimo a máximo 35,00% a 55,00% (não é IC)</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="526" viewBox="0 0 440 526" role="img" aria-labelledby="pureza-sistemas-title" aria-describedby="pureza-sistemas-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="pureza-sistemas-title">Pureza absoluta por sistema, no ponto fixo</title><desc id="pureza-sistemas-desc">LightGBM: mediana de 5 sementes 40,00%; mínimo a máximo 30,00% a 50,00% (não é IC); MLP completo: mediana de 5 sementes 45,00%; mínimo a máximo 35,00% a 55,00% (não é IC)</desc>
  <g id="pureza-sistemas-figure_1">
   <g id="pureza-sistemas-patch_1">
-   <path d="M 0 506 
-L 440 506 
+   <path d="M 0 526 
+L 440 526 
 L 440 0 
 L 0 0 
 z
@@ -10,53 +10,53 @@ z
   </g>
   <g id="pureza-sistemas-axes_1">
    <g id="pureza-sistemas-line2d_1">
-    <path d="M 24 98 
-L 24 246 
+    <path d="M 24 118 
+L 24 266 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="pureza-sistemas-line2d_2">
-    <path d="M 90.5 98 
-L 90.5 246 
+    <path d="M 90.5 118 
+L 90.5 266 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="pureza-sistemas-line2d_3">
-    <path d="M 157 98 
-L 157 246 
+    <path d="M 157 118 
+L 157 266 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="pureza-sistemas-line2d_4">
-    <path d="M 223.5 98 
-L 223.5 246 
+    <path d="M 223.5 118 
+L 223.5 266 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="pureza-sistemas-line2d_5">
-    <path d="M 290 98 
-L 290 246 
+    <path d="M 290 118 
+L 290 266 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="pureza-sistemas-line2d_6">
-    <path d="M 24 246 
-L 290 246 
+    <path d="M 24 266 
+L 290 266 
 " style="fill: none; stroke: #8a8a8a"/>
    </g>
    <g id="pureza-sistemas-line2d_7">
-    <path d="M 90.5 142 
-L 223.5 142 
+    <path d="M 90.5 162 
+L 223.5 162 
 " style="fill: none; stroke: #a0a0a0; stroke-width: 3"/>
    </g>
    <g id="pureza-sistemas-line2d_8">
-    <path d="M 157 134 
-L 157 150 
+    <path d="M 157 154 
+L 157 170 
 " style="fill: none; stroke: #eeeeee; stroke-width: 2.5"/>
    </g>
    <g id="pureza-sistemas-line2d_9">
-    <path d="M 123.75 212 
-L 256.75 212 
+    <path d="M 123.75 232 
+L 256.75 232 
 " style="fill: none; stroke: #a0a0a0; stroke-width: 3"/>
    </g>
    <g id="pureza-sistemas-line2d_10">
-    <path d="M 190.25 204 
-L 190.25 220 
+    <path d="M 190.25 224 
+L 190.25 240 
 " style="fill: none; stroke: #eeeeee; stroke-width: 2.5"/>
    </g>
    <g id="pureza-sistemas-text_1">
@@ -66,73 +66,76 @@ L 190.25 220
     <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="42" transform="rotate(-0 16 42)">fixo</text>
    </g>
    <g id="pureza-sistemas-text_3">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="62" transform="rotate(-0 16 62)">Regra · prior: P2 · C* = 0,80 (ponto fixo desta aba; a</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="62" transform="rotate(-0 16 62)">Regra · prior: P2 · C* = 0,80 (ponto fixo da</text>
    </g>
    <g id="pureza-sistemas-text_4">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="82" transform="rotate(-0 16 82)">regra e o prior da barra de ajustes não o mudam)</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="82" transform="rotate(-0 16 82)">comparação com as redes; a barra de ajustes não o</text>
    </g>
    <g id="pureza-sistemas-text_5">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="120" transform="rotate(-0 16 120)">LightGBM · referência</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="102" transform="rotate(-0 16 102)">muda)</text>
    </g>
    <g id="pureza-sistemas-text_6">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="190" transform="rotate(-0 16 190)">MLP completo</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="140" transform="rotate(-0 16 140)">LightGBM · referência</text>
    </g>
    <g id="pureza-sistemas-text_7">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="24" y="268" transform="rotate(-0 24 268)">20%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="210" transform="rotate(-0 16 210)">MLP completo</text>
    </g>
    <g id="pureza-sistemas-text_8">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="90.5" y="268" transform="rotate(-0 90.5 268)">30%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="24" y="288" transform="rotate(-0 24 288)">20%</text>
    </g>
    <g id="pureza-sistemas-text_9">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="157" y="268" transform="rotate(-0 157 268)">40%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="90.5" y="288" transform="rotate(-0 90.5 288)">30%</text>
    </g>
    <g id="pureza-sistemas-text_10">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="223.5" y="268" transform="rotate(-0 223.5 268)">50%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="157" y="288" transform="rotate(-0 157 288)">40%</text>
    </g>
    <g id="pureza-sistemas-text_11">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="290" y="268" transform="rotate(-0 290 268)">60%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="223.5" y="288" transform="rotate(-0 223.5 288)">50%</text>
    </g>
    <g id="pureza-sistemas-text_12">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="147" transform="rotate(-0 300 147)">40,00%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="290" y="288" transform="rotate(-0 290 288)">60%</text>
    </g>
    <g id="pureza-sistemas-text_13">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="167" transform="rotate(-0 300 167)">30,00% a 50,00%</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="167" transform="rotate(-0 300 167)">40,00%</text>
    </g>
    <g id="pureza-sistemas-text_14">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="217" transform="rotate(-0 300 217)">45,00%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="187" transform="rotate(-0 300 187)">30,00% a 50,00%</text>
    </g>
    <g id="pureza-sistemas-text_15">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="237" transform="rotate(-0 300 237)">35,00% a 55,00%</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="237" transform="rotate(-0 300 237)">45,00%</text>
    </g>
    <g id="pureza-sistemas-text_16">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="157" y="292" transform="rotate(-0 157 292)">Pureza absoluta (%)</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="257" transform="rotate(-0 300 257)">35,00% a 55,00%</text>
    </g>
    <g id="pureza-sistemas-text_17">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="320" transform="rotate(-0 16 320)">Atenção: o eixo não começa em zero</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="157" y="312" transform="rotate(-0 157 312)">Pureza absoluta (%)</text>
    </g>
    <g id="pureza-sistemas-text_18">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="340" transform="rotate(-0 16 340)">Traço horizontal: mínimo a máximo entre sementes</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="340" transform="rotate(-0 16 340)">Atenção: o eixo não começa em zero</text>
    </g>
    <g id="pureza-sistemas-text_19">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="360" transform="rotate(-0 16 360)">(não é IC) · traço vertical: mediana</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="360" transform="rotate(-0 16 360)">Traço horizontal: mínimo a máximo entre sementes</text>
    </g>
    <g id="pureza-sistemas-text_20">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="380" transform="rotate(-0 16 380)">LightGBM: mediana de 5 sementes 40,00%; mínimo a</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="380" transform="rotate(-0 16 380)">(não é IC) · traço vertical: mediana</text>
    </g>
    <g id="pureza-sistemas-text_21">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="400" transform="rotate(-0 16 400)">máximo 30,00% a 50,00% (não é IC)</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="400" transform="rotate(-0 16 400)">LightGBM: mediana de 5 sementes 40,00%; mínimo a</text>
    </g>
    <g id="pureza-sistemas-text_22">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="420" transform="rotate(-0 16 420)">MLP completo: mediana de 5 sementes 45,00%;</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="420" transform="rotate(-0 16 420)">máximo 30,00% a 50,00% (não é IC)</text>
    </g>
    <g id="pureza-sistemas-text_23">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="440" transform="rotate(-0 16 440)">mínimo a máximo 35,00% a 55,00% (não é IC)</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="440" transform="rotate(-0 16 440)">MLP completo: mediana de 5 sementes 45,00%;</text>
    </g>
    <g id="pureza-sistemas-text_24">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="470" transform="rotate(-0 16 470)">PROVISÓRIO</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="460" transform="rotate(-0 16 460)">mínimo a máximo 35,00% a 55,00% (não é IC)</text>
    </g>
    <g id="pureza-sistemas-text_25">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="490" transform="rotate(-0 16 490)">LightGBM, MLP e FT-Transformer · fixture_v0</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="490" transform="rotate(-0 16 490)">PROVISÓRIO</text>
+   </g>
+   <g id="pureza-sistemas-text_26">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="510" transform="rotate(-0 16 510)">LightGBM, MLP e FT-Transformer · fixture_v0</text>
    </g>
   </g>
  </g>

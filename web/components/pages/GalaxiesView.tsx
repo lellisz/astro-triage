@@ -4,19 +4,20 @@ import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { HBarCI, type HBarCIRow } from "@/components/charts/HBarCI";
+import { MplFigure } from "@/components/charts/MplFigure";
 import { DataTable, type DataColumn } from "@/components/kit/DataTable";
 import { Panel } from "@/components/kit/Panel";
 import { chartLabels, compareHref, galaxiesLabels as L } from "@/content/labels";
+import type { Figures } from "@/lib/figures";
 import { ptNum } from "@/lib/fmt";
 import type { Galaxies, GalaxyErrorRow, Meta, Rule } from "@/lib/schema";
 import { readState, withState, type UiState } from "@/lib/ui-state";
 import galaxiesStyles from "./galaxies.module.css";
 import styles from "./page.module.css";
 
-type Props = { meta: Meta; galaxies: Galaxies };
+type Props = { meta: Meta; galaxies: Galaxies; figures: Figures };
 
 const RULES: readonly Rule[] = ["as_shipped", "prior_matched"];
-const AXIS_STEPS = [0.2, 0.4, 0.8, 1];
 
 const columns: readonly DataColumn[] = [
   { key: "label", label: L.colBand },
@@ -33,22 +34,6 @@ const netColumns: readonly DataColumn[] = [
   { key: "delta", label: L.colDelta, numeric: true },
   { key: "verdict", label: L.colVerdict },
 ];
-
-// Só escala de eixo (layout): o menor degrau que contém o maior limite superior exportado.
-function axisMaxOf(rows: readonly GalaxyErrorRow[]): number {
-  const top = Math.max(0, ...rows.map((r) => r.rate.hi ?? 0));
-  return AXIS_STEPS.find((s) => s >= top) ?? 1;
-}
-
-function errorBars(prefix: string, rows: readonly GalaxyErrorRow[]): HBarCIRow[] {
-  return rows.map((r, i) => ({
-    key: `${prefix}-${i}`,
-    label: r.label,
-    est: r.rate,
-    selected: false,
-    partial: false,
-  }));
-}
 
 function tableRows(rows: readonly GalaxyErrorRow[]): Record<string, string>[] {
   return rows.map((r) => ({
@@ -127,10 +112,9 @@ function Networks({ g, meta, state }: { g: Galaxies; meta: Meta; state: UiState 
 }
 
 function Body({ props, state }: { props: Props; state: UiState }) {
-  const { meta, galaxies: g } = props;
+  const { meta, galaxies: g, figures } = props;
   const purity = priorRows(meta, g, state, "purity");
   const completeness = priorRows(meta, g, state, "completeness");
-  const overall = g.error_rows;
   return (
     <div className={styles.stack}>
       <div className={galaxiesStyles.context}>
@@ -165,13 +149,7 @@ function Body({ props, state }: { props: Props; state: UiState }) {
 
       <Panel id="gal-errors" title={L.errorsTitle} subtitle={L.errorsSub}>
         <Scroller label={L.errorsRegion}>
-          <HBarCI
-            id="gal-errors-chart"
-            title={L.errorsChart}
-            rows={errorBars("err", overall)}
-            axisMax={axisMaxOf(overall)}
-            partialTag={chartLabels.partialTag}
-          />
+          <MplFigure id="galaxia-erros" figures={figures} />
         </Scroller>
         <p className={galaxiesStyles.errorsNote}>{g.error_rows_note}</p>
       </Panel>

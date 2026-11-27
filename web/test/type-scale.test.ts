@@ -39,20 +39,12 @@ describe("escala do texto dos graficos SVG", () => {
       return m ? [{ file: f, w: Number(m[1]) }] : [];
     });
 
-  it("os 7 graficos declaram a largura do viewBox (PriorSeries e HistogramPair foram apagados)", () => {
-    expect(viewWidths.map((v) => v.file).sort()).toEqual([
-      "CmdMap.tsx",
-      "DotCI.tsx",
-      "HBar.tsx",
-      "HBarCI.tsx",
-      "PurityRange.tsx",
-      "RateByBin.tsx",
-      "ReliabilityPlot.tsx",
-    ]);
+  it("os 2 graficos React restantes declaram a largura do viewBox (os demais viraram figuras matplotlib)", () => {
+    expect(viewWidths.map((v) => v.file).sort()).toEqual(["CmdMap.tsx", "HBarCI.tsx"]);
   });
 
-  it("a descoberta acha os graficos exclusivos de /graficos (ReliabilityPlot saiu da Visao geral)", () => {
-    expect([...graficosOnly].sort()).toEqual(["CmdMap.tsx", "RateByBin.tsx", "ReliabilityPlot.tsx"]);
+  it("a descoberta acha o grafico exclusivo de /graficos (o mapa de contagem)", () => {
+    expect([...graficosOnly].sort()).toEqual(["CmdMap.tsx"]);
   });
 
   it(".scrollCal svg vem depois de .scroll svg (mesma especificidade: o teto do ReliabilityPlot e o dele)", () => {

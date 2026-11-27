@@ -1,19 +1,16 @@
 import type { ReactNode } from "react";
-import { DotCI, type DotCIRow } from "@/components/charts/DotCI";
-import { PurityRange, type PurityRangeRow } from "@/components/charts/PurityRange";
+import { MplFigure } from "@/components/charts/MplFigure";
 import { DataTable, type DataColumn } from "@/components/kit/DataTable";
 import { Panel } from "@/components/kit/Panel";
 import { Tabs, type TabItem } from "@/components/kit/Tabs";
 import { compareLabels as L } from "@/content/labels";
+import type { Figures } from "@/lib/figures";
 import type { Compare } from "@/lib/schema";
 import cmp from "./compare.module.css";
 import styles from "./page.module.css";
 
 type Ok = Extract<Compare, { status: "ok" }>;
 type Unavailable = Exclude<Compare, { status: "ok" }>;
-
-const MARKERS = ["circle", "square", "diamond"] as const;
-const markerAt = (i: number) => MARKERS[i % MARKERS.length];
 
 const verdictColumns: readonly DataColumn[] = [
   { key: "net", label: L.colNet },
@@ -37,16 +34,6 @@ function Scroller({ label, children }: { label: string; children: ReactNode }) {
       {children}
     </div>
   );
-}
-
-function indexer(): (name: string) => number {
-  const seen: string[] = [];
-  return (name) => {
-    const at = seen.indexOf(name);
-    if (at >= 0) return at;
-    seen.push(name);
-    return seen.length - 1;
-  };
 }
 
 function Models({ c }: { c: Ok }) {
@@ -115,16 +102,7 @@ function Verdicts({ c }: { c: Ok }) {
   );
 }
 
-function Purity({ c }: { c: Ok }) {
-  const rows: PurityRangeRow[] = c.purity.map((p, i) => ({
-    key: p.system,
-    label: p.label,
-    low: p.low,
-    median: p.median,
-    high: p.high,
-    detail: p.detail_text,
-    marker: markerAt(i),
-  }));
+function Purity({ c, figures }: { c: Ok; figures: Figures }) {
   return (
     <>
       <h3 className={cmp.subTitle}>{L.absolutePurity}</h3>
@@ -133,7 +111,7 @@ function Purity({ c }: { c: Ok }) {
         {L.purityRange} <strong>({L.notCi})</strong>
       </p>
       <Scroller label={L.purityRegion}>
-        <PurityRange id="cmp-purity-chart" title={L.purityChart} rows={rows} />
+        <MplFigure id="pureza-sistemas" figures={figures} />
       </Scroller>
       <ul className={cmp.details}>
         {c.purity.map((p) => (
@@ -146,24 +124,13 @@ function Purity({ c }: { c: Ok }) {
   );
 }
 
-function Diffs({ c }: { c: Ok }) {
-  const netIndex = indexer();
-  const decision: DotCIRow[] = c.grid.map((g) => {
-    const i = netIndex(g.net);
-    return {
-      key: `g-${g.net}-${g.cls}`,
-      label: `${g.net} · ${g.cls_label}`,
-      est: g.diff,
-      marker: markerAt(i),
-      dashed: i % 2 === 1,
-    };
-  });
+function Diffs({ c, figures }: { c: Ok; figures: Figures }) {
   return (
     <>
       <h3 className={cmp.subTitle}>{L.diffsTitle}</h3>
       <p className={styles.muted}>{L.diffsHint}</p>
       <Scroller label={L.diffsRegion}>
-        <DotCI id="cmp-decision" title={L.decisionChart} rows={decision} zeroLine />
+        <MplFigure id="decisao-diferencas" figures={figures} />
       </Scroller>
       {c.descriptive.length > 0 ? (
         <DataTable
@@ -221,11 +188,11 @@ function Notes({ c }: { c: Ok }) {
   );
 }
 
-function Available({ c }: { c: Ok }) {
+function Available({ c, figures }: { c: Ok; figures: Figures }) {
   const tabs: TabItem[] = [
     { key: "vereditos", label: L.tabVerdicts, content: <Verdicts c={c} /> },
-    { key: "pureza", label: L.tabPurity, content: <Purity c={c} /> },
-    { key: "diferencas", label: L.tabDiffs, content: <Diffs c={c} /> },
+    { key: "pureza", label: L.tabPurity, content: <Purity c={c} figures={figures} /> },
+    { key: "diferencas", label: L.tabDiffs, content: <Diffs c={c} figures={figures} /> },
     { key: "metodo", label: L.tabMethod, content: <Notes c={c} /> },
   ];
   return (
@@ -254,6 +221,6 @@ function Missing({ c }: { c: Unavailable }) {
   );
 }
 
-export function CompareView({ compare }: { compare: Compare }) {
-  return compare.status === "ok" ? <Available c={compare} /> : <Missing c={compare} />;
+export function CompareView({ compare, figures }: { compare: Compare; figures: Figures }) {
+  return compare.status === "ok" ? <Available c={compare} figures={figures} /> : <Missing c={compare} />;
 }

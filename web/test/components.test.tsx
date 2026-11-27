@@ -3,7 +3,6 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { DotCI } from "@/components/charts/DotCI";
 import { HBarCI, type HBarCIRow } from "@/components/charts/HBarCI";
 import { DataTable } from "@/components/kit/DataTable";
 import { NA } from "@/components/kit/NA";
@@ -17,6 +16,7 @@ import { RegionTooltip, regionDescription } from "@/components/sky/RegionTooltip
 import { chartLabels, overviewLabels, skyLabels, skyMapLabels } from "@/content/labels";
 import { ptInt, ptPct } from "@/lib/fmt";
 import type { Est, Meta, Overview, Sky } from "@/lib/schema";
+import { FIGS } from "./fixture-figures";
 
 const nav = vi.hoisted(() => ({ search: "" }));
 vi.mock("next/navigation", () => ({
@@ -134,7 +134,7 @@ describe("A3 Visao geral", () => {
   };
   const render = (search: string) => {
     nav.search = search;
-    return renderToStaticMarkup(<OverviewView {...props} />);
+    return renderToStaticMarkup(<OverviewView figures={FIGS} {...props} />);
   };
   const kpi = (html: string, label: string) =>
     html.match(new RegExp(`${label}</p><p[^>]*>([^<]*)</p>`))?.[1];
@@ -166,7 +166,7 @@ describe("A3 Visao geral", () => {
     };
     const rows = [row, ...overview.rows.slice(1)];
     nav.search = "";
-    const html = renderToStaticMarkup(<OverviewView {...props} rows={rows} />);
+    const html = renderToStaticMarkup(<OverviewView figures={FIGS} {...props} rows={rows} />);
     expect(kpi(html, overviewLabels.accuracy)).toBe(row.accuracy.text);
     expect(kpi(html, overviewLabels.accuracy)).toBe("n/a");
     expect(kpi(html, overviewLabels.accuracy)).not.toBe(overviewLabels.accuracyNA);
@@ -190,8 +190,10 @@ describe("A3 Visao geral", () => {
 
   it("partial_notice: aparece como aviso so quando o estado e P3", () => {
     const notice = escapeHtml(overview.rows[3].partial_notice!);
-    const p3 = render("regra=prior_matched&prior=P3");
-    const def = render("");
+    // As figuras matplotlib repetem a nota dentro do SVG; conta-se so o HTML da pagina.
+    const noFig = (h: string) => h.replace(/<figure[^>]*data-figure="[^"]*"[\s\S]*?<\/figure>/g, "");
+    const p3 = noFig(render("regra=prior_matched&prior=P3"));
+    const def = noFig(render(""));
     // no default aparece so a nota fixa do grafico; em P3 ha tambem o callout
     expect(countText(def, notice)).toBe(1);
     expect(countText(p3, notice)).toBe(2);
@@ -209,7 +211,7 @@ describe("A3 Visao geral", () => {
 
   it("mapa proprio do ceu: so regioes reportaveis, sem <img, com legenda", () => {
     nav.search = "";
-    const html = renderToStaticMarkup(<OverviewView {...props} sky={sky} />);
+    const html = renderToStaticMarkup(<OverviewView figures={FIGS} {...props} sky={sky} />);
     const fig = html.match(/<figure class="[^"]*thumb[^"]*">[\s\S]*?<\/figure>/)![0];
     const reportable = sky.regions.filter((r) => !r.below_floor && r.rate !== null).length;
     expect(reportable).toBeGreaterThan(0);
@@ -224,7 +226,7 @@ describe("A3 Visao geral", () => {
   it("sem tecnico nao ha conteudo tecnico; com tecnico=1 ele aparece", () => {
     const off = render("");
     const on = render("tecnico=1");
-    for (const marker of ["data-feature", "data-point", 'id="ov-confidence"']) {
+    for (const marker of ['data-figure="dsc-diferencas"', 'data-figure="ganho-lgbm-full"', 'id="ov-confidence"']) {
       expect(off, marker).not.toContain(marker);
       expect(on, marker).toContain(marker);
     }
@@ -235,6 +237,10 @@ describe("A3 Visao geral", () => {
     }
     expect(on).toMatch(/href="\/graficos\/?(\?[^"]*)?"[^>]*>[^<]*Calibra/);
     expect(on).toContain(overviewLabels.calibrationLink);
+    for (const html of [off, on]) {
+      expect(html).toContain('data-figure="quasar-pureza"');
+      expect(html).toContain('data-figure="quasar-completude"');
+    }
     expect(off).not.toContain(overviewLabels.techTitle);
     expect(on).toContain(overviewLabels.techTitle);
     // tecnico=0 explicito tambem e modo simples
@@ -242,7 +248,7 @@ describe("A3 Visao geral", () => {
   });
 
   it("OverviewTechnical direto: tabela de erros tem uma linha por direcao", () => {
-    const html = renderToStaticMarkup(<OverviewTechnical technical={overview.technical} />);
+    const html = renderToStaticMarkup(<OverviewTechnical figures={FIGS} technical={overview.technical} />);
     const tbody = html.match(/<tbody>([\s\S]*?)<\/tbody>/)![1];
     expect(count(tbody, /<tr>/g)).toBe(overview.technical.error_directions.length);
   });
@@ -487,13 +493,5 @@ describe("kit e graficos: fronteira", () => {
     );
     expect(html).toContain("<th");
     expect(count(html, /<tr>/g)).toBe(1);
-  });
-
-  it("DotCI: estimativa sem ponto nao desenha ponto", () => {
-    const html = renderToStaticMarkup(
-      <DotCI id="d" title="t" rows={[{ key: "a", label: "A", est: naEst }]} />,
-    );
-    expect(html).not.toContain("data-point");
-    expect(html).not.toContain("data-ci");
   });
 });

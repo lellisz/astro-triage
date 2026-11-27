@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="440" height="774" viewBox="0 0 440 774" role="img" aria-labelledby="cmd-taxa-title" aria-describedby="cmd-taxa-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="cmd-taxa-title">Taxa de erro no diagrama cor-magnitude</title><desc id="cmd-taxa-desc">nenhuma célula acima do piso; 37 objetos fora da área</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="794" viewBox="0 0 440 794" role="img" aria-labelledby="cmd-taxa-title" aria-describedby="cmd-taxa-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="cmd-taxa-title">Taxa de erro no diagrama cor-magnitude</title><desc id="cmd-taxa-desc">nenhuma célula acima do piso; 37 objetos fora da área</desc>
  <g id="cmd-taxa-figure_1">
   <g id="cmd-taxa-patch_1">
-   <path d="M 0 774 
-L 440 774 
+   <path d="M 0 794 
+L 440 794 
 L 440 0 
 L 0 0 
 z
@@ -2545,16 +2545,19 @@ L 64 374
     <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="668" transform="rotate(-0 16 668)">valor. Ficam fora do mapa 3 objetos sem magnitude G</text>
    </g>
    <g id="cmd-taxa-text_34">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="688" transform="rotate(-0 16 688)">ou sem cor BP-RP e 37 fora da área desenhada.</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="688" transform="rotate(-0 16 688)">ou sem cor BP-RP e 37 (82,2% do teste) fora da área</text>
    </g>
    <g id="cmd-taxa-text_35">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="718" transform="rotate(-0 16 718)">PROVISÓRIO</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="708" transform="rotate(-0 16 708)">desenhada.</text>
    </g>
    <g id="cmd-taxa-text_36">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="738" transform="rotate(-0 16 738)">LightGBM completo · fixture_v0</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="738" transform="rotate(-0 16 738)">PROVISÓRIO</text>
    </g>
    <g id="cmd-taxa-text_37">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="758" transform="rotate(-0 16 758)">Piso de 5 objetos por célula</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="758" transform="rotate(-0 16 758)">LightGBM completo · fixture_v0</text>
+   </g>
+   <g id="cmd-taxa-text_38">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="778" transform="rotate(-0 16 778)">Piso de 5 objetos por célula</text>
    </g>
   </g>
  </g>

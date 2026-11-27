@@ -132,7 +132,16 @@ def _export_dir(out: Path, release: str) -> Path:
 
 def _read_all(folder: Path, release: str) -> dict[str, dict]:
     docs = {}
-    assert sorted(p.name for p in folder.iterdir()) == sorted(f"{n}.json" for n in FILES)
+    # REV-05: the export is atomic over the JSON AND figures/; nothing else may be there.
+    assert sorted(p.name for p in folder.iterdir()) == sorted([*(f"{n}.json" for n in FILES), "figures"])
+    figs = folder / "figures"
+    assert figs.is_dir() and not figs.is_symlink(), "figures/ must be a real folder"
+    manifest = _strict((figs / "figures.json").read_text(encoding="utf-8"))
+    assert manifest["release"] == release and manifest["provisional"] is True
+    assert manifest["figures"], "figures.json lists no figure"
+    assert sorted(p.name for p in figs.iterdir()) == sorted(
+        ["figures.json", *(f"{fid}.svg" for fid in manifest["figures"])]
+    )
     for name in FILES:
         text = (folder / f"{name}.json").read_text(encoding="utf-8")
         doc = _strict(text)
@@ -429,6 +438,29 @@ def test_compare_with_malformed_dl_results_is_error(
     assert doc["status"] == "error"
     assert isinstance(doc["error_text"], str) and doc["error_text"]
     assert doc["answer_text"] is None and doc["grid"] is None
+
+
+COMPARE_FIGURES = {"pureza-sistemas", "decisao-diferencas"}
+
+
+@pytest.mark.parametrize("status", ["unavailable", "error"])
+def test_compare_not_ok_exports_without_compare_figures(
+    status: str, synth_root: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """INT-01 c: compare not ok -> export exits 0 and figures.json has no compare figure
+    (same rule as compareFigureIds in web/lib/figure-ids.ts)."""
+    root = synth_root if status == "unavailable" else _malformed_root(synth_root, tmp_path)
+    monkeypatch.setenv("ASTRO_DATA_ROOT", str(root))
+    out = tmp_path / "out"
+    assert main(["--release", RELEASE, "--out", str(out)]) == 0
+    assert _strict((out / RELEASE / "compare.json").read_text("utf-8"))["status"] == status
+    docs = _read_all(out / RELEASE, RELEASE)  # also checks figures/ is complete
+    assert docs["compare"]["status"] == status
+    manifest = _strict((out / RELEASE / "figures" / "figures.json").read_text("utf-8"))
+    ids = set(manifest["figures"])
+    assert not ids & COMPARE_FIGURES, ids
+    assert {"calibracao", "confusao", "dsc-diferencas"} <= ids
+    assert not any((out / RELEASE / "figures" / f"{fid}.svg").exists() for fid in COMPARE_FIGURES)
 
 
 # ------------------------------------------------------------------ 4. real release

@@ -1,8 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="440" height="748" viewBox="0 0 440 748" role="img" aria-labelledby="decisao-diferencas-title" aria-describedby="decisao-diferencas-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="decisao-diferencas-title">Diferenças nas células da decisão</title><desc id="decisao-diferencas-desc">MLP − LightGBM, Quasar: +10,00 p.p. (IC 95% +5,00 a +15,00), δ 2,00 p.p., vitória; FTT − LightGBM, Quasar: +10,00 p.p. (IC 95% +5,00 a +15,00), δ 2,00 p.p., vitória; MLP − LightGBM, Galáxia: +0,10 p.p. (IC 95% -1,00 a +1,00), δ 2,00 p.p., sem diferença detectável; FTT − LightGBM, Galáxia: +10,00 p.p. (IC 95% +5,00 a +15,00), δ 2,00 p.p., vitória</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="768" viewBox="0 0 440 768" role="img" aria-labelledby="decisao-diferencas-title" aria-describedby="decisao-diferencas-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="decisao-diferencas-title">Diferenças nas células da decisão</title><desc id="decisao-diferencas-desc">MLP − LightGBM, Quasar: +10,00 p.p. (IC 95% +5,00 a +15,00), δ 2,00 p.p., vitória; FTT − LightGBM, Quasar: +10,00 p.p. (IC 95% +5,00 a +15,00), δ 2,00 p.p., vitória; MLP − LightGBM, Galáxia: +0,10 p.p. (IC 95% -1,00 a +1,00), δ 2,00 p.p., sem diferença detectável; FTT − LightGBM, Galáxia: +10,00 p.p. (IC 95% +5,00 a +15,00), δ 2,00 p.p., vitória</desc>
  <g id="decisao-diferencas-figure_1">
   <g id="decisao-diferencas-patch_1">
-   <path d="M 0 748 
-L 440 748 
+   <path d="M 0 768 
+L 440 768 
 L 440 0 
 L 0 0 
 z
@@ -10,273 +10,276 @@ z
   </g>
   <g id="decisao-diferencas-axes_1">
    <g id="decisao-diferencas-patch_2">
-    <path d="M 55.92 140 
-L 98.48 140 
-L 98.48 164 
-L 55.92 164 
+    <path d="M 55.92 160 
+L 98.48 160 
+L 98.48 184 
+L 55.92 184 
 z
 " style="fill: #7a7a7a; fill-opacity: 0.35"/>
    </g>
    <g id="decisao-diferencas-patch_3">
-    <path d="M 55.92 210 
-L 98.48 210 
-L 98.48 234 
-L 55.92 234 
+    <path d="M 55.92 230 
+L 98.48 230 
+L 98.48 254 
+L 55.92 254 
 z
 " style="fill: #7a7a7a; fill-opacity: 0.35"/>
    </g>
    <g id="decisao-diferencas-patch_4">
-    <path d="M 55.92 406 
-L 98.48 406 
-L 98.48 430 
-L 55.92 430 
+    <path d="M 55.92 426 
+L 98.48 426 
+L 98.48 450 
+L 55.92 450 
 z
 " style="fill: #7a7a7a; fill-opacity: 0.35"/>
    </g>
    <g id="decisao-diferencas-patch_5">
-    <path d="M 55.92 476 
-L 98.48 476 
-L 98.48 500 
-L 55.92 500 
+    <path d="M 55.92 496 
+L 98.48 496 
+L 98.48 520 
+L 55.92 520 
 z
 " style="fill: #7a7a7a; fill-opacity: 0.35"/>
    </g>
    <g id="decisao-diferencas-line2d_1">
-    <path d="M 24 108 
-L 24 256 
+    <path d="M 24 128 
+L 24 276 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="decisao-diferencas-line2d_2">
-    <path d="M 77.2 108 
-L 77.2 256 
+    <path d="M 77.2 128 
+L 77.2 276 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="decisao-diferencas-line2d_3">
-    <path d="M 130.4 108 
-L 130.4 256 
+    <path d="M 130.4 128 
+L 130.4 276 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="decisao-diferencas-line2d_4">
-    <path d="M 183.6 108 
-L 183.6 256 
+    <path d="M 183.6 128 
+L 183.6 276 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="decisao-diferencas-line2d_5">
-    <path d="M 236.8 108 
-L 236.8 256 
+    <path d="M 236.8 128 
+L 236.8 276 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="decisao-diferencas-line2d_6">
-    <path d="M 290 108 
-L 290 256 
+    <path d="M 290 128 
+L 290 276 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="decisao-diferencas-line2d_7">
-    <path d="M 77.2 108 
-L 77.2 256 
+    <path d="M 77.2 128 
+L 77.2 276 
 " style="fill: none; stroke-dasharray: 4,4; stroke-dashoffset: 0; stroke: #8c8c8c"/>
    </g>
    <g id="decisao-diferencas-line2d_8">
-    <path d="M 24 256 
-L 290 256 
+    <path d="M 24 276 
+L 290 276 
 " style="fill: none; stroke: #8a8a8a"/>
    </g>
    <g id="decisao-diferencas-line2d_9">
-    <path d="M 130.4 152 
-L 236.8 152 
+    <path d="M 130.4 172 
+L 236.8 172 
 " style="fill: none; stroke: #a0a0a0; stroke-width: 3"/>
    </g>
    <g id="decisao-diferencas-line2d_10">
-    <path d="M 183.6 144 
-L 183.6 160 
+    <path d="M 183.6 164 
+L 183.6 180 
 " style="fill: none; stroke: #eeeeee; stroke-width: 2.5"/>
    </g>
    <g id="decisao-diferencas-line2d_11">
-    <path d="M 130.4 222 
-L 236.8 222 
+    <path d="M 130.4 242 
+L 236.8 242 
 " style="fill: none; stroke: #a0a0a0; stroke-width: 3"/>
    </g>
    <g id="decisao-diferencas-line2d_12">
-    <path d="M 183.6 214 
-L 183.6 230 
+    <path d="M 183.6 234 
+L 183.6 250 
 " style="fill: none; stroke: #eeeeee; stroke-width: 2.5"/>
    </g>
    <g id="decisao-diferencas-line2d_13">
-    <path d="M 24 374 
-L 24 522 
+    <path d="M 24 394 
+L 24 542 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="decisao-diferencas-line2d_14">
-    <path d="M 77.2 374 
-L 77.2 522 
+    <path d="M 77.2 394 
+L 77.2 542 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="decisao-diferencas-line2d_15">
-    <path d="M 130.4 374 
-L 130.4 522 
+    <path d="M 130.4 394 
+L 130.4 542 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="decisao-diferencas-line2d_16">
-    <path d="M 183.6 374 
-L 183.6 522 
+    <path d="M 183.6 394 
+L 183.6 542 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="decisao-diferencas-line2d_17">
-    <path d="M 236.8 374 
-L 236.8 522 
+    <path d="M 236.8 394 
+L 236.8 542 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="decisao-diferencas-line2d_18">
-    <path d="M 290 374 
-L 290 522 
+    <path d="M 290 394 
+L 290 542 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="decisao-diferencas-line2d_19">
-    <path d="M 77.2 374 
-L 77.2 522 
+    <path d="M 77.2 394 
+L 77.2 542 
 " style="fill: none; stroke-dasharray: 4,4; stroke-dashoffset: 0; stroke: #8c8c8c"/>
    </g>
    <g id="decisao-diferencas-line2d_20">
-    <path d="M 24 522 
-L 290 522 
+    <path d="M 24 542 
+L 290 542 
 " style="fill: none; stroke: #8a8a8a"/>
    </g>
    <g id="decisao-diferencas-line2d_21">
-    <path d="M 66.56 418 
-L 87.84 418 
+    <path d="M 66.56 438 
+L 87.84 438 
 " style="fill: none; stroke: #a0a0a0; stroke-width: 3"/>
    </g>
    <g id="decisao-diferencas-line2d_22">
-    <path d="M 78.264 410 
-L 78.264 426 
+    <path d="M 78.264 430 
+L 78.264 446 
 " style="fill: none; stroke: #eeeeee; stroke-width: 2.5"/>
    </g>
    <g id="decisao-diferencas-line2d_23">
-    <path d="M 130.4 488 
-L 236.8 488 
+    <path d="M 130.4 508 
+L 236.8 508 
 " style="fill: none; stroke: #a0a0a0; stroke-width: 3"/>
    </g>
    <g id="decisao-diferencas-line2d_24">
-    <path d="M 183.6 480 
-L 183.6 496 
+    <path d="M 183.6 500 
+L 183.6 516 
 " style="fill: none; stroke: #eeeeee; stroke-width: 2.5"/>
    </g>
    <g id="decisao-diferencas-text_1">
     <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="22" transform="rotate(-0 16 22)">Diferenças nas células da decisão</text>
    </g>
    <g id="decisao-diferencas-text_2">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="42" transform="rotate(-0 16 42)">Regra · prior: P2 · C* = 0,80 (ponto fixo desta aba; a</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="42" transform="rotate(-0 16 42)">Regra · prior: P2 · C* = 0,80 (ponto fixo da</text>
    </g>
    <g id="decisao-diferencas-text_3">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="62" transform="rotate(-0 16 62)">regra e o prior da barra de ajustes não o mudam)</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="62" transform="rotate(-0 16 62)">comparação com as redes; a barra de ajustes não o</text>
    </g>
    <g id="decisao-diferencas-text_4">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="92" transform="rotate(-0 16 92)">Quasar · escala própria</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="82" transform="rotate(-0 16 82)">muda)</text>
    </g>
    <g id="decisao-diferencas-text_5">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="130" transform="rotate(-0 16 130)">MLP − LightGBM · vitória</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="112" transform="rotate(-0 16 112)">Quasar · escala própria</text>
    </g>
    <g id="decisao-diferencas-text_6">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="200" transform="rotate(-0 16 200)">FTT − LightGBM · vitória</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="150" transform="rotate(-0 16 150)">MLP − LightGBM · vitória</text>
    </g>
    <g id="decisao-diferencas-text_7">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="24" y="278" transform="rotate(-0 24 278)">-5</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="220" transform="rotate(-0 16 220)">FTT − LightGBM · vitória</text>
    </g>
    <g id="decisao-diferencas-text_8">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="77.2" y="278" transform="rotate(-0 77.2 278)">0</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="24" y="298" transform="rotate(-0 24 298)">-5</text>
    </g>
    <g id="decisao-diferencas-text_9">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="130.4" y="278" transform="rotate(-0 130.4 278)">+5</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="77.2" y="298" transform="rotate(-0 77.2 298)">0</text>
    </g>
    <g id="decisao-diferencas-text_10">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="183.6" y="278" transform="rotate(-0 183.6 278)">+10</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="130.4" y="298" transform="rotate(-0 130.4 298)">+5</text>
    </g>
    <g id="decisao-diferencas-text_11">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="236.8" y="278" transform="rotate(-0 236.8 278)">+15</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="183.6" y="298" transform="rotate(-0 183.6 298)">+10</text>
    </g>
    <g id="decisao-diferencas-text_12">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="290" y="278" transform="rotate(-0 290 278)">+20</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="236.8" y="298" transform="rotate(-0 236.8 298)">+15</text>
    </g>
    <g id="decisao-diferencas-text_13">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="157" transform="rotate(-0 300 157)">+10,00 p.p.</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="290" y="298" transform="rotate(-0 290 298)">+20</text>
    </g>
    <g id="decisao-diferencas-text_14">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="177" transform="rotate(-0 300 177)">+5,00 a +15,00</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="177" transform="rotate(-0 300 177)">+10,00 p.p.</text>
    </g>
    <g id="decisao-diferencas-text_15">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="227" transform="rotate(-0 300 227)">+10,00 p.p.</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="197" transform="rotate(-0 300 197)">+5,00 a +15,00</text>
    </g>
    <g id="decisao-diferencas-text_16">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="247" transform="rotate(-0 300 247)">+5,00 a +15,00</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="247" transform="rotate(-0 300 247)">+10,00 p.p.</text>
    </g>
    <g id="decisao-diferencas-text_17">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="157" y="302" transform="rotate(-0 157 302)">Diferença de pureza (p.p.)</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="267" transform="rotate(-0 300 267)">+5,00 a +15,00</text>
    </g>
    <g id="decisao-diferencas-text_18">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="328" transform="rotate(-0 16 328)">Faixa cinza: ±δ = 2,00 p.p.</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="157" y="322" transform="rotate(-0 157 322)">Diferença de pureza (p.p.)</text>
    </g>
    <g id="decisao-diferencas-text_19">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="358" transform="rotate(-0 16 358)">Galáxia · escala própria</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="348" transform="rotate(-0 16 348)">Faixa cinza: ±δ = 2,00 p.p.</text>
    </g>
    <g id="decisao-diferencas-text_20">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="396" transform="rotate(-0 16 396)">MLP − LightGBM · sem diferença detectável</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="378" transform="rotate(-0 16 378)">Galáxia · escala própria</text>
    </g>
    <g id="decisao-diferencas-text_21">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="466" transform="rotate(-0 16 466)">FTT − LightGBM · vitória</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="416" transform="rotate(-0 16 416)">MLP − LightGBM · sem diferença detectável</text>
    </g>
    <g id="decisao-diferencas-text_22">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="24" y="544" transform="rotate(-0 24 544)">-5</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="486" transform="rotate(-0 16 486)">FTT − LightGBM · vitória</text>
    </g>
    <g id="decisao-diferencas-text_23">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="77.2" y="544" transform="rotate(-0 77.2 544)">0</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="24" y="564" transform="rotate(-0 24 564)">-5</text>
    </g>
    <g id="decisao-diferencas-text_24">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="130.4" y="544" transform="rotate(-0 130.4 544)">+5</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="77.2" y="564" transform="rotate(-0 77.2 564)">0</text>
    </g>
    <g id="decisao-diferencas-text_25">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="183.6" y="544" transform="rotate(-0 183.6 544)">+10</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="130.4" y="564" transform="rotate(-0 130.4 564)">+5</text>
    </g>
    <g id="decisao-diferencas-text_26">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="236.8" y="544" transform="rotate(-0 236.8 544)">+15</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="183.6" y="564" transform="rotate(-0 183.6 564)">+10</text>
    </g>
    <g id="decisao-diferencas-text_27">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="290" y="544" transform="rotate(-0 290 544)">+20</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="236.8" y="564" transform="rotate(-0 236.8 564)">+15</text>
    </g>
    <g id="decisao-diferencas-text_28">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="423" transform="rotate(-0 300 423)">+0,10 p.p.</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="290" y="564" transform="rotate(-0 290 564)">+20</text>
    </g>
    <g id="decisao-diferencas-text_29">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="443" transform="rotate(-0 300 443)">-1,00 a +1,00</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="443" transform="rotate(-0 300 443)">+0,10 p.p.</text>
    </g>
    <g id="decisao-diferencas-text_30">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="493" transform="rotate(-0 300 493)">+10,00 p.p.</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="463" transform="rotate(-0 300 463)">-1,00 a +1,00</text>
    </g>
    <g id="decisao-diferencas-text_31">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="513" transform="rotate(-0 300 513)">+5,00 a +15,00</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="300" y="513" transform="rotate(-0 300 513)">+10,00 p.p.</text>
    </g>
    <g id="decisao-diferencas-text_32">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="157" y="568" transform="rotate(-0 157 568)">Diferença de pureza (p.p.)</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="300" y="533" transform="rotate(-0 300 533)">+5,00 a +15,00</text>
    </g>
    <g id="decisao-diferencas-text_33">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="594" transform="rotate(-0 16 594)">Faixa cinza: ±δ = 2,00 p.p.</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="157" y="588" transform="rotate(-0 157 588)">Diferença de pureza (p.p.)</text>
    </g>
    <g id="decisao-diferencas-text_34">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="622" transform="rotate(-0 16 622)">Traço horizontal: IC 95% · traço vertical: diferença D ·</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="614" transform="rotate(-0 16 614)">Faixa cinza: ±δ = 2,00 p.p.</text>
    </g>
    <g id="decisao-diferencas-text_35">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="642" transform="rotate(-0 16 642)">tracejado: zero</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="642" transform="rotate(-0 16 642)">Traço horizontal: IC 95% · traço vertical: diferença D ·</text>
    </g>
    <g id="decisao-diferencas-text_36">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="662" transform="rotate(-0 16 662)">Métrica: pureza à completude fixa C* = 0,80, prior</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="662" transform="rotate(-0 16 662)">tracejado: zero</text>
    </g>
    <g id="decisao-diferencas-text_37">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="682" transform="rotate(-0 16 682)">P2; sensibilidade em P1, P3.</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="682" transform="rotate(-0 16 682)">Métrica: pureza à completude fixa C* = 0,80, prior</text>
    </g>
    <g id="decisao-diferencas-text_38">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="712" transform="rotate(-0 16 712)">PROVISÓRIO</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="702" transform="rotate(-0 16 702)">P2; sensibilidade em P1, P3.</text>
    </g>
    <g id="decisao-diferencas-text_39">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="732" transform="rotate(-0 16 732)">LightGBM, MLP e FT-Transformer · fixture_v0</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="732" transform="rotate(-0 16 732)">PROVISÓRIO</text>
+   </g>
+   <g id="decisao-diferencas-text_40">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="752" transform="rotate(-0 16 752)">LightGBM, MLP e FT-Transformer · fixture_v0</text>
    </g>
   </g>
  </g>

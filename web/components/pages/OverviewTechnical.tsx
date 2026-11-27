@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { ConfidenceTable } from "@/components/charts/ConfidenceTable";
-import { HBar } from "@/components/charts/HBar";
-import { DotCI, type DotCIRow } from "@/components/charts/DotCI";
+import { MplFigure } from "@/components/charts/MplFigure";
 import { DataTable, type DataColumn } from "@/components/kit/DataTable";
 import { chartsHref, overviewLabels as L } from "@/content/labels";
+import { gainFigureId } from "@/lib/figure-ids";
+import type { Figures } from "@/lib/figures";
 import type { Cls, Num, Overview } from "@/lib/schema";
 import overviewStyles from "./overview.module.css";
 import styles from "./page.module.css";
@@ -36,7 +37,7 @@ function Facts({ items }: { items: [string, Num][] }) {
   );
 }
 
-export function OverviewTechnical({ technical }: { technical: Overview["technical"] }) {
+export function OverviewTechnical({ technical, figures }: { technical: Overview["technical"]; figures: Figures }) {
   const { data_box: box, validation, error_directions: directions, triage, dsc, models, confidence_hist: hist } = technical;
   const boxItems: [string, Num][] = [
     [L.nPairs, box.n_pairs],
@@ -55,12 +56,6 @@ export function OverviewTechnical({ technical }: { technical: Overview["technica
     share: d.share.text,
   }));
   const f1Rows = dsc.macro_f1.map((m) => ({ model: m.label, score: m.est.text, ci: m.est.ci_text }));
-  const names = new Map<string, string>([...models, ...dsc.macro_f1].map((m) => [m.model, m.label]));
-  const diffRows: DotCIRow[] = dsc.paired_diffs.map((d) => ({
-    key: `${d.a}-${d.b}`,
-    label: `${names.get(d.a) ?? d.a} − ${names.get(d.b) ?? d.b}`,
-    est: d.est,
-  }));
 
   return (
     <section className={styles.panel} aria-labelledby="ov-tech">
@@ -123,7 +118,7 @@ export function OverviewTechnical({ technical }: { technical: Overview["technica
             aria-label={L.dscRegion}
             tabIndex={0}
           >
-            <DotCI id="ov-dsc-diff" title={L.dscDiffChart} rows={diffRows} zeroLine />
+            <MplFigure id="dsc-diferencas" figures={figures} />
           </div>
         </div>
 
@@ -138,11 +133,7 @@ export function OverviewTechnical({ technical }: { technical: Overview["technica
             >
               {models.map((m) => (
                 <div key={m.model}>
-                  <HBar
-                    id={`ov-imp-${m.model}`}
-                    title={`${L.importanceChart}: ${m.label}`}
-                    rows={m.importance.map((f) => ({ key: f.feature, label: f.feature, value: f.gain }))}
-                  />
+                  <MplFigure id={gainFigureId(m.model)} figures={figures} />
                   <p className={overviewStyles.note}>
                     {L.temperature}: {m.temperature.text}
                   </p>

@@ -7,6 +7,7 @@ import { OverviewView } from "@/components/pages/OverviewView";
 import { SkyView } from "@/components/pages/SkyView";
 import { skyLabels } from "@/content/labels";
 import type { Meta, Overview, Sky } from "@/lib/schema";
+import { FIGS } from "./fixture-figures";
 
 const nav = vi.hoisted(() => ({ search: "" }));
 vi.mock("next/navigation", () => ({
@@ -127,7 +128,7 @@ describe("SkyView com tecnico=1", () => {
 describe("(d) OverviewView: ContextStrip", () => {
   nav.search = "";
   const html = renderToStaticMarkup(
-    <OverviewView
+    <OverviewView figures={FIGS}
       meta={meta}
       rows={overview.rows}
       accuracyNote={overview.accuracy_note}

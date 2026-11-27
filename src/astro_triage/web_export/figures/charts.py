@@ -103,7 +103,9 @@ def calibration(p: Pages) -> Figure:
     marks = []
     for s in cal["series"]:
         ok = [b for b in s["bins"] if b["p_mean"]["value"] is not None and b["freq"]["point"] is not None]
-        b = min(ok, key=lambda b: abs(b["freq"]["point"] - 0.5))
+        if not ok:  # series with no reportable bin: nothing to label
+            continue
+        b = min(ok,key=lambda b: abs(b["freq"]["point"] - 0.5))
         x, y = x_(b["p_mean"]["value"]), y_(b["freq"]["point"])
         cv.line(x - 2, y - 2, x - 9, y - 9, "lead")
         cv.text(x - 12, y - 29, s["label"], "nm", "end")
@@ -479,7 +481,8 @@ def _intervals(cv: Canvas, rows: list[_Row], fmt: Callable[[float, int], str], a
     if zero:
         bounds.append(0.0)
     lo, hi = min(bounds), max(bounds)
-    pad = (hi - lo) * pad_frac
+    # Zero-width span (no reportable row, or every interval at one value): pad around it instead.
+    pad = (hi - lo) * pad_frac or max(abs(hi), 1.0) * pad_frac
     ticks, step = nice_ticks(lo - pad, hi + pad, 4)
 
     def x_(v: float) -> float:
@@ -641,12 +644,17 @@ def _models(p: Pages) -> list[Callable[[Pages], Figure]]:
 def builders(p: Pages) -> list[Callable[[Pages], Figure]]:
     """Builders of every MUDAR figure (02-graficos-veredito.md), in page order."""
     zs = [_rate_by_z(s["cls"], f"taxa-por-z-{s['cls'].lower()}") for s in p["graficos"]["error_by_z"]["series"]]
+    # Same rule as web/lib/figure-ids.ts: the compare figures exist only when compare.status is "ok".
+    cmp_ok = p["compare"]["status"] == "ok"
+    # Same rule as web/lib/figure-ids.ts: "cmd-taxa" exists only when graficos.cmd is not null.
+    cmd_ok = p["graficos"]["cmd"] is not None
     return [
-        calibration, rate_by_g, *zs, confusion, cmd_map,
+        calibration, rate_by_g, *zs, confusion, *([cmd_map] if cmd_ok else []),
         _quasar("purity", "quasar-pureza", "Pureza de quasar por regra e prior", "Pureza de quasar (%)"),
         _quasar("completeness", "quasar-completude", "Completude de quasar por regra e prior",
                 "Completude de quasar (%)"),
-        galaxy_errors, dsc_diffs, decision_diffs, *_models(p), purity_range,
+        galaxy_errors, dsc_diffs, *([decision_diffs] if cmp_ok else []), *_models(p),
+        *([purity_range] if cmp_ok else []),
     ]
 
 

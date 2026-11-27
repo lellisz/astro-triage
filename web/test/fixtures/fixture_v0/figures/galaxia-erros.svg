@@ -1,4 +1,4 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="440" height="552" viewBox="0 0 440 552" role="img" aria-labelledby="galaxia-erros-title" aria-describedby="galaxia-erros-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="galaxia-erros-title">Taxa de erro por grupo de galáxias</title><desc id="galaxia-erros-desc">Todas as galáxias: 80,0%, IC 95%: 54,8% a 93,0%, n = 15; As mais brilhantes: n/a, n/a, n = n/a; As mais próximas: n/a, n/a, n = n/a; As mais distantes: n/a, n/a, n = n/a</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="552" viewBox="0 0 440 552" role="img" aria-labelledby="galaxia-erros-title" aria-describedby="galaxia-erros-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="galaxia-erros-title">Taxa de erro por grupo de galáxias</title><desc id="galaxia-erros-desc">Todas as galáxias: 80,0%, IC 95%: 54,8% a 93,0%, n = 15; mais brilhantes: n/a, n/a, n = n/a; redshift quase nulo: n/a, n/a, n = n/a; maior redshift: n/a, n/a, n = n/a</desc>
  <g id="galaxia-erros-figure_1">
   <g id="galaxia-erros-patch_1">
    <path d="M 0 552 
@@ -86,7 +86,7 @@ L 294.857352 122
     <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="302.857352" y="127" transform="rotate(-0 302.857352 127)">80,0%</text>
    </g>
    <g id="galaxia-erros-text_12">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="162" transform="rotate(-0 16 162)">As mais brilhantes · n = n/a</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="162" transform="rotate(-0 16 162)">mais brilhantes · n = n/a</text>
    </g>
    <g id="galaxia-erros-text_13">
     <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="424" y="162" transform="rotate(-0 424 162)">n/a</text>
@@ -95,7 +95,7 @@ L 294.857352 122
     <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="184" transform="rotate(-0 16 184)">n/a</text>
    </g>
    <g id="galaxia-erros-text_15">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="218" transform="rotate(-0 16 218)">As mais próximas · n = n/a</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="218" transform="rotate(-0 16 218)">redshift quase nulo · n = n/a</text>
    </g>
    <g id="galaxia-erros-text_16">
     <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="424" y="218" transform="rotate(-0 424 218)">n/a</text>
@@ -104,7 +104,7 @@ L 294.857352 122
     <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="240" transform="rotate(-0 16 240)">n/a</text>
    </g>
    <g id="galaxia-erros-text_18">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="274" transform="rotate(-0 16 274)">As mais distantes · n = n/a</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="274" transform="rotate(-0 16 274)">maior redshift · n = n/a</text>
    </g>
    <g id="galaxia-erros-text_19">
     <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: end; fill: #8c8c8c" x="424" y="274" transform="rotate(-0 424 274)">n/a</text>

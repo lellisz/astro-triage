@@ -14,6 +14,7 @@ import * as scale from "@/components/sky/scale";
 import { overviewLabels, skyLabels, skyMapLabels } from "@/content/labels";
 import type { Meta, Overview, Sky } from "@/lib/schema";
 import { MollweideMapBase } from "./fixtures/legacy/MollweideMap.base";
+import { FIGS } from "./fixture-figures";
 
 vi.mock("next/navigation", () => ({
   useSearchParams: () => new URLSearchParams(""),
@@ -168,8 +169,8 @@ describe("(3) mapa da Visao geral (SkyThumb)", () => {
     expect(circles(renderToStaticMarkup(<SkyThumb {...thumbProps(none)} />))).toHaveLength(0);
   });
   it("Visao geral: sem a prop sky nao ha painel e o resto e identico ao com sky", () => {
-    const without = renderToStaticMarkup(<OverviewView {...props} />);
-    const withSky = renderToStaticMarkup(<OverviewView {...props} sky={sky} />);
+    const without = renderToStaticMarkup(<OverviewView figures={FIGS} {...props} />);
+    const withSky = renderToStaticMarkup(<OverviewView figures={FIGS} {...props} sky={sky} />);
     expect(without).not.toContain("ov-sky");
     expect(without).not.toContain(overviewLabels.skyTitle);
     expect(without).not.toContain("<svg class=\"" + "sky");

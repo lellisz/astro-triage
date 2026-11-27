@@ -24,6 +24,7 @@ import {
 } from "@/content/labels";
 import { ptInt, ptPct } from "@/lib/fmt";
 import type { Compare, Est, Galaxies, Meta, Method, Overview, Sky } from "@/lib/schema";
+import { FIGS } from "./fixture-figures";
 
 const nav = vi.hoisted(() => ({ search: "", path: "/" }));
 vi.mock("next/navigation", () => ({
@@ -137,9 +138,11 @@ const figure = (html: string, id: string): string => {
   return m[0];
 };
 
+const noFig = (html: string): string => html.replace(/<figure[^>]*data-figure="[^"]*"[\s\S]*?<\/figure>/g, "");
+
 const renderGal = (g: Galaxies, search = "") => {
   nav.search = search;
-  return renderToStaticMarkup(<GalaxiesView meta={meta} galaxies={g} />);
+  return renderToStaticMarkup(<GalaxiesView figures={FIGS} meta={meta} galaxies={g} />);
 };
 
 describe("A1 Galaxias: Est com point null vira n/a, sem zero, barra ou ponto", () => {
@@ -173,18 +176,10 @@ describe("A1 Galaxias: Est com point null vira n/a, sem zero, barra ou ponto", (
     }
   });
 
-  it("barras de erro gerais: linhas nulas sem barra, ponto ou intervalo; G e z sao so tabela (Tarefa 37)", () => {
-    galaxies.error_rows.forEach((r, i) => {
-      const c = rowChunks(html, `err-${i}`);
-      expect(c, `err-${i}`).toHaveLength(1);
-      if (r.rate.point !== null) {
-        expect(c[0]).toContain("data-bar");
-        return;
-      }
-      expect(c[0]).not.toContain("data-bar");
-      expect(c[0]).not.toContain("data-ci");
-      expect(c[0]).toContain("n/a");
-    });
+  it("erros gerais viram a figura galaxia-erros; G e z sao so tabela (Tarefa 37)", () => {
+    const errors = panel(html, "gal-errors");
+    expect(count(errors, 'data-figure="galaxia-erros"')).toBe(1);
+    expect(count(html, /data-row="err-\d+"/g)).toBe(0);
     expect(html).not.toContain('id="gal-g-chart"');
     expect(html).not.toContain('id="gal-z-chart"');
     expect(count(html, /data-row="(g|z)-\d+"/g)).toBe(0);
@@ -201,7 +196,6 @@ describe("A1 Galaxias: Est com point null vira n/a, sem zero, barra ou ponto", (
   });
 
   it("faixas abaixo do piso nao somem: linhas das tabelas = contagem do JSON, com IC (Tarefa 37)", () => {
-    expect(count(html, /data-row="err-\d+"/g)).toBe(galaxies.error_rows.length);
     expect(galaxies.technical.by_g.length).toBe(5);
     expect(galaxies.technical.by_z.length).toBe(7);
     expect(galaxies.technical.by_g.some((r) => !r.reportable)).toBe(true);
@@ -216,14 +210,6 @@ describe("A1 Galaxias: Est com point null vira n/a, sem zero, barra ou ponto", (
       if (r.rate.point !== null) expect(textOf(tech)).toContain(r.rate.ci_text);
     }
     expect(textOf(tech)).toContain(L_gal.galBandsJoinNote);
-  });
-
-  it("uma estimativa 0 real (point 0) NAO e confundida com n/a: continua desenhada", () => {
-    const z = clone(galaxies);
-    z.error_rows[0].rate = { point: 0, lo: 0, hi: 0.1, text: "0,0%", ci_text: "IC 95%: 0,0% a 10,0%" };
-    const c = rowChunks(renderGal(z), "err-0")[0];
-    expect(c).toContain("data-bar");
-    expect(textOf(c)).toContain("0,0%");
   });
 });
 
@@ -293,9 +279,11 @@ describe("A2 Galaxias: P3 parcial, marcador distinto e series separadas", () => 
   });
 
   it("nenhuma cor fora de tokens/currentColor: atributos, style inline e css do grafico", () => {
-    const attrs = [...html.matchAll(/\s(fill|stroke)="([^"]*)"/g)].map((m) => m[2]);
+    // As figuras matplotlib trazem as cores proprias no SVG; a regra vale para o markup React.
+    const page = noFig(html);
+    const attrs = [...page.matchAll(/\s(fill|stroke)="([^"]*)"/g)].map((m) => m[2]);
     for (const v of attrs) expect(v).toMatch(/^(none|currentColor|var\(--[\w-]+\))$/);
-    expect(html).not.toMatch(/style="[^"]*(#|rgb|hsl)/i);
+    expect(page).not.toMatch(/style="[^"]*(#|rgb|hsl)/i);
     const decls = [...css.matchAll(/(?:^|[;{\s])(?:fill|stroke)\s*:\s*([^;}]+)/g)].map((m) => m[1].trim());
     expect(decls.length).toBeGreaterThan(5);
     for (const v of decls) expect(v, v).toMatch(/^(none|currentColor|inherit|var\(--[\w-]+\))$/);
@@ -421,7 +409,7 @@ describe("A4 Comparacao: unavailable/error e 3 cartoes", () => {
     ["unavailable", null],
     ["error", "Falha controlada ao ler o resultado."],
   ] as const)("%s: estado claro, sem digito, sem cartoes, sem grafico", (status, err) => {
-    const html = renderToStaticMarkup(<CompareView compare={down(status, err)} />);
+    const html = renderToStaticMarkup(<CompareView figures={FIGS} compare={down(status, err)} />);
     const text = textOf(html);
     expect(text).toContain(compareLabels.unavailable);
     expect(text).toContain(compareLabels.unavailableHint);
@@ -440,7 +428,7 @@ describe("A4 Comparacao: unavailable/error e 3 cartoes", () => {
 
   it("status error com sobras de purity/grid no objeto: nenhum numero vaza", () => {
     const leaky = { ...compare, status: "error", error_text: "Falha controlada." } as unknown as Compare;
-    const html = renderToStaticMarkup(<CompareView compare={leaky} />);
+    const html = renderToStaticMarkup(<CompareView figures={FIGS} compare={leaky} />);
     const text = textOf(html);
     expect(text).not.toMatch(/\d/);
     expect(html).not.toContain("data-system");
@@ -453,7 +441,7 @@ describe("A4 Comparacao: unavailable/error e 3 cartoes", () => {
     { ...ok.purity[1], system: "ftt_full", net: "FTT", label: "FT-Transformer completo", median: 0.5, low: 0.4, high: 0.6 },
     ok.purity[0],
   ];
-  const html3 = renderToStaticMarkup(<CompareView compare={three} />);
+  const html3 = renderToStaticMarkup(<CompareView figures={FIGS} compare={three} />);
 
   it("ok com 3 sistemas: 3 cartoes, exatamente um de referencia, referencia primeiro", () => {
     const cards = [...html3.matchAll(/<li class="([^"]*)" data-system="([^"]+)"/g)];
@@ -469,13 +457,13 @@ describe("A4 Comparacao: unavailable/error e 3 cartoes", () => {
   it("rede sem par no JSON mostra a frase de par ausente, nunca vazio", () => {
     const noPair = clone(three);
     noPair.pairs = noPair.pairs.filter((p) => p.net !== "FTT");
-    const t = textOf(renderToStaticMarkup(<CompareView compare={noPair} />));
+    const t = textOf(renderToStaticMarkup(<CompareView figures={FIGS} compare={noPair} />));
     expect(t).toContain(compareLabels.pairMissing);
   });
 });
 
 describe("A5 Comparacao: faixa min-max rotulada 'nao e IC'", () => {
-  const html = renderToStaticMarkup(<CompareView compare={ok} />);
+  const html = renderToStaticMarkup(<CompareView figures={FIGS} compare={ok} />);
   const panel = (() => {
     const m = html.match(/<div role="tabpanel" id="[^"]*-panel-pureza"[\s\S]*?(?=<div role="tabpanel"|$)/);
     if (!m) throw new Error("painel de pureza ausente");
@@ -502,17 +490,15 @@ describe("A5 Comparacao: faixa min-max rotulada 'nao e IC'", () => {
     expect(count(visible, "não é IC")).toBeGreaterThanOrEqual(1 + ok.purity.length);
   });
 
-  it("o grafico de faixa nao reaproveita a classe/data-ci de intervalo de confianca", () => {
-    const fig = figure(html, "cmp-purity-chart");
-    expect(fig).not.toContain("data-ci");
-    expect(fig).toContain("data-range");
-    expect(count(fig, "data-row=")).toBe(ok.purity.length);
+  it("a faixa min-max e a figura pureza-sistemas, uma vez no painel", () => {
+    expect(count(panel, 'data-figure="pureza-sistemas"')).toBe(1);
+    expect(count(panel, "<figure")).toBe(1);
   });
 });
 
 describe("A6 Comparacao: abas", () => {
   nav.search = "";
-  const html = renderToStaticMarkup(<CompareView compare={ok} />);
+  const html = renderToStaticMarkup(<CompareView figures={FIGS} compare={ok} />);
 
   it("markup: 4 abas, cada aria-controls aponta para um tabpanel existente e vice-versa", () => {
     const tabs = [...html.matchAll(/<button[^>]*role="tab"[^>]*>/g)].map((m) => m[0]);
@@ -626,23 +612,17 @@ describe("A7 Comparacao: forest plot de diferencas", () => {
     { pair: "FTT", role: "desc", cls: "GALAXY", d: 0, lo: 0, hi: 0, diff: NA_EST, text: "t" },
     { pair: "FTT", role: "desc", cls: "QSO", d: 0.02, lo: 0.01, hi: 0.03, diff: { point: 0.02, lo: 0.01, hi: 0.03, text: "+0,0200", ci_text: "IC 95%: +0,0100 a +0,0300" }, text: "t" },
   ];
-  const html = renderToStaticMarkup(<CompareView compare={v} />);
+  const html = renderToStaticMarkup(<CompareView figures={FIGS} compare={v} />);
 
-  it("decisao: linha de zero, uma linha por celula do grid, celula sem d vira n/a sem ponto", () => {
-    const fig = figure(html, "cmp-decision");
-    expect(count(fig, "data-zero")).toBe(1);
-    expect(count(fig, "data-row=")).toBe(ok.grid.length);
-    const na = rowChunks(fig, `g-${ok.grid[2].net}-${ok.grid[2].cls}`)[0];
-    expect(na).not.toContain("data-point");
-    expect(na).not.toContain("data-ci");
-    expect(na).toContain("n/a");
-    expect(textOf(na)).not.toMatch(/[+-]?0,\d/);
-    expect(count(fig, "data-point")).toBe(ok.grid.length - 1);
+  it("decisao: a figura decisao-diferencas aparece uma vez", () => {
+    expect(count(html, 'data-figure="decisao-diferencas"')).toBe(1);
   });
 
   it("descritivo (Tarefa 31): sem grafico #cmp-descriptive; tabela com uma linha por item e a coluna de IC", () => {
     expect(html).not.toContain('id="cmp-descriptive"');
-    expect(count(html, "<figure")).toBe(count(html, 'id="cmp-decision"') + count(html, 'id="cmp-purity-chart"'));
+    expect(count(html, 'data-figure="decisao-diferencas"')).toBe(1);
+    expect(count(html, 'data-figure="pureza-sistemas"')).toBe(1);
+    expect(count(html, "<figure")).toBe(2);
     // A DataTable poe a legenda num <p> antes da tabela (aria-labelledby), nao num <caption>.
     const t = tableAfterCaption(html, compareLabels.descriptiveChart);
     expect(t).toBeDefined();
@@ -663,7 +643,7 @@ describe("A7 Comparacao: forest plot de diferencas", () => {
       pair: k % 2 ? "FTT" : "MLP",
       diff: { ...v.descriptive[0].diff, ci_text: `IC-${k}` },
     }));
-    const h14 = renderToStaticMarkup(<CompareView compare={many} />);
+    const h14 = renderToStaticMarkup(<CompareView figures={FIGS} compare={many} />);
     expect(h14).not.toContain('id="cmp-descriptive"');
     const t = [...h14.matchAll(/<table[^>]*>[\s\S]*?<\/table>/g)].map((m) => m[0]).find((x) => x.includes("IC-0"))!;
     expect(count(t.match(/<tbody>([\s\S]*?)<\/tbody>/)![1], "<tr>")).toBe(14);
@@ -671,10 +651,10 @@ describe("A7 Comparacao: forest plot de diferencas", () => {
   });
 
   it("sem itens descritivos: mensagem, sem segundo grafico", () => {
-    const h2 = renderToStaticMarkup(<CompareView compare={ok} />);
+    const h2 = renderToStaticMarkup(<CompareView figures={FIGS} compare={ok} />);
     expect(h2).not.toContain('id="cmp-descriptive"');
     expect(textOf(h2)).toContain(compareLabels.noDescriptive);
-    expect(count(figure(h2, "cmp-decision"), "data-zero")).toBe(1);
+    expect(count(h2, 'data-figure="decisao-diferencas"')).toBe(1);
   });
 });
 
@@ -863,7 +843,7 @@ describe("Graficos: barra sem regra nem prior, com modo tecnico", () => {
 describe("Tarefa 30: status do protocolo dentro do Resultado da Comparacao", () => {
   it("'em proposta' aparece dentro de #cmp-result quando protocol_accepted e false", () => {
     expect(ok.protocol_accepted).toBe(false);
-    const res = textOf(panel(renderToStaticMarkup(<CompareView compare={ok} />), "cmp-result"));
+    const res = textOf(panel(renderToStaticMarkup(<CompareView figures={FIGS} compare={ok} />), "cmp-result"));
     expect(res).toContain("em proposta");
     expect(res).toContain(compareLabels.protocolProposed);
   });
@@ -871,12 +851,12 @@ describe("Tarefa 30: status do protocolo dentro do Resultado da Comparacao", () 
   it("aceito e desconhecido mudam o texto do painel; 'em proposta' some", () => {
     const acc = clone(ok);
     acc.protocol_accepted = true;
-    const a = textOf(panel(renderToStaticMarkup(<CompareView compare={acc} />), "cmp-result"));
+    const a = textOf(panel(renderToStaticMarkup(<CompareView figures={FIGS} compare={acc} />), "cmp-result"));
     expect(a).toContain(compareLabels.protocolAccepted);
     expect(a).not.toContain("em proposta");
     const unk = clone(ok);
     unk.protocol_accepted = null;
-    const u = textOf(panel(renderToStaticMarkup(<CompareView compare={unk} />), "cmp-result"));
+    const u = textOf(panel(renderToStaticMarkup(<CompareView figures={FIGS} compare={unk} />), "cmp-result"));
     expect(u).toContain(compareLabels.protocolUnknown);
     expect(u).not.toContain("em proposta");
   });
@@ -962,7 +942,7 @@ describe("Tarefas 40b, 40c e validacao: Visao geral tecnica", () => {
     const t = clone(tech);
     t.dsc.population = "c_sdsc"; // o campo cru nunca deve ser exibido
     t.dsc.prior = "c_sdsc";
-    const html = renderToStaticMarkup(<OverviewTechnical technical={t} />);
+    const html = renderToStaticMarkup(<OverviewTechnical figures={FIGS} technical={t} />);
     expect(html).not.toContain("c_sdsc");
     expect(html).not.toContain('id="ov-dsc-f1"');
     expect(html).not.toContain('id="ov-calibration"');
@@ -983,7 +963,7 @@ describe("Tarefas 40b, 40c e validacao: Visao geral tecnica", () => {
   it("40c: ConfidenceTable com uma linha por faixa; contagens e soma dos erros lidas da fixture", () => {
     const hist = tech.confidence_hist;
     expect(hist).toHaveLength(8);
-    const html = renderToStaticMarkup(<OverviewTechnical technical={tech} />);
+    const html = renderToStaticMarkup(<OverviewTechnical figures={FIGS} technical={tech} />);
     const rows = body(html.match(/<table id="ov-confidence"[\s\S]*?<\/table>/)![0]);
     expect(rows).toHaveLength(hist.length);
     let wrongSum = 0;
@@ -1006,7 +986,7 @@ describe("Tarefas 40b, 40c e validacao: Visao geral tecnica", () => {
       { lo: 0, hi: 0.5, n_right: 1000, n_wrong: 10 },
       { lo: 0.5, hi: 1, n_right: 500, n_wrong: 5 },
     ];
-    const html = renderToStaticMarkup(<OverviewTechnical technical={t} />);
+    const html = renderToStaticMarkup(<OverviewTechnical figures={FIGS} technical={t} />);
     const widths = body(html.match(/<table id="ov-confidence"[\s\S]*?<\/table>/)![0]).map((r) =>
       [...r.matchAll(/<rect[^>]*width="([\d.]+)"/g)].map((m) => Number(m[1])),
     );
@@ -1026,12 +1006,12 @@ describe("Tarefas 40b, 40c e validacao: Visao geral tecnica", () => {
       completeness: { text: "80,0%", value: 0.8 },
       prior: "P2",
     } as unknown as NonNullable<Overview["technical"]["validation"]>;
-    const text = textOf(renderToStaticMarkup(<OverviewTechnical technical={t} />));
+    const text = textOf(renderToStaticMarkup(<OverviewTechnical figures={FIGS} technical={t} />));
     expect(text).toContain(L_ov.validationTitle);
     expect(text).toContain(`${L_ov.validationPrior}: P2`);
     expect(text).toContain("71,3%");
     expect(text).toContain("80,0%");
-    const none = textOf(renderToStaticMarkup(<OverviewTechnical technical={tech} />));
+    const none = textOf(renderToStaticMarkup(<OverviewTechnical figures={FIGS} technical={tech} />));
     expect(none).not.toContain(L_ov.validationTitle);
     expect(none).not.toContain(`${L_ov.validationPrior}: P2`);
   });

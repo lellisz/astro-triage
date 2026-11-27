@@ -49,7 +49,9 @@ npm run typecheck
 ## 3. Exportar a release real e construir (tudo local)
 
 ```powershell
-# raiz do repositório: grava web/data/full_v0/*.json (pasta ignorada pelo git, fora de data/)
+# raiz do repositório: grava web/data/full_v0/*.json e web/data/full_v0/figures/ (SVG do
+# matplotlib, desenhados desses JSON; precisa do matplotlib de requirements.txt). A pasta é
+# ignorada pelo git e fica fora de data/. Rodar de novo substitui a exportação anterior inteira.
 .venv\Scripts\python.exe -m astro_triage.web_export --release full_v0 --out web\data
 
 cd web

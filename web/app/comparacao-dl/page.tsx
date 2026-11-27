@@ -2,6 +2,8 @@ import { CompareView } from "@/components/pages/CompareView";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { pages } from "@/content/labels";
 import { loadPage } from "@/lib/data";
+import { compareFigureIds } from "@/lib/figure-ids";
+import { loadFigures } from "@/lib/figures";
 
 export default function CompareDlPage() {
   const meta = loadPage("meta");
@@ -10,7 +12,7 @@ export default function CompareDlPage() {
   return (
     <>
       <PageHeader eyebrow={eyebrow} title={title} lead={lead} showStateChip={false} meta={meta} />
-      <CompareView compare={compare} />
+      <CompareView compare={compare} figures={loadFigures(compareFigureIds(compare))} />
     </>
   );
 }

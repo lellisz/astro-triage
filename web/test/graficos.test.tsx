@@ -5,9 +5,10 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { GraficosView } from "@/components/pages/GraficosView";
 import { cmdRange } from "@/components/charts/CmdMap";
-import { MIN_OPACITY } from "@/components/sky/scale";
+import { graficosFigureIds, zFigureId } from "@/lib/figure-ids";
 import { ptPct } from "@/lib/fmt";
 import type { Graficos, Meta } from "@/lib/schema";
+import { FIGS } from "./fixture-figures";
 
 const nav = vi.hoisted(() => ({ search: "" }));
 vi.mock("next/navigation", () => ({
@@ -24,7 +25,7 @@ const graficos = load<Graficos>("graficos");
 
 const render = (search: string, data: Graficos = graficos): string => {
   nav.search = search;
-  return renderToStaticMarkup(<GraficosView meta={meta} graficos={data} />);
+  return renderToStaticMarkup(<GraficosView figures={FIGS} meta={meta} graficos={data} />);
 };
 const count = (html: string, needle: string) => html.split(needle).length - 1;
 const decode = (s: string) =>
@@ -48,37 +49,34 @@ const NUMBER = /\d+(?:[.,]\d+)*%?/g;
 describe("/graficos: modo simples", () => {
   const html = render("");
 
-  it("seis figuras (o by-z tem uma por classe), cada uma com alternativa em tabela", () => {
+  it("seis figuras matplotlib (o by-z tem uma por classe), cada uma com alternativa em tabela", () => {
+    const ids = [...html.matchAll(/data-figure="([^"]+)"/g)].map((m) => m[1]);
+    expect(ids).toEqual(graficosFigureIds(graficos));
+    expect(ids).toEqual(["calibracao", "taxa-por-g", "taxa-por-z-galaxy", "taxa-por-z-qso", "confusao", "cmd-taxa"]);
     expect(count(html, "<figure")).toBe(6);
     expect(count(html, "<details")).toBe(5);
-    expect(count(html, "<table")).toBe(5 + 1);
+    expect(count(html, "<table")).toBe(5);
     expect(count(html, "<th scope=\"col\"")).toBeGreaterThan(8);
     expect(count(html, "Ver os números")).toBe(5);
     expect(count(html, 'role="img"')).toBeGreaterThanOrEqual(3);
   });
 
-  it("o by-z tem um grafico por classe, com os rotulos de faixa exatos do JSON da classe", () => {
+  it("o by-z tem uma figura por classe, dentro da secao by-z", () => {
     const section = html.slice(html.indexOf('id="graf-by-z"'), html.indexOf('id="graf-confusion"'));
-    expect(count(section, "<figure")).toBe(graficos.error_by_z.series.length);
     expect(graficos.error_by_z.series.length).toBe(2);
+    expect(count(section, "<figure")).toBe(graficos.error_by_z.series.length);
     for (const s of graficos.error_by_z.series) {
-      const start = section.indexOf(`id="graf-by-z-chart-${s.cls}"`);
-      expect(start).toBeGreaterThan(-1);
-      const fig = section.slice(start, section.indexOf("</figure>", start));
-      const labels = [...fig.matchAll(/<text[^>]*data-bin-label[^>]*>([^<]*)<\/text>/g)].map((m) => decode(m[1]));
-      expect(labels).toEqual(s.rows.map((r) => r.label));
+      expect(section).toContain(`data-figure="${zFigureId(s.cls)}"`);
     }
   });
 
-  it("IC sempre visivel (Tarefa 34): whiskers na taxa, na matriz e na calibracao com tecnico=false", () => {
+  it("IC sempre visivel (Tarefa 34): as figuras com IC sao as mesmas com tecnico=false e tecnico=1", () => {
     const tech = render("tecnico=1");
-    // o modo simples mostra os mesmos IC do modo tecnico
-    expect(count(html, "data-ci")).toBeGreaterThan(0);
-    expect(count(html, "data-ci")).toBe(count(tech, "data-ci"));
-    expect(count(html, "data-cal-ci")).toBeGreaterThan(0);
-    expect(count(html, "data-cal-ci")).toBe(count(tech, "data-cal-ci"));
-    // a legenda do intervalo nao depende do modo tecnico
-    expect(textOf(html)).toContain("Barras: intervalo de confiança (Wilson, por objeto)");
+    for (const id of ["calibracao", "taxa-por-g", "confusao"]) {
+      const svg = FIGS[id].svg.slice(0, 200);
+      expect(html, id).toContain(svg);
+      expect(tech, id).toContain(svg);
+    }
   });
 
   it("sem curva crua no modo simples (raw continua so tecnico)", () => {
@@ -112,19 +110,16 @@ describe("/graficos: modo simples", () => {
   });
 
   it("figuras rotuladas e tabelas reais", () => {
-    expect(count(html, "<figcaption")).toBe(5);
+    expect(count(html, "<figcaption")).toBe(6);
     expect(count(html, "aria-labelledby")).toBeGreaterThanOrEqual(7);
-    expect(html).toContain("<caption>");
+    expect(html.match(/<table[^>]*aria-labelledby="/g)).toHaveLength(5);
   });
 });
 
 describe("/graficos: modo tecnico", () => {
   const html = render("tecnico=1");
 
-  it("acrescenta whiskers, curva crua e colunas de n e intervalo", () => {
-    expect(count(html, "data-ci")).toBeGreaterThan(0);
-    expect(count(html, "data-cal-ci")).toBeGreaterThan(0);
-    expect(count(html, "data-cal-raw")).toBeGreaterThan(0);
+  it("acrescenta colunas de n e intervalo", () => {
     expect(html).toContain("Intervalo de confiança");
     expect(html).toContain("Objetos");
   });
@@ -176,8 +171,7 @@ describe("/graficos: abaixo do piso mostra o texto NA do JSON", () => {
     );
     expect(below.length).toBeGreaterThan(0);
     const html = render("");
-    const rows = html.slice(0, html.indexOf('id="graf-cmd"'));
-    expect(count(rows, "data-below-floor")).toBe(below.length);
+
     for (const r of below) expect(r.rate.point).toBeNull();
     expect(textOf(html)).toContain(below[0].rate.text);
   });
@@ -188,23 +182,22 @@ describe("/graficos: abaixo do piso mostra o texto NA do JSON", () => {
     cell.below_floor = true;
     cell.share = { point: null, lo: null, hi: null, text: "SEM-VALOR", ci_text: "SEM-VALOR" };
     const html = render("", data);
-    const cellHtml = new RegExp(`data-cell="${data.confusion.rows[0].true}-${cell.pred}"[\\s\\S]*?</td>`).exec(html)![0];
-    expect(cellHtml).toContain("SEM-VALOR");
-    expect(cellHtml).not.toContain("data-shade");
+    const section = html.slice(html.indexOf('id="graf-confusion"'), html.indexOf('id="graf-cmd"'));
+    const table = section.slice(section.indexOf("<tbody"), section.indexOf("</tbody>"));
+    expect(table).toContain("SEM-VALOR");
   });
 });
 
 describe("/graficos: mapa cor-magnitude", () => {
   const cmd = graficos.cmd!;
 
-  it("a fixture traz as 252 celulas, todas abaixo do piso: hachuradas e sem valor", () => {
+  it("a fixture traz as 252 celulas, todas abaixo do piso: figura cmd-taxa e legenda da hachura", () => {
     const html = render("");
     const section = html.slice(html.indexOf('id="graf-cmd"'));
     expect(cmd.cells).toHaveLength(252);
     expect(cmd.cells.every((c) => c.below_floor)).toBe(true);
-    expect(count(section, "data-cell=")).toBe(252);
-    expect(count(section, "data-below-floor")).toBe(cmd.cells.filter((c) => c.below_floor).length);
-    expect(count(section, "data-point")).toBe(cmd.cells.length - count(section, "data-below-floor"));
+    expect(section).toContain('data-figure="cmd-taxa"');
+    expect(count(section, "<figure")).toBe(1);
     expect(textOf(section)).toContain("Célula hachurada");
   });
 
@@ -222,14 +215,9 @@ describe("/graficos: mapa cor-magnitude", () => {
     return data;
   };
 
-  it("celulas com valor viram retangulos cinza com opacidade minima e linhas da tabela", () => {
+  it("celulas com valor viram linhas da tabela", () => {
     const html = render("", dense());
     const section = html.slice(html.indexOf('id="graf-cmd"'));
-    expect(count(section, "data-point")).toBe(3);
-    const ops = [...section.matchAll(/data-point=""[^>]*fill-opacity="([\d.]+)"/g)].map((m) => Number(m[1]));
-    expect(ops).toHaveLength(3);
-    expect(Math.min(...ops)).toBeGreaterThan(MIN_OPACITY);
-    expect(Math.max(...ops)).toBe(1);
     const table = section.slice(section.indexOf("<tbody"), section.indexOf("</tbody>"));
     expect(count(table, "<tr")).toBe(3);
     for (const i of [0, 1, 2]) expect(table).toContain(`R${i}`);

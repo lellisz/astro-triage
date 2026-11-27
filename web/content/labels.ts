@@ -92,6 +92,7 @@ export const overviewLabels = {
   purityChart: "Pureza de quasar",
   completenessChart: "Completude de quasar",
   chartsRegion: "Gráficos de pureza e completude, rolável na horizontal",
+  selectedRow: "Condição selecionada nesta página",
   shortcutsTitle: "Continue explorando",
   shortcutsSub: "Outras páginas, mantendo a regra e o prior escolhidos",
   skyTitle: "Onde os erros aparecem no céu",

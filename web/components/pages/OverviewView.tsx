@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
-import { HBarCI, type HBarCIRow } from "@/components/charts/HBarCI";
+import { MplFigure } from "@/components/charts/MplFigure";
 import { ContextStrip } from "@/components/kit/ContextStrip";
 import { Kpi } from "@/components/kit/Kpi";
 import { Panel } from "@/components/kit/Panel";
 import { SkyThumb } from "@/components/sky/SkyThumb";
 import { OverviewTechnical } from "./OverviewTechnical";
 import { chartLabels, overviewLabels as L, routes } from "@/content/labels";
+import type { Figures } from "@/lib/figures";
 import type { Meta, Overview, OverviewHeadline, Sky } from "@/lib/schema";
 import { readState, withState, type UiState } from "@/lib/ui-state";
 import overviewStyles from "./overview.module.css";
@@ -22,6 +23,7 @@ type Props = {
   accuracyNote: string;
   technical: Overview["technical"];
   sky?: Sky;
+  figures: Figures;
 };
 
 function Headline({ h, meta, state }: { h: OverviewHeadline; meta: Meta; state: UiState }) {
@@ -75,19 +77,11 @@ function Headline({ h, meta, state }: { h: OverviewHeadline; meta: Meta; state: 
 }
 
 function Body({ props, state }: { props: Props; state: UiState }) {
-  const { meta, headline, rows, accuracyNote, technical, sky } = props;
+  const { meta, headline, rows, accuracyNote, technical, sky, figures } = props;
   const row = rows.find((r) => r.rule === state.rule && r.prior === state.prior);
   const partialRow = rows.find((r) => r.partial && r.partial_notice);
-  const chartRows = (pick: "purity" | "completeness"): HBarCIRow[] =>
-    rows.map((r) => ({
-      key: `${r.rule}-${r.prior}`,
-      label:
-        meta.states.find((s) => s.rule === r.rule && s.prior === r.prior)?.label ??
-        `${meta.rule_labels[r.rule]} · ${r.prior}`,
-      est: r[pick],
-      selected: r.rule === state.rule && r.prior === state.prior,
-      partial: r.partial,
-    }));
+  // The static figures draw every row alike; name the chosen one with the same label as the SVG.
+  const selected = meta.states.find((s) => s.rule === state.rule && s.prior === state.prior);
   const shortcuts = routes.filter((r) => r.href !== "/");
   const box = technical.data_box;
   const contextItems = [
@@ -139,19 +133,14 @@ function Body({ props, state }: { props: Props; state: UiState }) {
             aria-label={L.chartsRegion}
             tabIndex={0}
           >
-            <HBarCI
-              id="ov-purity"
-              title={L.purityChart}
-              rows={chartRows("purity")}
-              partialTag={chartLabels.partialTag}
-            />
-            <HBarCI
-              id="ov-completeness"
-              title={L.completenessChart}
-              rows={chartRows("completeness")}
-              partialTag={chartLabels.partialTag}
-            />
+            <MplFigure id="quasar-pureza" figures={figures} />
+            <MplFigure id="quasar-completude" figures={figures} />
           </div>
+          {selected ? (
+            <p className={overviewStyles.partialNote} data-selected-row="">
+              {L.selectedRow}: <strong>{selected.label}</strong>
+            </p>
+          ) : null}
           {partialRow?.partial_notice ? (
             <p className={overviewStyles.partialNote}>
               {chartLabels.partialTag}: {partialRow.partial_notice}
@@ -185,7 +174,7 @@ function Body({ props, state }: { props: Props; state: UiState }) {
         </div>
       </div>
 
-      {state.tech ? <OverviewTechnical technical={technical} /> : null}
+      {state.tech ? <OverviewTechnical technical={technical} figures={figures} /> : null}
     </div>
   );
 }

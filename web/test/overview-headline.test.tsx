@@ -8,6 +8,7 @@ import { OverviewView } from "@/components/pages/OverviewView";
 import { overviewLabels as L } from "@/content/labels";
 import type { Galaxies, Meta, Overview } from "@/lib/schema";
 import { withState } from "@/lib/ui-state";
+import { FIGS } from "./fixture-figures";
 
 const nav = vi.hoisted(() => ({ search: "" }));
 vi.mock("next/navigation", () => ({
@@ -29,7 +30,7 @@ const escapeHtml = (s: string) =>
 const render = (headline: Overview["headline"], search = "") => {
   nav.search = search;
   return renderToStaticMarkup(
-    <OverviewView
+    <OverviewView figures={FIGS}
       meta={meta}
       headline={headline}
       rows={overview.rows}
@@ -148,7 +149,7 @@ describe("Visao geral: comparacao indisponivel", () => {
 describe("Galaxias: nota da tabela de faixas", () => {
   it("renderiza error_rows_note", () => {
     nav.search = "";
-    const html = renderToStaticMarkup(<GalaxiesView meta={meta} galaxies={galaxies} />);
+    const html = renderToStaticMarkup(<GalaxiesView figures={FIGS} meta={meta} galaxies={galaxies} />);
     expect(galaxies.error_rows_note.length).toBeGreaterThan(0);
     expect(html).toContain(escapeHtml(galaxies.error_rows_note));
   });

@@ -2,6 +2,8 @@ import { OverviewView } from "@/components/pages/OverviewView";
 import { PageHeader } from "@/components/shell/PageHeader";
 import { pages } from "@/content/labels";
 import { loadPage } from "@/lib/data";
+import { overviewFigureIds } from "@/lib/figure-ids";
+import { loadFigures } from "@/lib/figures";
 
 export default function OverviewPage() {
   const meta = loadPage("meta");
@@ -18,6 +20,7 @@ export default function OverviewPage() {
         accuracyNote={overview.accuracy_note}
         technical={overview.technical}
         sky={sky}
+        figures={loadFigures(overviewFigureIds(overview.technical))}
       />
     </>
   );
