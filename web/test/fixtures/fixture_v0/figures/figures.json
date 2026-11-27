@@ -2,72 +2,72 @@
  "figures": {
   "calibracao": {
    "aria_label": "Diagrama de confiabilidade: Estrela: 4,6% / 60,0% (23,1% a 88,2%); Galáxia: 6,5% / 40,0% (11,8% a 76,9%); Quasar: 5,2% / 40,0% (11,8% a 76,9%)",
-   "caption": "Diagrama de confiabilidade. LightGBM completo · conjunto de teste. PROVISÓRIO · fixture_v0.",
+   "caption": "Diagrama de confiabilidade. LightGBM completo · conjunto de teste. fixture_v0.",
    "title": "Diagrama de confiabilidade"
   },
   "cmd-taxa": {
    "aria_label": "Taxa de erro no diagrama cor-magnitude: nenhuma célula acima do piso; 37 objetos fora da área",
-   "caption": "Taxa de erro no diagrama cor-magnitude. LightGBM completo · célula de magnitude G por cor BP-RP. PROVISÓRIO · fixture_v0.",
+   "caption": "Taxa de erro no diagrama cor-magnitude. LightGBM completo · célula de magnitude G por cor BP-RP. fixture_v0.",
    "title": "Taxa de erro no diagrama cor-magnitude"
   },
   "confusao": {
    "aria_label": "Matriz de confusão: Estrela prevista como Estrela: 40,0%, n = 6, IC 95%: 19,8% a 64,3%; Estrela prevista como Galáxia: 40,0%, n = 6, IC 95%: 19,8% a 64,3%; Estrela prevista como Quasar: n/a, n = n/a, n/a; Galáxia prevista como Estrela: 46,7%, n = 7, IC 95%: 24,8% a 69,9%; Galáxia prevista como Galáxia: n/a, n = n/a, n/a; Galáxia prevista como Quasar: 33,3%, n = 5, IC 95%: 15,2% a 58,3%; Quasar prevista como Estrela: 46,7%, n = 7, IC 95%: 24,8% a 69,9%; Quasar prevista como Galáxia: n/a, n = n/a, n/a; Quasar prevista como Quasar: n/a, n = n/a, n/a",
-   "caption": "Matriz de confusão. LightGBM completo · conjunto de teste · fração de cada linha. PROVISÓRIO · fixture_v0.",
+   "caption": "Matriz de confusão. LightGBM completo · conjunto de teste · fração de cada linha. fixture_v0.",
    "title": "Matriz de confusão"
   },
   "decisao-diferencas": {
    "aria_label": "Diferenças nas células da decisão: MLP − LightGBM, Quasar: +10,00 p.p. (IC 95% +5,00 a +15,00), δ 2,00 p.p., vitória; FTT − LightGBM, Quasar: +10,00 p.p. (IC 95% +5,00 a +15,00), δ 2,00 p.p., vitória; MLP − LightGBM, Galáxia: +0,10 p.p. (IC 95% -1,00 a +1,00), δ 2,00 p.p., sem diferença detectável; FTT − LightGBM, Galáxia: +10,00 p.p. (IC 95% +5,00 a +15,00), δ 2,00 p.p., vitória",
-   "caption": "Diferenças nas células da decisão. Regra · prior: P2 · C* = 0,80 (ponto fixo da comparação com as redes; a barra de ajustes não o muda). PROVISÓRIO · fixture_v0.",
+   "caption": "Diferenças nas células da decisão. Regra · prior: P2 · C* = 0,80 (ponto fixo da comparação com as redes; a barra de ajustes não o muda). fixture_v0.",
    "title": "Diferenças nas células da decisão"
   },
   "dsc-diferencas": {
    "aria_label": "Diferenças pareadas da medida F macro: LightGBM completo − Gaia DSC (allosmod): +0,100, IC 95%: +0,050 a +0,150; LightGBM completo − LightGBM sem indicadores de astrometria: +0,050, IC 95%: 0,000 a +0,100",
-   "caption": "Diferenças pareadas da medida F macro. Só os 321 objetos do teste com as três probabilidades do Gaia DSC (allosmod); é uma população menor que a do resto da página. · prior P0: mistura do teste. PROVISÓRIO · fixture_v0.",
+   "caption": "Diferenças pareadas da medida F macro. Só os 321 objetos do teste com as três probabilidades do Gaia DSC (allosmod); é uma população menor que a do resto da página. · prior P0: mistura do teste. fixture_v0.",
    "title": "Diferenças pareadas da medida F macro"
   },
   "galaxia-erros": {
    "aria_label": "Taxa de erro por grupo de galáxias: Todas as galáxias: 80,0%, IC 95%: 54,8% a 93,0%, n = 15; mais brilhantes: n/a, n/a, n = n/a; redshift quase nulo: n/a, n/a, n = n/a; maior redshift: n/a, n/a, n = n/a",
-   "caption": "Taxa de erro por grupo de galáxias. LightGBM completo · classe de maior probabilidade (regra como entregue). PROVISÓRIO · fixture_v0.",
+   "caption": "Taxa de erro por grupo de galáxias. LightGBM completo · classe de maior probabilidade (regra como entregue). fixture_v0.",
    "title": "Taxa de erro por grupo de galáxias"
   },
   "ganho-lgbm-full": {
    "aria_label": "Ganho por atributo: LightGBM completo: f_b: 60,0%; f_a: 40,0%",
-   "caption": "Ganho por atributo: LightGBM completo. Participação de cada atributo no ganho total do modelo. PROVISÓRIO · fixture_v0.",
+   "caption": "Ganho por atributo: LightGBM completo. Participação de cada atributo no ganho total do modelo. fixture_v0.",
    "title": "Ganho por atributo: LightGBM completo"
   },
   "ganho-lgbm-noind": {
    "aria_label": "Ganho por atributo: LightGBM sem indicadores de astrometria: f_b: 60,0%; f_a: 40,0%",
-   "caption": "Ganho por atributo: LightGBM sem indicadores de astrometria. Participação de cada atributo no ganho total do modelo. PROVISÓRIO · fixture_v0.",
+   "caption": "Ganho por atributo: LightGBM sem indicadores de astrometria. Participação de cada atributo no ganho total do modelo. fixture_v0.",
    "title": "Ganho por atributo: LightGBM sem indicadores de astrometria"
   },
   "pureza-sistemas": {
    "aria_label": "Pureza absoluta por sistema, no ponto fixo: LightGBM: mediana de 5 sementes 40,00%; mínimo a máximo 30,00% a 50,00% (não é IC); MLP completo: mediana de 5 sementes 45,00%; mínimo a máximo 35,00% a 55,00% (não é IC)",
-   "caption": "Pureza absoluta por sistema, no ponto fixo. Regra · prior: P2 · C* = 0,80 (ponto fixo da comparação com as redes; a barra de ajustes não o muda). PROVISÓRIO · fixture_v0.",
+   "caption": "Pureza absoluta por sistema, no ponto fixo. Regra · prior: P2 · C* = 0,80 (ponto fixo da comparação com as redes; a barra de ajustes não o muda). fixture_v0.",
    "title": "Pureza absoluta por sistema, no ponto fixo"
   },
   "quasar-completude": {
    "aria_label": "Completude de quasar por regra e prior: como entregue · P2: 90,0%, IC 95%: 88,0% a 92,0%; ajustada ao prior · P1: 80,0%, IC 95%: 78,0% a 82,0%; ajustada ao prior · P2: 80,0%, IC 95%: 78,0% a 82,0%; ajustada ao prior · P3 (parcial): 80,0%, IC 95%: 78,0% a 82,0%",
-   "caption": "Completude de quasar por regra e prior. LightGBM completo · conjunto de teste · por regra e prior. PROVISÓRIO · fixture_v0.",
+   "caption": "Completude de quasar por regra e prior. LightGBM completo · conjunto de teste · por regra e prior. fixture_v0.",
    "title": "Completude de quasar por regra e prior"
   },
   "quasar-pureza": {
    "aria_label": "Pureza de quasar por regra e prior: como entregue · P2: 31,0%, IC 95%: 29,0% a 33,0%; ajustada ao prior · P1: 40,0%, IC 95%: 38,0% a 42,0%; ajustada ao prior · P2: 50,0%, IC 95%: 48,0% a 52,0%; ajustada ao prior · P3 (parcial): 60,0%, IC 95%: 58,0% a 62,0%",
-   "caption": "Pureza de quasar por regra e prior. LightGBM completo · conjunto de teste · por regra e prior. PROVISÓRIO · fixture_v0.",
+   "caption": "Pureza de quasar por regra e prior. LightGBM completo · conjunto de teste · por regra e prior. fixture_v0.",
    "title": "Pureza de quasar por regra e prior"
   },
   "taxa-por-g": {
    "aria_label": "Taxa de erro por faixa de magnitude G: Estrela: ≥ 22 61,5% (35,5% a 82,3%); Galáxia: ≥ 22 76,9% (49,7% a 91,8%); Quasar: ≥ 22 69,2% (42,4% a 87,3%)",
-   "caption": "Taxa de erro por faixa de magnitude G. LightGBM completo · conjunto de teste · por classe. PROVISÓRIO · fixture_v0.",
+   "caption": "Taxa de erro por faixa de magnitude G. LightGBM completo · conjunto de teste · por classe. fixture_v0.",
    "title": "Taxa de erro por faixa de magnitude G"
   },
   "taxa-por-z-galaxy": {
    "aria_label": "Taxa de erro por faixa de redshift: Galáxia: Galáxia: ",
-   "caption": "Taxa de erro por faixa de redshift: Galáxia. LightGBM completo · conjunto de teste · Galáxia. PROVISÓRIO · fixture_v0.",
+   "caption": "Taxa de erro por faixa de redshift: Galáxia. LightGBM completo · conjunto de teste · Galáxia. fixture_v0.",
    "title": "Taxa de erro por faixa de redshift: Galáxia"
   },
   "taxa-por-z-qso": {
    "aria_label": "Taxa de erro por faixa de redshift: Quasar: Quasar: 0,5–1 80,0% (37,6% a 96,4%), 1–1,5 62,5% (30,6% a 86,3%)",
-   "caption": "Taxa de erro por faixa de redshift: Quasar. LightGBM completo · conjunto de teste · Quasar. PROVISÓRIO · fixture_v0.",
+   "caption": "Taxa de erro por faixa de redshift: Quasar. LightGBM completo · conjunto de teste · Quasar. fixture_v0.",
    "title": "Taxa de erro por faixa de redshift: Quasar"
   }
  },

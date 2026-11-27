@@ -40,14 +40,15 @@ describe("criterio 8: MplFigure renderiza a partir de figures.json da fixture", 
     expect(Object.keys(manifest.figures)).toHaveLength(14);
   });
 
-  it.each(Object.keys(manifest.figures))("%s: figure, figcaption, aria-label e SVG", (id) => {
+  it.each(Object.keys(manifest.figures))("%s: figure, aria-label e SVG, sem legenda repetida", (id) => {
     const e = manifest.figures[id];
     const html = renderToStaticMarkup(<MplFigure id={id} figures={loadFigures([id])} />);
     expect(html.startsWith("<figure")).toBe(true);
     const open = html.slice(0, html.indexOf(">") + 1);
     expect(open).toContain(`aria-label="${esc(e.aria_label)}"`);
     expect(open).toContain(`data-figure="${id}"`);
-    expect(html).toContain(`<figcaption>${esc(e.caption)}</figcaption>`);
+    expect(html).not.toContain("<figcaption");
+    expect(html).not.toContain("PROVISÓRIO");
     const svg = readFileSync(path.join(FIX_ROOT, REL, "figures", `${id}.svg`), "utf-8");
     expect(html).toContain(svg.slice(0, 200));
     expect(html).toContain(`<title id="${id}-title">`);

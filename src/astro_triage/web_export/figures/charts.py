@@ -12,10 +12,12 @@ from astro_triage.web_export.figures.canvas import (
     SERIES,
     TEXT2,
     TEXT3,
+    Y_TITLE_X,
     Canvas,
     M,
     W,
     decimals_for,
+    left_pad,
     nice_ticks,
     place_labels,
     pt_dec,
@@ -40,7 +42,7 @@ class Figure:
 
 
 def _done(cv: Canvas, subtitle: str, desc: str, release: str) -> Figure:
-    caption = f"{cv.title}. {subtitle}. PROVISÓRIO · {release}."
+    caption = f"{cv.title}. {subtitle}. {release}."
     return Figure(cv.fid, cv.title, caption, f"{cv.title}: {desc}", cv.render(desc))
 
 
@@ -58,12 +60,31 @@ def _top(values: list[float]) -> float:
 
 
 # 1a ------------------------------------------------------------- calibration
+def _cal_ok(s: Mapping[str, Any]) -> list[Mapping[str, Any]]:
+    return [b for b in s["bins"] if b["p_mean"]["value"] is not None and b["freq"]["point"] is not None]
+
+
 def calibration(p: Pages) -> Figure:
     g, rel = p["graficos"], p["meta"]["release"]
     cal = g["calibration"]
     sub = f"{g['model_label']} · conjunto de teste"
     cv = Canvas("calibracao", "Diagrama de confiabilidade", sub)
-    px, ps = 72, 336
+    # Deviation from the diagonal in p.p.: the three curves sit on the diagonal and only separate here.
+    dev: list[list[tuple[float, float, float | None, float | None]]] = []
+    for s in cal["series"]:
+        rows = []
+        for b in _cal_ok(s):
+            pm, f = b["p_mean"]["value"], b["freq"]
+            lo = None if f["lo"] is None else (f["lo"] - pm) * 100
+            hi = None if f["hi"] is None else (f["hi"] - pm) * 100
+            rows.append((pm, (f["point"] - pm) * 100, lo, hi))
+        dev.append(rows)
+    span = max((abs(v) for rows in dev for r in rows for v in r[1:] if v is not None), default=0.0) or 0.5
+    rticks, rstep = nice_ticks(-span, span, 4)
+    rdec = decimals_for(rstep)
+    rlabels = [pt_dec(v, rdec, sign=True) for v in rticks]
+    px = left_pad([pt_pct(t) for t in PCT_TICKS] + rlabels)
+    ps = 360
     py = cv.y + 26
 
     def x_(v: float) -> float:
@@ -84,7 +105,7 @@ def calibration(p: Pages) -> Figure:
     best: tuple[float, tuple[float, float] | None] = (0.0, None)
     for si, s in reversed(list(enumerate(cal["series"]))):
         k = si + 1
-        ok = [b for b in s["bins"] if b["p_mean"]["value"] is not None and b["freq"]["point"] is not None]
+        ok = _cal_ok(s)
         for b in ok:
             if b["freq"]["lo"] is not None:
                 x = x_(b["p_mean"]["value"])
@@ -102,10 +123,10 @@ def calibration(p: Pages) -> Figure:
                 best = (d, (x_(b["raw_p_mean"]), y_(b["raw_freq"])))
     marks = []
     for s in cal["series"]:
-        ok = [b for b in s["bins"] if b["p_mean"]["value"] is not None and b["freq"]["point"] is not None]
+        ok = _cal_ok(s)
         if not ok:  # series with no reportable bin: nothing to label
             continue
-        b = min(ok,key=lambda b: abs(b["freq"]["point"] - 0.5))
+        b = min(ok, key=lambda b: abs(b["freq"]["point"] - 0.5))
         x, y = x_(b["p_mean"]["value"]), y_(b["freq"]["point"])
         cv.line(x - 2, y - 2, x - 9, y - 9, "lead")
         cv.text(x - 12, y - 29, s["label"], "nm", "end")
@@ -116,17 +137,53 @@ def calibration(p: Pages) -> Figure:
         rx, ry = best[1]
         cv.line(rx + 3, ry - 3, rx + 40, ry - 26, "lead")
         cv.text(rx + 44, ry - 24, "antes do ajuste", "n")
-    cv.text(px + ps / 2, py + ps + 48, "Probabilidade média prevista (%)", "s", "middle")
-    cv.vtext(20, py + ps / 2, "Frequência observada (%)", "s")
-    cv.y = py + ps + 48
+    cv.vtext(Y_TITLE_X, py + ps / 2, "Frequência observada (%)", "s")
+
+    # Residual panel on the same x scale.
+    cv.text(M, py + ps + 58, "Desvio da diagonal: observada − prevista (p.p.)", "s")
+    rt, rh = py + ps + 74, 150
+    rb = rt + rh
+
+    def r_(v: float) -> float:
+        return rt + (rticks[-1] - v) / (rticks[-1] - rticks[0]) * rh
+
+    for v, lab in zip(rticks, rlabels, strict=True):
+        cv.line(px, r_(v), px + ps, r_(v), "grid")
+        cv.text(px - 8, r_(v) + 5, lab, "tk", "end")
+    for t in PCT_TICKS:
+        cv.line(x_(t), rt, x_(t), rb, "grid")
+        cv.text(x_(t), rb + 22, pt_pct(t), "tk", "middle")
+    cv.line(px, r_(0), px + ps, r_(0), "ref")
+    cv.line(px, rb, px + ps, rb, "axis")
+    cv.line(px, rt, px, rb, "axis")
+    dodge = (-3, 0, 3)
+    wanted, ends = [], {}
+    for si, rows in reversed(list(enumerate(dev))):
+        k = si + 1
+        for pm, _, lo, hi in rows:
+            if lo is not None and hi is not None:
+                x = x_(pm) + dodge[si % 3]
+                cv.line(x, r_(lo), x, r_(hi), f"ci{k}")
+        if rows:
+            cv.poly([(x_(pm), r_(d)) for pm, d, _, _ in rows], f"ln{k}")
+            ends[si] = (x_(rows[-1][0]), r_(rows[-1][1]))
+            wanted.append((si, r_(rows[-1][1]) + 5))
+    pos = place_labels(wanted, 20, rt + 10, rb - 4)
+    lx = px + ps + 12
+    for si, (ex, ey) in ends.items():
+        cv.line(ex + 3, ey, lx - 3, pos[si] - 5, "lead")
+        cv.text(lx, pos[si], cal["series"][si]["label"], "nm")
+    cv.text(px + ps / 2, rb + 48, "Probabilidade média prevista (%)", "s", "middle")
+    cv.y = rb + 48
     ns = [b["n"]["value"] for b in cal["series"][0]["bins"] if b["n"]["value"] is not None]
     cv.notes([
-        f"n = {pt_int(min(ns))} a {pt_int(max(ns))} objetos por faixa",
-        f"{cal['n_bins']} faixas · total {pt_int(sum(ns))} objetos no teste",
+        f"n = {pt_int(min(ns))} a {pt_int(max(ns))} objetos por faixa" if ns else "Nenhuma faixa com n",
+        f"{cal['n_bins']} faixas" + (f" · total {pt_int(sum(ns))} objetos no teste" if ns else ""),
         "Barras: IC 95% · valor: prevista / observada",
         "Tracejado fino: pontos antes do ajuste de temperatura",
+        "Painel de baixo: a mesma curva menos a diagonal; acima de zero, a classe sai mais do que o previsto",
     ])
-    cv.provisional(g["model_label"], rel, f"Piso de {pt_int(g['floor'])} objetos por faixa")
+    cv.source(g["model_label"], rel, f"Piso de {pt_int(g['floor'])} objetos por faixa")
     return _done(cv, sub, "; ".join(marks), rel)
 
 
@@ -135,11 +192,7 @@ def _rate(p: Pages, fid: str, title: str, sub: str, series: list[dict[str, Any]]
           extra: list[str]) -> Figure:
     g, rel = p["graficos"], p["meta"]["release"]
     cv = Canvas(fid, title, sub)
-    px, pw, ph = 64, 262, 240
-    py = cv.y + 30
-    base = py + ph
     rows0 = series[0]["rows"]
-    band = pw / len(rows0)
 
     def rep(r: Mapping[str, Any]) -> bool:
         return _rep(r["rate"], r["below_floor"])
@@ -149,6 +202,11 @@ def _rate(p: Pages, fid: str, title: str, sub: str, series: list[dict[str, Any]]
     ticks, step = nice_ticks(0, top, 4)
     top = ticks[-1]
     dec = decimals_for(step * 100)
+    px = left_pad([pt_pct(v, dec) for v in ticks])
+    pw, ph = W - px - 150, 240
+    py = cv.y + 30
+    base = py + ph
+    band = pw / len(rows0)
 
     def y_(v: float) -> float:
         return base - v / top * ph
@@ -206,7 +264,7 @@ def _rate(p: Pages, fid: str, title: str, sub: str, series: list[dict[str, Any]]
         cv.text(lx, y + 18, lr["rate"]["text"], "val")
     lab_h = max(tw(r["label"]) for r in rows0) + 12
     cv.text(px + pw / 2, base + lab_h + 24, xlabel, "s", "middle")
-    cv.vtext(20, py + ph / 2, "Taxa de erro (%)", "s")
+    cv.vtext(Y_TITLE_X, py + ph / 2, "Taxa de erro (%)", "s")
     cv.y = base + lab_h + 24
     ns = [r["n"]["value"] for s in series for r in s["rows"] if rep(r)]
     cv.notes([
@@ -215,7 +273,7 @@ def _rate(p: Pages, fid: str, title: str, sub: str, series: list[dict[str, Any]]
         "Barras verticais: IC 95% · linha interrompida: faixa abaixo do piso (n/a)",
         *extra,
     ])
-    cv.provisional(g["model_label"], rel, f"Piso de {pt_int(g['floor'])} objetos por faixa")
+    cv.source(g["model_label"], rel, f"Piso de {pt_int(g['floor'])} objetos por faixa")
     desc = "; ".join(
         f"{s['label']}: " + ", ".join(f"{r['label']} {r['rate']['text']} ({_ci(r['rate']['ci_text'])})"
                                        for r in s["rows"] if rep(r))
@@ -229,7 +287,7 @@ def rate_by_g(p: Pages) -> Figure:
     eg = g["error_by_g"]
     sub = f"{g['model_label']} · conjunto de teste · por classe"
     return _rate(p, "taxa-por-g", "Taxa de erro por faixa de magnitude G", sub, eg["series"],
-                 "Magnitude G (mag)", [eg["missing_note"]])
+                 "Magnitude G (mag)", [])
 
 
 def _rate_by_z(cls: str, fid: str) -> Callable[[Pages], Figure]:
@@ -238,7 +296,7 @@ def _rate_by_z(cls: str, fid: str) -> Callable[[Pages], Figure]:
         s = next(s for s in g["error_by_z"]["series"] if s["cls"] == cls)
         sub = f"{g['model_label']} · conjunto de teste · {s['label']}"
         return _rate(p, fid, f"Taxa de erro por faixa de redshift: {s['label']}", sub, [s],
-                     "Redshift espectroscópico z (adimensional)", [g["error_by_z"]["star_note"]])
+                     "Redshift espectroscópico z (adimensional)", [])
 
     return build
 
@@ -289,7 +347,7 @@ def confusion(p: Pages) -> Figure:
         "Contorno: diagonal (acertos) · tom de cinza proporcional à fração",
         f"Total: {pt_int(total)} objetos no teste",
     ])
-    cv.provisional(g["model_label"], rel, f"Célula com menos de {pt_int(g['floor'])} objetos: n/a")
+    cv.source(g["model_label"], rel, f"Célula com menos de {pt_int(g['floor'])} objetos: n/a")
     return _done(cv, sub, "; ".join(desc), rel)
 
 
@@ -301,7 +359,9 @@ def cmd_map(p: Pages) -> Figure:
     rows, cols = len(cmd["g_edges"]) - 1, len(cmd["c_edges"]) - 1
     sub = f"{g['model_label']} · célula de magnitude G por cor BP-RP"
     cv = Canvas("cmd-taxa", "Taxa de erro no diagrama cor-magnitude", sub)
-    px, cwc, chc = 64, 23, 16
+    px = left_pad([t["text"] for t in cmd["g_ticks"]])
+    cwc = min(34.0, (W - px - M) / cols)
+    chc = round(cwc * 0.7, 1)
     pw, ph = cols * cwc, rows * chc
     py = cv.y + 24
     base = py + ph
@@ -327,7 +387,7 @@ def cmd_map(p: Pages) -> Figure:
         cv.line(px - 5, y, px, y, "axis")
         cv.text(px - 9, y + 5, t["text"], "tk", "end")
     cv.text(px + pw / 2, base + 46, "Cor BP-RP (mag)", "s", "middle")
-    cv.vtext(20, py + ph / 2, "Magnitude G (mag)", "s")
+    cv.vtext(Y_TITLE_X, py + ph / 2, "Magnitude G (mag)", "s")
     out = cmd["n_outside"]
     if rep:
         mx = max(rep, key=lambda c: c["rate"]["point"])
@@ -363,7 +423,7 @@ def cmd_map(p: Pages) -> Figure:
         "sem taxa nesta figura"),
         cmd["note"],
     ])
-    cv.provisional(g["model_label"], rel, f"Piso de {pt_int(g['floor'])} objetos por célula")
+    cv.source(g["model_label"], rel, f"Piso de {pt_int(g['floor'])} objetos por célula")
     return _done(cv, sub, desc, rel)
 
 
@@ -378,7 +438,7 @@ class _Bar:
 
 
 def _hbars(cv: Canvas, bars: list[_Bar], top: float, axis: str) -> None:
-    pw, rh = 300, 56
+    pw, rh = W - 2 * M - 110, 56
 
     def x_(v: float) -> float:
         return M + min(max(v, 0), top) / top * pw
@@ -431,9 +491,8 @@ def _quasar(pick: str, fid: str, title: str, axis: str) -> Callable[[Pages], Fig
             f"n = {o['technical']['data_box']['n_test']['text']} objetos no teste",
             f"Traço sobre a barra: IC 95% (bootstrap, {pt_int(meta['n_boot'])} reamostragens)",
             f"Contorno: estado padrão ({st[(ds['rule'], ds['prior'])]}) · barra tracejada: parcial",
-            *[r["partial_notice"] for r in o["rows"] if r["partial_notice"]],
         ])
-        cv.provisional(g["model_label"], rel, None)
+        cv.source(g["model_label"], rel, None)
         desc = "; ".join(f"{b.name}: {b.est['text']}, {b.est['ci_text']}" for b in bars)
         return _done(cv, sub, desc, rel)
 
@@ -451,10 +510,8 @@ def galaxy_errors(p: Pages) -> Figure:
     _hbars(cv, bars, _top([r["rate"]["hi"] or 0 for r in rows]), "Taxa de erro (%)")
     cv.notes([
         "Traço sobre a barra: IC 95% · n: galáxias no grupo",
-        ga["error_rows_note"],
-        ga["floor_note"],
     ])
-    cv.provisional(g["model_label"], rel, None)
+    cv.source(g["model_label"], rel, None)
     desc = "; ".join(f"{r['label']}: {r['rate']['text']}, {r['rate']['ci_text']}, n = {r['n']['text']}"
                      for r in rows)
     return _done(cv, sub, desc, rel)
@@ -475,7 +532,8 @@ class _Row:
 
 def _intervals(cv: Canvas, rows: list[_Row], fmt: Callable[[float, int], str], axis: str,
                zero: bool, pad_frac: float = 0.08) -> None:
-    pxl, pw = 24, 266
+    pxl = 24
+    pw = W - pxl - M - 180
     bounds = [v for r in rows for v in (r.lo, r.hi)]
     bounds += [v for r in rows if r.band is not None for v in (-r.band, r.band)]
     if zero:
@@ -537,7 +595,7 @@ def dsc_diffs(p: Pages) -> Figure:
         "Traço horizontal: IC 95% pareado · traço vertical: estimativa",
         "Tracejado vertical: diferença zero",
     ])
-    cv.provisional("LightGBM e Gaia DSC", rel, None)
+    cv.source("LightGBM e Gaia DSC", rel, None)
     desc = "; ".join(f"{d['a']} − {d['b']}: {d['est']['text']}, {d['est']['ci_text']}" for d in dsc["paired_diffs"])
     return _done(cv, sub, desc, rel)
 
@@ -567,13 +625,11 @@ def decision_diffs(p: Pages) -> Figure:
         desc += [f"{gr['net']} − LightGBM, {cls_label}: {_pp(gr['d'])} p.p. (IC 95% {_pp(gr['lo'])} a "
                  f"{_pp(gr['hi'])}), δ {pt_dec(gr['delta'] * 100, 2)} p.p., {gr['word']}" for gr in cells]
     metric = next((ln for ln in c["rule_lines"] if ln.startswith("Métrica")), None)
-    under = any(gr["underpowered"] for gr in c["grid"])
     cv.notes([
         "Traço horizontal: IC 95% · traço vertical: diferença D · tracejado: zero",
         *([metric] if metric else []),
-        *([f"Galáxia: {c['power_note']}"] if under else []),
     ])
-    cv.provisional("LightGBM, MLP e FT-Transformer", rel, None)
+    cv.source("LightGBM, MLP e FT-Transformer", rel, None)
     return _done(cv, sub, "; ".join(desc), rel)
 
 
@@ -585,7 +641,7 @@ def _importance(index: int) -> Callable[[Pages], Figure]:
         imp = m["importance"]
         sub = "Participação de cada atributo no ganho total do modelo"
         cv = Canvas(f"ganho-{m['model'].replace('_', '-')}", f"Ganho por atributo: {m['label']}", sub)
-        pw, rh = 320, 42
+        pw, rh = W - 2 * M - 90, 42
         ticks, step = nice_ticks(0, max(i["gain"]["value"] for i in imp), 3)
 
         def x_(v: float) -> float:
@@ -609,7 +665,7 @@ def _importance(index: int) -> Callable[[Pages], Figure]:
             "Sem IC: ganho do modelo treinado, não é estimativa amostral",
             f"Temperatura de calibração: {m['temperature']['text']}",
         ])
-        cv.provisional(m["label"], rel, None)
+        cv.source(m["label"], rel, None)
         return _done(cv, sub, "; ".join(f"{r['feature']}: {r['gain']['text']}" for r in imp), rel)
 
     return build
@@ -633,7 +689,7 @@ def purity_range(p: Pages) -> Figure:
         "Traço horizontal: mínimo a máximo entre sementes (não é IC) · traço vertical: mediana",
         *[f"{r['label']}: {r['detail_text']}" for r in pur],
     ])
-    cv.provisional("LightGBM, MLP e FT-Transformer", rel, None)
+    cv.source("LightGBM, MLP e FT-Transformer", rel, None)
     return _done(cv, sub, "; ".join(f"{r['label']}: {r['detail_text']}" for r in pur), rel)
 
 

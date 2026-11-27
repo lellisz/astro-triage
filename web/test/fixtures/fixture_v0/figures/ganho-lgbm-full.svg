@@ -1,108 +1,100 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="440" height="366" viewBox="0 0 440 366" role="img" aria-labelledby="ganho-lgbm-full-title" aria-describedby="ganho-lgbm-full-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="ganho-lgbm-full-title">Ganho por atributo: LightGBM completo</title><desc id="ganho-lgbm-full-desc">f_b: 60,0%; f_a: 40,0%</desc>
+<svg xmlns="http://www.w3.org/2000/svg" width="640" height="304" viewBox="0 0 640 304" role="img" aria-labelledby="ganho-lgbm-full-title" aria-describedby="ganho-lgbm-full-desc" stroke-linejoin="round" stroke-linecap="butt" style="width:100%;min-width:640px;max-width:800px;height:auto"><title id="ganho-lgbm-full-title">Ganho por atributo: LightGBM completo</title><desc id="ganho-lgbm-full-desc">f_b: 60,0%; f_a: 40,0%</desc>
  <g id="ganho-lgbm-full-figure_1">
   <g id="ganho-lgbm-full-patch_1">
-   <path d="M 0 366 
-L 440 366 
-L 440 0 
+   <path d="M 0 304 
+L 640 304 
+L 640 0 
 L 0 0 
+L 0 304 
 z
-" style="fill: #141414"/>
+" style="fill: none"/>
   </g>
   <g id="ganho-lgbm-full-axes_1">
    <g id="ganho-lgbm-full-patch_2">
-    <path d="M 16 105 
-L 336 105 
-L 336 117 
-L 16 117 
+    <path d="M 16 85 
+L 534 85 
+L 534 97 
+L 16 97 
 z
 " style="fill: #d6d6d6"/>
    </g>
    <g id="ganho-lgbm-full-patch_3">
-    <path d="M 16 147 
-L 229.333333 147 
-L 229.333333 159 
-L 16 159 
+    <path d="M 16 127 
+L 361.333333 127 
+L 361.333333 139 
+L 16 139 
 z
 " style="fill: #d6d6d6"/>
    </g>
    <g id="ganho-lgbm-full-line2d_1">
-    <path d="M 16 82 
-L 16 166 
+    <path d="M 16 62 
+L 16 146 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="ganho-lgbm-full-line2d_2">
-    <path d="M 122.666667 82 
-L 122.666667 166 
+    <path d="M 188.666667 62 
+L 188.666667 146 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="ganho-lgbm-full-line2d_3">
-    <path d="M 229.333333 82 
-L 229.333333 166 
+    <path d="M 361.333333 62 
+L 361.333333 146 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="ganho-lgbm-full-line2d_4">
-    <path d="M 336 82 
-L 336 166 
+    <path d="M 534 62 
+L 534 146 
 " style="fill: none; stroke: #2a2a2a"/>
    </g>
    <g id="ganho-lgbm-full-line2d_5">
-    <path d="M 16 166 
-L 336 166 
+    <path d="M 16 146 
+L 534 146 
 " style="fill: none; stroke: #8a8a8a"/>
    </g>
    <g id="ganho-lgbm-full-text_1">
     <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="22" transform="rotate(-0 16 22)">Ganho por atributo: LightGBM completo</text>
    </g>
    <g id="ganho-lgbm-full-text_2">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="42" transform="rotate(-0 16 42)">Participação de cada atributo no ganho total do</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="42" transform="rotate(-0 16 42)">Participação de cada atributo no ganho total do modelo</text>
    </g>
    <g id="ganho-lgbm-full-text_3">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="62" transform="rotate(-0 16 62)">modelo</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="16" y="168" transform="rotate(-0 16 168)">0%</text>
    </g>
    <g id="ganho-lgbm-full-text_4">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="16" y="188" transform="rotate(-0 16 188)">0%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="188.666667" y="168" transform="rotate(-0 188.666667 168)">20%</text>
    </g>
    <g id="ganho-lgbm-full-text_5">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="122.666667" y="188" transform="rotate(-0 122.666667 188)">20%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="361.333333" y="168" transform="rotate(-0 361.333333 168)">40%</text>
    </g>
    <g id="ganho-lgbm-full-text_6">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="229.333333" y="188" transform="rotate(-0 229.333333 188)">40%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="534" y="168" transform="rotate(-0 534 168)">60%</text>
    </g>
    <g id="ganho-lgbm-full-text_7">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="336" y="188" transform="rotate(-0 336 188)">60%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="78" transform="rotate(-0 16 78)">f_b</text>
    </g>
    <g id="ganho-lgbm-full-text_8">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="98" transform="rotate(-0 16 98)">f_b</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="542" y="96" transform="rotate(-0 542 96)">60,0%</text>
    </g>
    <g id="ganho-lgbm-full-text_9">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="344" y="116" transform="rotate(-0 344 116)">60,0%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="120" transform="rotate(-0 16 120)">f_a</text>
    </g>
    <g id="ganho-lgbm-full-text_10">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="140" transform="rotate(-0 16 140)">f_a</text>
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="369.333333" y="138" transform="rotate(-0 369.333333 138)">40,0%</text>
    </g>
    <g id="ganho-lgbm-full-text_11">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="237.333333" y="158" transform="rotate(-0 237.333333 158)">40,0%</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="275" y="192" transform="rotate(-0 275 192)">Ganho (% do ganho total)</text>
    </g>
    <g id="ganho-lgbm-full-text_12">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="176" y="212" transform="rotate(-0 176 212)">Ganho (% do ganho total)</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="220" transform="rotate(-0 16 220)">2 maiores de 12 atributos · melhor iteração 77</text>
    </g>
    <g id="ganho-lgbm-full-text_13">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="240" transform="rotate(-0 16 240)">2 maiores de 12 atributos · melhor iteração 77</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="240" transform="rotate(-0 16 240)">Sem IC: ganho do modelo treinado, não é estimativa amostral</text>
    </g>
    <g id="ganho-lgbm-full-text_14">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="260" transform="rotate(-0 16 260)">Sem IC: ganho do modelo treinado, não é estimativa</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="260" transform="rotate(-0 16 260)">Temperatura de calibração: 1,250</text>
    </g>
    <g id="ganho-lgbm-full-text_15">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="280" transform="rotate(-0 16 280)">amostral</text>
-   </g>
-   <g id="ganho-lgbm-full-text_16">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="300" transform="rotate(-0 16 300)">Temperatura de calibração: 1,250</text>
-   </g>
-   <g id="ganho-lgbm-full-text_17">
-    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="330" transform="rotate(-0 16 330)">PROVISÓRIO</text>
-   </g>
-   <g id="ganho-lgbm-full-text_18">
-    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="350" transform="rotate(-0 16 350)">LightGBM completo · fixture_v0</text>
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="288" transform="rotate(-0 16 288)">LightGBM completo · fixture_v0</text>
    </g>
   </g>
  </g>

@@ -110,7 +110,9 @@ describe("/graficos: modo simples", () => {
   });
 
   it("figuras rotuladas e tabelas reais", () => {
-    expect(count(html, "<figcaption")).toBe(6);
+    // As figuras matplotlib nao repetem titulo e fonte numa <figcaption>: tudo esta no SVG.
+    expect(count(html, "<figcaption")).toBe(0);
+    expect(count(html, "<figure")).toBe(6);
     expect(count(html, "aria-labelledby")).toBeGreaterThanOrEqual(7);
     expect(html.match(/<table[^>]*aria-labelledby="/g)).toHaveLength(5);
   });
@@ -139,7 +141,10 @@ describe("/graficos: nenhum numero formatado no front", () => {
   for (const search of ["", "tecnico=1"]) {
     it(`todo algarismo no DOM e texto do JSON ou tick de fmt.ts (${search || "simples"})`, () => {
       const html = render(search);
-      const dom = [textOf(html), ...labelsOf(html)].join(" ");
+      // O texto das figuras matplotlib e conferido numero a numero contra o JSON em
+      // tests/test_web_figures.py (test_5), com deteccao de ticks por eixo e unidade.
+      const noFigures = html.replace(/<figure[^>]*data-figure="[^"]*"[^>]*>[\s\S]*?<\/figure>/g, "");
+      const dom = [textOf(noFigures), ...labelsOf(html)].join(" ");
       const unknown: string[] = [];
       for (const m of dom.matchAll(NUMBER)) {
         const token = m[0];

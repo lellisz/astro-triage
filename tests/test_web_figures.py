@@ -276,14 +276,18 @@ def allowed(pages) -> set[str]:
 
 
 def _ticks(texts: list[tuple[dict[str, str], str]]) -> set[int]:
-    """Indices of axis tick labels: >= 3 bare numbers on one row (or column) in arithmetic step."""
+    """Indices of axis tick labels: >= 3 bare numbers of one unit on one row (or column) in arithmetic step.
+
+    The unit (with or without %) splits a column shared by two stacked axes, as in the calibration
+    figure (percent above, p.p. deviation below).
+    """
     bare = re.compile(r"^[+\-−]?\d+(?:,\d+)?%?$")
     idx = [i for i, (_, t) in enumerate(texts) if bare.match(t.strip())]
     out: set[int] = set()
     for key in ("y", "x"):
-        groups: dict[str, list[int]] = {}
+        groups: dict[tuple[str, bool], list[int]] = {}
         for i in idx:
-            groups.setdefault(texts[i][0].get(key, ""), []).append(i)
+            groups.setdefault((texts[i][0].get(key, ""), texts[i][1].strip().endswith("%")), []).append(i)
         for members in groups.values():
             if len(members) < 3:
                 continue
@@ -310,7 +314,8 @@ def test_5_no_invented_number_in_any_text(svgs, allowed):
 
 
 def test_5_scan_flags_a_planted_number(svgs, allowed):
-    planted = svgs["confusao"].replace("PROVISÓRIO", "PROVISÓRIO 97,3%", 1)
+    planted = svgs["confusao"].replace(">Classe prevista<", ">Classe prevista 97,3%<", 1)
+    assert planted != svgs["confusao"]
     texts = _texts(planted)
     ticks = _ticks(texts)
     toks = [tok for i, (_, t) in enumerate(texts) if i not in ticks for tok in _tokens(t)]
@@ -376,7 +381,9 @@ def test_6_seal_role_title_and_no_external_content(svgs):
         assert 'role="img"' in root, fid
         title = re.search(r"<title\b[^>]*>([^<]+)</title>", svg)
         assert title and title.group(1).strip(), fid
-        assert any(t.strip() == "PROVISÓRIO" for _, t in _texts(svg)), fid
+        # Owner's decision (2026-11-27): no PROVISÓRIO seal inside the figures; the pages carry it.
+        assert not any("PROVISÓRIO" in t for _, t in _texts(svg)), fid
+        assert 'style="width:100%;min-width:640px;max-width:800px;height:auto"' in root, fid
         for bad in ("<image", "data:", "<script"):
             assert bad not in svg.lower(), (fid, bad)
 
@@ -425,15 +432,17 @@ def _axes(svg: str) -> list[tuple[str, list[tuple[float, str]]]]:
     A tick label is a bare number in the axis grey; a vertical axis is >= 3 of them right-aligned on
     the same x, a horizontal axis is >= 3 of them centred on the same y.
     """
-    groups: dict[tuple[str, str], list[tuple[float, str]]] = {}
+    groups: dict[tuple[str, str, bool], list[tuple[float, str]]] = {}
     for attrs, body in _texts(svg):
         style = attrs.get("style", "")
         if AXIS_FILL not in style or not BARE_NUM.match(body.strip()):
             continue
+        # The unit splits stacked axes sharing one column (calibration: % above, p.p. below).
+        pct = body.strip().endswith("%")
         if "text-anchor: end" in style:
-            groups.setdefault(("v", attrs["x"]), []).append((float(attrs["y"]), body.strip()))
+            groups.setdefault(("v", attrs["x"], pct), []).append((float(attrs["y"]), body.strip()))
         elif "text-anchor: middle" in style:
-            groups.setdefault(("h", attrs["y"]), []).append((float(attrs["x"]), body.strip()))
+            groups.setdefault(("h", attrs["y"], pct), []).append((float(attrs["x"]), body.strip()))
     return [(k[0], sorted(v)) for k, v in sorted(groups.items()) if len(v) >= 3]
 
 

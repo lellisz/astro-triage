@@ -1,7 +1,7 @@
 """Pixel-space drawing (y grows downwards) rendered by matplotlib into a deterministic SVG.
 
 Operations are recorded first and replayed at the end, because the figure height is only known
-after the notes and the PROVISÓRIO seal have been laid out. Text stays as ``<text>``
+after the notes and the source line have been laid out. Text stays as ``<text>``
 (``svg.fonttype = none``), so the browser draws it in the site's Inter; widths are measured with
 DejaVu Sans, which ships with matplotlib and is wider than Inter, so wrapping errs on the safe side.
 """
@@ -28,7 +28,9 @@ from matplotlib.font_manager import FontProperties
 from matplotlib.patches import Rectangle
 from matplotlib.textpath import TextToPath
 
-W: Final = 440
+W: Final = 640
+# Rendered between W (text at --text-sm, 15px) and 1.25 W (the site's growth ceiling).
+MAX_W: Final = round(W * 1.25)
 M: Final = 16
 FS: Final = 15
 LINE: Final = 20
@@ -68,7 +70,6 @@ TEXT_STYLE: Final = {
     "nm": (TEXT, FS, 600),
     "val": (ACCENT, FS, 600),
     "big": (ACCENT, 17, 600),
-    "prov": (ACCENT, FS, 600),
 }
 
 # class -> (color, width, dashes)
@@ -145,6 +146,14 @@ def decimals_for(step: float) -> int:
     if abs(step * 10**d - round(step * 10**d)) > 1e-9:
         d += 1
     return d
+
+
+Y_TITLE_X: Final = 18
+
+
+def left_pad(labels: list[str]) -> float:
+    """Plot left edge that keeps right-aligned tick labels clear of the rotated axis title at Y_TITLE_X."""
+    return Y_TITLE_X + 8 + 12 + max((tw(t) for t in labels), default=0.0) + 8
 
 
 def place_labels(wanted: list[tuple[int, float]], gap: float, lo: float, hi: float) -> dict[int, float]:
@@ -244,9 +253,8 @@ class Canvas:
                 self.text(M, self.y, ln, "n")
                 first = False
 
-    def provisional(self, source: str, release: str, floor_line: str | None) -> None:
-        self.y += 30
-        self.text(M, self.y, "PROVISÓRIO", "prov")
+    def source(self, source: str, release: str, floor_line: str | None) -> None:
+        self.y += 8
         for s in [f"{source} · {release}"] + ([floor_line] if floor_line else []):
             for ln in wrap(s, W - 2 * M):
                 self.y += LINE
@@ -255,7 +263,7 @@ class Canvas:
     def render(self, desc: str) -> str:
         h = math.ceil(self.y + 16)
         with matplotlib.rc_context(RC):
-            fig = Figure(figsize=(W / 72, h / 72), dpi=72, facecolor=SURFACE)
+            fig = Figure(figsize=(W / 72, h / 72), dpi=72, facecolor="none")
             ax = fig.add_axes((0, 0, 1, 1))
             ax.set_xlim(0, W)
             ax.set_ylim(h, 0)
@@ -263,7 +271,7 @@ class Canvas:
             for op in self.ops:
                 op(ax)
             buf = io.StringIO()
-            fig.savefig(buf, format="svg", facecolor=SURFACE, metadata={"Date": None})
+            fig.savefig(buf, format="svg", transparent=True, metadata={"Date": None})
         return _finish(buf.getvalue(), self.fid, self.title, desc, h)
 
 
@@ -280,7 +288,8 @@ def _finish(svg: str, fid: str, title: str, desc: str, h: int) -> str:
     head = (
         f'<svg xmlns="http://www.w3.org/2000/svg" width="{W}" height="{h}" viewBox="0 0 {W} {h}" '
         f'role="img" aria-labelledby="{fid}-title" aria-describedby="{fid}-desc" '
-        'stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto">'
+        'stroke-linejoin="round" stroke-linecap="butt" '
+        f'style="width:100%;min-width:{W}px;max-width:{MAX_W}px;height:auto">'
         f'<title id="{fid}-title">{escape(title)}</title><desc id="{fid}-desc">{escape(desc)}</desc>'
     )
     return head + svg[svg.index(">") + 1:]
