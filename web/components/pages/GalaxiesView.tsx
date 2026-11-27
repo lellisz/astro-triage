@@ -80,12 +80,12 @@ function Networks({ g, meta, state }: { g: Galaxies; meta: Meta; state: UiState 
   }));
   return (
     <>
-      <p className={styles.muted}>{g.fixed_point_text}</p>
+      {state.tech ? <p className={styles.muted}>{g.fixed_point_text}</p> : null}
       {g.dl_error ? <p className={styles.callout}>{g.dl_error}</p> : null}
       {g.networks_note ? <p className={styles.callout}>{g.networks_note}</p> : null}
       {nets.length > 0 ? (
         <>
-          <DataTable caption={L.netTableCaption} columns={netColumns} rows={rows} />
+          {state.tech ? <DataTable caption={L.netTableCaption} columns={netColumns} rows={rows} /> : null}
           <p>
             <Link href={withState(compareHref, state, meta.release)}>{L.compareLink}</Link>
           </p>
@@ -117,37 +117,42 @@ function Body({ props, state }: { props: Props; state: UiState }) {
   const completeness = priorRows(meta, g, state, "completeness");
   return (
     <div className={styles.stack}>
-      <div className={galaxiesStyles.context}>
-        <p className={styles.answer}>{g.verdict.text}</p>
-        {g.verdict.scope_text ? <p className={styles.muted}>{g.verdict.scope_text}</p> : null}
-      </div>
+      {/* Modo simples: o veredito e os graficos por prior saem; ficam a figura simples e as notas. */}
+      {state.tech ? (
+        <>
+          <div className={galaxiesStyles.context}>
+            <p className={styles.answer}>{g.verdict.text}</p>
+            {g.verdict.scope_text ? <p className={styles.muted}>{g.verdict.scope_text}</p> : null}
+          </div>
 
-      <Panel id="gal-purity" title={L.purityTitle} subtitle={L.puritySub}>
-        <Scroller label={L.chartsRegion}>
-          <HBarCI
-            id="gal-purity-chart"
-            title={L.purityChart}
-            rows={purity}
-            partialTag={chartLabels.partialTag}
-          />
-        </Scroller>
-      </Panel>
-      <Panel id="gal-completeness" title={L.completenessTitle} subtitle={L.completenessSub}>
-        <Scroller label={L.chartsRegion}>
-          <HBarCI
-            id="gal-completeness-chart"
-            title={L.completenessChart}
-            rows={completeness}
-            partialTag={chartLabels.partialTag}
-          />
-        </Scroller>
-      </Panel>
+          <Panel id="gal-purity" title={L.purityTitle} subtitle={L.puritySub}>
+            <Scroller label={L.chartsRegion}>
+              <HBarCI
+                id="gal-purity-chart"
+                title={L.purityChart}
+                rows={purity}
+                partialTag={chartLabels.partialTag}
+              />
+            </Scroller>
+          </Panel>
+          <Panel id="gal-completeness" title={L.completenessTitle} subtitle={L.completenessSub}>
+            <Scroller label={L.chartsRegion}>
+              <HBarCI
+                id="gal-completeness-chart"
+                title={L.completenessChart}
+                rows={completeness}
+                partialTag={chartLabels.partialTag}
+              />
+            </Scroller>
+          </Panel>
+        </>
+      ) : null}
 
       <Panel id="gal-networks" title={L.networksTitle} subtitle={L.networksSub}>
         <Networks g={g} meta={meta} state={state} />
       </Panel>
 
-      <Panel id="gal-errors" title={L.errorsTitle} subtitle={L.errorsSub}>
+      <Panel id="gal-errors" title={L.errorsTitle} subtitle={state.tech ? L.errorsSub : L.errorsSubSimple}>
         <Scroller label={L.errorsRegion}>
           <MplFigure id={state.tech ? "galaxia-erros" : "galaxia-erros-simples"} figures={figures} />
         </Scroller>

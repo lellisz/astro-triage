@@ -149,7 +149,7 @@ describe("A3 Visao geral", () => {
   });
 
   it("prior_matched: KPI de acuracia mostra o motivo (accuracyNA) e pureza muda", () => {
-    const html = render("regra=prior_matched&prior=P2");
+    const html = render("tecnico=1&regra=prior_matched&prior=P2");
     expect(overview.rows[2].accuracy.value).toBeNull();
     expect(overviewLabels.accuracyNA).toMatch(/mistura do teste/);
     expect(kpi(html, overviewLabels.accuracy)).toBe(overviewLabels.accuracyNA);
@@ -174,7 +174,7 @@ describe("A3 Visao geral", () => {
     const pm = overview.rows[2];
     expect(pm.rule).toBe("prior_matched");
     expect(pm.accuracy_na_reason).toBe("not_test_mix");
-    expect(kpi(render("regra=prior_matched&prior=P2"), overviewLabels.accuracy)).toBe(
+    expect(kpi(render("tecnico=1&regra=prior_matched&prior=P2"), overviewLabels.accuracy)).toBe(
       overviewLabels.accuracyNA,
     );
   });
@@ -182,7 +182,7 @@ describe("A3 Visao geral", () => {
   it("prior_matched P1 (Tarefa 29): KPI de acuracia mostra accuracyNA, nunca 'n/a' cru", () => {
     const row = overview.rows.find((r) => r.rule === "prior_matched" && r.prior === "P1")!;
     expect(row.accuracy.value).toBeNull();
-    const html = render("regra=prior_matched&prior=P1");
+    const html = render("tecnico=1&regra=prior_matched&prior=P1");
     expect(kpi(html, overviewLabels.accuracy)).toBe(overviewLabels.accuracyNA);
     // e na regra como entregue o valor real continua
     expect(kpi(render(""), overviewLabels.accuracy)).not.toBe(overviewLabels.accuracyNA);
@@ -192,7 +192,7 @@ describe("A3 Visao geral", () => {
     const notice = escapeHtml(overview.rows[3].partial_notice!);
     // As figuras matplotlib repetem a nota dentro do SVG; conta-se so o HTML da pagina.
     const noFig = (h: string) => h.replace(/<figure[^>]*data-figure="[^"]*"[\s\S]*?<\/figure>/g, "");
-    const p3 = noFig(render("regra=prior_matched&prior=P3"));
+    const p3 = noFig(render("tecnico=1&regra=prior_matched&prior=P3"));
     const def = noFig(render(""));
     // no default aparece so a nota fixa do grafico; em P3 ha tambem o callout
     expect(countText(def, notice)).toBe(1);

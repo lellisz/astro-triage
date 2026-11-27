@@ -54,11 +54,11 @@ function Headline({ h, meta, state }: { h: OverviewHeadline; meta: Meta; state: 
               <span className={o.figureValue}>{h.contrast.accuracy.text}</span>
             </p>
             <p className={o.figure}>
-              <span className={o.figureLabel}>{L.contrastPurity}</span>
+              <span className={o.figureLabel}>{state.tech ? L.contrastPurity : L.purity}</span>
               <span className={o.figureValue}>{h.contrast.qso_purity.text}</span>
             </p>
           </div>
-          <p className={o.contrastText}>{h.contrast.text}</p>
+          {state.tech ? <p className={o.contrastText}>{h.contrast.text}</p> : null}
         </>
       )}
       <p className={o.summaryEn} lang="en">
@@ -97,7 +97,7 @@ function Body({ props, state }: { props: Props; state: UiState }) {
       {row ? (
         <>
           <div className={overviewStyles.context}>
-            <p className={overviewStyles.answer}>{row.answer_text}</p>
+            {state.tech ? <p className={overviewStyles.answer}>{row.answer_text}</p> : null}
             <p className={overviewStyles.note}>{accuracyNote}</p>
             <ContextStrip items={contextItems} />
           </div>
@@ -111,11 +111,11 @@ function Body({ props, state }: { props: Props; state: UiState }) {
         <div className={overviewStyles.main}>
           {row ? (
             <div className={overviewStyles.kpis}>
-              <Kpi label={L.purity} text={row.purity.text} ci={row.purity.ci_text || undefined} />
+              <Kpi label={L.purity} text={row.purity.text} ci={(state.tech && row.purity.ci_text) || undefined} />
               <Kpi
                 label={L.completeness}
                 text={row.completeness.text}
-                ci={row.completeness.ci_text || undefined}
+                ci={(state.tech && row.completeness.ci_text) || undefined}
               />
               <Kpi
                 label={L.accuracy}
@@ -171,7 +171,7 @@ function Body({ props, state }: { props: Props; state: UiState }) {
               />
             </Panel>
           ) : null}
-          <Panel id="ov-links" title={L.shortcutsTitle} subtitle={L.shortcutsSub}>
+          <Panel id="ov-links" title={L.shortcutsTitle} subtitle={state.tech ? L.shortcutsSub : L.shortcutsSubSimple}>
             <ul className={overviewStyles.shortcuts}>
               {shortcuts.map((r) => (
                 <li key={r.href}>

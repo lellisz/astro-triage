@@ -8,10 +8,10 @@ import { loadFigures } from "@/lib/figures";
 export default function GalaxiesPage() {
   const meta = loadPage("meta");
   const galaxies = loadPage("galaxies");
-  const { eyebrow, title, lead } = pages.galaxies;
+  const { eyebrow, title, lead, leadSimple } = pages.galaxies;
   return (
     <>
-      <PageHeader eyebrow={eyebrow} title={title} lead={lead} showStateChip meta={meta} />
+      <PageHeader eyebrow={eyebrow} title={title} lead={lead} leadSimple={leadSimple} showStateChip meta={meta} />
       <GalaxiesView meta={meta} galaxies={galaxies} figures={loadFigures(galaxiesFigureIds())} />
     </>
   );

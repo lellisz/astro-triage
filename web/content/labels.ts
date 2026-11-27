@@ -13,13 +13,16 @@ export const routes: readonly Route[] = [
   { href: "/comparacao-dl/", label: "Comparação com DL" },
   { href: "/graficos/", label: "Gráficos" },
   { href: "/metodo/", label: "Método" },
+  { href: "/glossario/", label: "Glossário" },
 ];
 
 export const compareHref = "/comparacao-dl/";
 export const chartsHref = "/graficos/";
 export const skyHref = "/ceu/";
+export const glossaryHref = "/glossario/";
 
-export type PageLabels = { eyebrow: string; title: string; lead: string };
+// leadSimple: variante sem jargao, usada so fora do modo tecnico.
+export type PageLabels = { eyebrow: string; title: string; lead: string; leadSimple?: string };
 
 export const pages = {
   overview: {
@@ -36,6 +39,7 @@ export const pages = {
     eyebrow: "Classe de galáxias",
     title: "Galáxias",
     lead: "Pureza e completude das galáxias, com o efeito do prior de quasar.",
+    leadSimple: "Onde o modelo mais erra ao reconhecer galáxias.",
   },
   compare: {
     eyebrow: "Redes neurais contra o modelo de árvores",
@@ -46,11 +50,17 @@ export const pages = {
     eyebrow: "Como o classificador acerta e erra",
     title: "Gráficos",
     lead: "Calibração, taxa de erro por magnitude e por redshift, e matriz de confusão do modelo de árvores.",
+    leadSimple: "Como a taxa de erro muda com o brilho dos objetos e quais classes o modelo confunde.",
   },
   method: {
     eyebrow: "Como os resultados foram obtidos",
     title: "Método",
     lead: "Dados, regras de decisão, limites e glossário.",
+  },
+  glossary: {
+    eyebrow: "Termos usados no painel",
+    title: "Glossário",
+    lead: "O que cada sigla e termo técnico quer dizer, em linguagem simples.",
   },
 } satisfies Record<string, PageLabels>;
 
@@ -97,6 +107,7 @@ export const overviewLabels = {
   selectedRow: "Condição selecionada nesta página",
   shortcutsTitle: "Continue explorando",
   shortcutsSub: "Outras páginas, mantendo a regra e o prior escolhidos",
+  shortcutsSubSimple: "Outras páginas do painel",
   skyTitle: "Onde os erros aparecem no céu",
   skySub: "Versão pequena do mapa da página do céu",
   skyAria: "Mapa do céu inteiro: cada ponto é uma região com taxa de erro",
@@ -222,6 +233,7 @@ export const galaxiesLabels = {
   networksSub: "Diferença de pureza em relação ao modelo de árvores",
   errorsTitle: "Onde os erros se concentram",
   errorsSub: "Taxa de erro da classe de maior probabilidade (regra como entregue), por magnitude G e por redshift",
+  errorsSubSimple: "Taxa de erro em grupos de galáxias",
   pointMissing: "indisponível",
   purityChart: "Pureza de galáxia",
   completenessChart: "Completude de galáxia",

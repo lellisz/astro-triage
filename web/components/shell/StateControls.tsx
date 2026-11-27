@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { acessibilidade, chartsHref, compareHref, controls, skyHref } from "@/content/labels";
+import { acessibilidade, chartsHref, compareHref, controls, glossaryHref, skyHref } from "@/content/labels";
 import type { Meta, Prior, Rule } from "@/lib/schema";
 import { readState, withState, type UiState } from "@/lib/ui-state";
 import styles from "./StateControls.module.css";
@@ -41,7 +41,8 @@ function Controls({
 
   return (
     <div className={styles.row}>
-      {hideRuleAndPrior ? null : (
+      {/* Modo simples: sem regra e prior; readState sempre devolve o default_state. */}
+      {hideRuleAndPrior || !state.tech ? null : (
         <>
           <fieldset className={styles.group} disabled={disabled}>
             <legend className={styles.legend}>{controls.rule}</legend>
@@ -98,7 +99,8 @@ function Controls({
 function hidesRuleAndPrior(pathname: string, forced: boolean | undefined): boolean {
   if (forced !== undefined) return forced;
   const here = trimSlash(pathname);
-  return [compareHref, chartsHref, skyHref].some((href) => here === trimSlash(href));
+  // O glossario nao depende de regra nem prior: os seletores nao teriam efeito ali.
+  return [compareHref, chartsHref, skyHref, glossaryHref].some((href) => here === trimSlash(href));
 }
 
 function ControlsWithState({ meta, hideRuleAndPrior }: Props) {
@@ -117,8 +119,8 @@ function ControlsWithState({ meta, hideRuleAndPrior }: Props) {
 
 export function StateControls({ meta, hideRuleAndPrior }: Props) {
   const pathname = usePathname();
-  // Comparacao nao tem modo tecnico nem usa regra e prior (como no Streamlit):
-  // sem controles com efeito, a barra inteira sai.
+  // Comparacao nao usa regra e prior (como no Streamlit), e a barra inteira sai:
+  // o modo tecnico dela e alcancado pelo link "Ver detalhes tecnicos" do modo simples.
   if (trimSlash(pathname) === trimSlash(compareHref)) return null;
   return (
     <section className={styles.bar} aria-label={acessibilidade.settingsRegion}>

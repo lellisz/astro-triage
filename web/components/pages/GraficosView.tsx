@@ -48,20 +48,16 @@ function columnsWith(base: readonly DataColumn[], tech: boolean, extra: readonly
   return tech ? [...base, ...extra] : base;
 }
 
-function Calibration({ g, tech, figures }: { g: Graficos; tech: boolean; figures: Figures }) {
+// So existe no modo tecnico (o modo simples nao mostra a calibracao).
+function Calibration({ g, figures }: { g: Graficos; figures: Figures }) {
   const { calibration: cal } = g;
-  const columns = columnsWith(
-    [
-      { key: "cls", label: L.colClass },
-      { key: "p", label: L.colMeanProb, numeric: true },
-      { key: "freq", label: L.colFreq, numeric: true },
-    ],
-    tech,
-    [
-      { key: "n", label: L.colObjects, numeric: true },
-      { key: "ci", label: L.colFreqCi },
-    ],
-  );
+  const columns: DataColumn[] = [
+    { key: "cls", label: L.colClass },
+    { key: "p", label: L.colMeanProb, numeric: true },
+    { key: "freq", label: L.colFreq, numeric: true },
+    { key: "n", label: L.colObjects, numeric: true },
+    { key: "ci", label: L.colFreqCi },
+  ];
   const rows: Row[] = cal.series.flatMap((s) =>
     s.bins.map((b) => ({
       cls: s.label,
@@ -73,11 +69,9 @@ function Calibration({ g, tech, figures }: { g: Graficos; tech: boolean; figures
   );
   return (
     <Panel id="graf-calibration" title={L.calibrationTitle}>
-      {tech ? (
-        <Scroller label={L.chartRegion} narrow>
-          <MplFigure id="calibracao" figures={figures} />
-        </Scroller>
-      ) : null}
+      <Scroller label={L.chartRegion} narrow>
+        <MplFigure id="calibracao" figures={figures} />
+      </Scroller>
       <p className={styles.callout}>{cal.networks_note}</p>
       <Numbers>
         <DataTable caption={L.calibrationChart} columns={columns} rows={rows} />
@@ -243,11 +237,14 @@ function Body({ props, state }: { props: Props; state: UiState }) {
   });
   return (
     <div className={styles.stack}>
-      <div className={graficosStyles.context}>
-        <p className={styles.answer}>{g.scope_text}</p>
-        <p className={styles.muted}>{g.floor_text}</p>
-      </div>
-      <Calibration g={g} tech={state.tech} figures={figures} />
+      {/* Modo simples: sem os textos e paineis de jargao (calibracao, redshift); ficam as figuras simples. */}
+      {state.tech ? (
+        <div className={graficosStyles.context}>
+          <p className={styles.answer}>{g.scope_text}</p>
+          <p className={styles.muted}>{g.floor_text}</p>
+        </div>
+      ) : null}
+      {state.tech ? <Calibration g={g} figures={figures} /> : null}
       <RatePanel
         id="graf-by-g"
         title={L.errorByGTitle}
@@ -259,17 +256,19 @@ function Body({ props, state }: { props: Props; state: UiState }) {
         figureIds={[state.tech ? "taxa-por-g" : "taxa-por-g-simples"]}
         figures={figures}
       />
-      <RatePanel
-        id="graf-by-z"
-        title={L.errorByZTitle}
-        chart={L.errorByZChart}
-        xLabel={L.errorByZX}
-        note={g.error_by_z.star_note}
-        series={g.error_by_z.series.map(toSeries)}
-        tech={state.tech}
-        figureIds={state.tech ? g.error_by_z.series.map((s) => zFigureId(s.cls)) : []}
-        figures={figures}
-      />
+      {state.tech ? (
+        <RatePanel
+          id="graf-by-z"
+          title={L.errorByZTitle}
+          chart={L.errorByZChart}
+          xLabel={L.errorByZX}
+          note={g.error_by_z.star_note}
+          series={g.error_by_z.series.map(toSeries)}
+          tech
+          figureIds={g.error_by_z.series.map((s) => zFigureId(s.cls))}
+          figures={figures}
+        />
+      ) : null}
       <Confusion g={g} tech={state.tech} figures={figures} />
       {g.cmd === null ? null : <CmdSection cmd={g.cmd} tech={state.tech} figures={figures} />}
     </div>

@@ -4,9 +4,11 @@ export type UiState = { rule: Rule; prior: Prior; tech: boolean };
 
 export function readState(params: URLSearchParams, meta: Meta): UiState {
   const tech = params.get("tecnico") === "1";
-  const found = meta.states.find(
-    (s) => s.rule === params.get("regra") && s.prior === params.get("prior"),
-  );
+  // Decisao do owner (2026-11-27): o modo simples nao tem seletor de regra e prior, entao sempre
+  // mostra a condicao padrao; a escolha feita no modo tecnico nao vaza para o simples.
+  const found = tech
+    ? meta.states.find((s) => s.rule === params.get("regra") && s.prior === params.get("prior"))
+    : undefined;
   const { rule, prior } = found ?? meta.default_state;
   return { rule, prior, tech };
 }

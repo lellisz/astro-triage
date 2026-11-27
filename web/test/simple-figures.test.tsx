@@ -96,17 +96,15 @@ describe("criterio 5: roteamento modo simples x tecnico=1", () => {
     });
   }
 
-  it("visao geral simples mostra o quasar-resumo do estado da URL (2 estados diferentes)", () => {
-    const p3 = at("regra=prior_matched&prior=P3", pages.overview);
-    const p1 = at("regra=prior_matched&prior=P1", pages.overview);
-    expect(p3).toEqual(["quasar-resumo-prior-matched-p3"]);
-    expect(p1).toEqual(["quasar-resumo-prior-matched-p1"]);
-    // e o SVG embutido e o do estado, nao outro
+  it("visao geral simples ignora o estado da URL e mostra o quasar-resumo do padrao (decisao do owner)", () => {
+    // Sem seletor de regra/prior no modo simples, o estado escolhido no tecnico nao vaza.
+    expect(at("regra=prior_matched&prior=P3", pages.overview)).toEqual(SIMPLE.overview);
+    expect(at("regra=prior_matched&prior=P1&tecnico=0", pages.overview)).toEqual(SIMPLE.overview);
     nav.search = "regra=prior_matched&prior=P3";
     const html = renderToStaticMarkup(pages.overview());
     nav.search = "";
-    expect(html).toContain(FIGS["quasar-resumo-prior-matched-p3"].svg.slice(0, 200));
-    expect(html).not.toContain(FIGS["quasar-resumo-as-shipped-p2"].svg.slice(0, 200));
+    expect(html).toContain(FIGS["quasar-resumo-as-shipped-p2"].svg.slice(0, 200));
+    expect(html).not.toContain(FIGS["quasar-resumo-prior-matched-p3"].svg.slice(0, 200));
   });
 
   it("estado invalido na URL cai no padrao; tecnico=1 com estado nao mostra resumo", () => {

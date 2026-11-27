@@ -52,7 +52,8 @@ const selectedParas = (html: string): string[] =>
 const svgTexts = (id: string): string[] =>
   [...FIGS[id].svg.matchAll(/<text\b[^>]*>([^<]*)<\/text>/g)].map((m) => unescape(m[1]));
 
-const q = (s: { rule: string; prior: string }) => `regra=${s.rule}&prior=${s.prior}`;
+// O estado da URL so vale no modo tecnico (o simples sempre usa o padrao).
+const q = (s: { rule: string; prior: string }) => `regra=${s.rule}&prior=${s.prior}&tecnico=1`;
 
 describe("REV-02 linha escolhida abaixo das figuras de quasar", () => {
   it("a fixture tem estados com rotulos distintos (pre-condicao do teste)", () => {

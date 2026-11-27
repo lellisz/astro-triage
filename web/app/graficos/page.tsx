@@ -8,10 +8,10 @@ import { loadFigures } from "@/lib/figures";
 export default function GraficosPage() {
   const meta = loadPage("meta");
   const graficos = loadPage("graficos");
-  const { eyebrow, title, lead } = pages.charts;
+  const { eyebrow, title, lead, leadSimple } = pages.charts;
   return (
     <>
-      <PageHeader eyebrow={eyebrow} title={title} lead={lead} showStateChip={false} meta={meta} />
+      <PageHeader eyebrow={eyebrow} title={title} lead={lead} leadSimple={leadSimple} showStateChip={false} meta={meta} />
       <GraficosView meta={meta} graficos={graficos} figures={loadFigures(graficosFigureIds(graficos))} />
     </>
   );

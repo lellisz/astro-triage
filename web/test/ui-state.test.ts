@@ -20,12 +20,17 @@ describe("readState", () => {
   it("params ausentes caem no default", () => {
     expect(readState(P(""), meta)).toEqual(DEF);
   });
-  it("par valido e respeitado", () => {
-    expect(readState(P("regra=prior_matched&prior=P3"), meta)).toEqual({
+  it("par valido e respeitado no modo tecnico", () => {
+    expect(readState(P("regra=prior_matched&prior=P3&tecnico=1"), meta)).toEqual({
       rule: "prior_matched",
       prior: "P3",
-      tech: false,
+      tech: true,
     });
+  });
+  it("modo simples ignora regra e prior da URL e usa o padrao (decisao do owner)", () => {
+    const s = readState(P("regra=prior_matched&prior=P3&tecnico=0"), meta);
+    expect(s).toEqual({ rule: meta.default_state.rule, prior: meta.default_state.prior, tech: false });
+    expect(readState(P("regra=prior_matched&prior=P3"), meta).prior).toBe(meta.default_state.prior);
   });
   it("tecnico=1 liga tech; outros valores nao", () => {
     expect(readState(P("tecnico=1"), meta).tech).toBe(true);

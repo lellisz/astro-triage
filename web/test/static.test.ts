@@ -174,6 +174,7 @@ const PAGES: [string, string, string][] = [
   ["comparacao-dl/index.html", "/comparacao-dl/", "comparacao"],
   ["graficos/index.html", "/graficos/", "graficos"],
   ["metodo/index.html", "/metodo/", "metodo"],
+  ["glossario/index.html", "/glossario/", "glossario"],
 ];
 
 describe("saida estatica (web/out)", () => {
@@ -185,7 +186,7 @@ describe("saida estatica (web/out)", () => {
   const escape = (s: string) => s.replace(/&/g, "&amp;");
 
   for (const [file, , name] of PAGES) {
-    it(`${file}: lang pt-BR, selo, 6 links, sem CDN de fontes`, () => {
+    it(`${file}: lang pt-BR, selo, links do menu, sem CDN de fontes`, () => {
       const p = path.join(OUT, file);
       expect(fs.existsSync(p), p).toBe(true);
       const html = fs.readFileSync(p, "utf8");

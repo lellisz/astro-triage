@@ -31,7 +31,9 @@ def _rel():
 
 
 def test_glossary_has_no_digits():
-    assert not re.search(r"\d", "".join(t for pair in HM.GLOSSARY for t in pair))
+    # Só os identificadores dos priors e do catálogo podem ter algarismo; nenhum número de dado.
+    text = " ".join(t for pair in HM.GLOSSARY for t in pair if t)
+    assert not re.search(r"\d", re.sub(r"\b(?:P[123]|DR3)\b", "", text))
 
 
 def test_limitations_translated_and_original_fallback():

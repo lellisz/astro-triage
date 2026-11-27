@@ -1,16 +1,18 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
 import { MplFigure } from "@/components/charts/MplFigure";
 import { DataTable, type DataColumn } from "@/components/kit/DataTable";
 import { Panel } from "@/components/kit/Panel";
 import { Tabs, type TabItem } from "@/components/kit/Tabs";
-import { compareLabels as L } from "@/content/labels";
+import { compareHref, compareLabels as L, overviewLabels } from "@/content/labels";
 import type { Figures } from "@/lib/figures";
 import type { Compare, Meta } from "@/lib/schema";
-import { readState } from "@/lib/ui-state";
+import { readState, withState, type UiState } from "@/lib/ui-state";
 import cmp from "./compare.module.css";
+import o from "./overview.module.css";
 import styles from "./page.module.css";
 
 type Ok = Extract<Compare, { status: "ok" }>;
@@ -40,7 +42,7 @@ function Scroller({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function Models({ c }: { c: Ok }) {
+function Models({ c, tech }: { c: Ok; tech: boolean }) {
   const ordered = [...c.purity].sort((a, b) => Number(b.reference) - Number(a.reference));
   return (
     <Panel id="cmp-models" title={L.modelsTitle} subtitle={L.modelsSub}>
@@ -51,7 +53,7 @@ function Models({ c }: { c: Ok }) {
             <li key={p.system} className={p.reference ? cmp.cardRef : cmp.card} data-system={p.system}>
               <h3 className={cmp.cardTitle}>{p.label}</h3>
               {p.reference ? <p className={cmp.tag}>{L.referenceTag}</p> : null}
-              <p>{p.detail_text}</p>
+              {tech ? <p>{p.detail_text}</p> : null}
               {p.reference ? (
                 <p className={styles.muted}>{L.referenceNote}</p>
               ) : (
@@ -106,7 +108,7 @@ function Verdicts({ c }: { c: Ok }) {
   );
 }
 
-function Purity({ c, figures, tech }: { c: Ok; figures: Figures; tech: boolean }) {
+function Purity({ c, figures }: { c: Ok; figures: Figures }) {
   return (
     <>
       <h3 className={cmp.subTitle}>{L.absolutePurity}</h3>
@@ -115,7 +117,7 @@ function Purity({ c, figures, tech }: { c: Ok; figures: Figures; tech: boolean }
         {L.purityRange} <strong>({L.notCi})</strong>
       </p>
       <Scroller label={L.purityRegion}>
-        <MplFigure id={tech ? "pureza-sistemas" : "pureza-sistemas-simples"} figures={figures} />
+        <MplFigure id="pureza-sistemas" figures={figures} />
       </Scroller>
       <ul className={cmp.details}>
         {c.purity.map((p) => (
@@ -128,16 +130,14 @@ function Purity({ c, figures, tech }: { c: Ok; figures: Figures; tech: boolean }
   );
 }
 
-function Diffs({ c, figures, tech }: { c: Ok; figures: Figures; tech: boolean }) {
+function Diffs({ c, figures }: { c: Ok; figures: Figures }) {
   return (
     <>
       <h3 className={cmp.subTitle}>{L.diffsTitle}</h3>
       <p className={styles.muted}>{L.diffsHint}</p>
-      {tech ? (
-        <Scroller label={L.diffsRegion}>
-          <MplFigure id="decisao-diferencas" figures={figures} />
-        </Scroller>
-      ) : null}
+      <Scroller label={L.diffsRegion}>
+        <MplFigure id="decisao-diferencas" figures={figures} />
+      </Scroller>
       {c.descriptive.length > 0 ? (
         <DataTable
           caption={L.descriptiveChart}
@@ -194,11 +194,11 @@ function Notes({ c }: { c: Ok }) {
   );
 }
 
-function Available({ c, figures, tech }: { c: Ok; figures: Figures; tech: boolean }) {
+function Available({ c, figures, tech, techHref }: { c: Ok; figures: Figures; tech: boolean; techHref: string }) {
   const tabs: TabItem[] = [
     { key: "vereditos", label: L.tabVerdicts, content: <Verdicts c={c} /> },
-    { key: "pureza", label: L.tabPurity, content: <Purity c={c} figures={figures} tech={tech} /> },
-    { key: "diferencas", label: L.tabDiffs, content: <Diffs c={c} figures={figures} tech={tech} /> },
+    { key: "pureza", label: L.tabPurity, content: <Purity c={c} figures={figures} /> },
+    { key: "diferencas", label: L.tabDiffs, content: <Diffs c={c} figures={figures} /> },
     { key: "metodo", label: L.tabMethod, content: <Notes c={c} /> },
   ];
   return (
@@ -206,10 +206,24 @@ function Available({ c, figures, tech }: { c: Ok; figures: Figures; tech: boolea
       <Panel id="cmp-result" title={L.result}>
         <p className={styles.answer}>{c.answer_text}</p>
         <p>{protocolText(c)}</p>
-        <p className={styles.muted}>{c.fixed_point.text}</p>
+        {tech ? <p className={styles.muted}>{c.fixed_point.text}</p> : null}
       </Panel>
-      <Models c={c} />
-      <Tabs label={L.tabsLabel} tabs={tabs} />
+      <Models c={c} tech={tech} />
+      {/* Modo simples: sem as abas (IC, sementes, regra de decisao); fica a figura simples,
+          a ressalva de poder e o link para o modo tecnico. */}
+      {tech ? (
+        <Tabs label={L.tabsLabel} tabs={tabs} />
+      ) : (
+        <Panel id="cmp-purity" title={L.absolutePurity}>
+          <Scroller label={L.purityRegion}>
+            <MplFigure id="pureza-sistemas-simples" figures={figures} />
+          </Scroller>
+          {c.power_note ? <p className={styles.callout}>{c.power_note}</p> : null}
+          <Link className={o.techLink} href={techHref} aria-label={overviewLabels.techLinkAria}>
+            {overviewLabels.techLink}
+          </Link>
+        </Panel>
+      )}
     </div>
   );
 }
@@ -229,18 +243,23 @@ function Missing({ c }: { c: Unavailable }) {
 
 type Props = { meta: Meta; compare: Compare; figures: Figures };
 
-function Body({ props, tech }: { props: Props; tech: boolean }) {
-  const { compare, figures } = props;
-  return compare.status === "ok" ? <Available c={compare} figures={figures} tech={tech} /> : <Missing c={compare} />;
+function Body({ props, state }: { props: Props; state: UiState }) {
+  const { compare, figures, meta } = props;
+  const techHref = withState(compareHref, { ...state, tech: true }, meta.release);
+  return compare.status === "ok" ? (
+    <Available c={compare} figures={figures} tech={state.tech} techHref={techHref} />
+  ) : (
+    <Missing c={compare} />
+  );
 }
 
 function WithUrlState(props: Props) {
-  return <Body props={props} tech={readState(useSearchParams(), props.meta).tech} />;
+  return <Body props={props} state={readState(useSearchParams(), props.meta)} />;
 }
 
 export function CompareView(props: Props) {
   return (
-    <Suspense fallback={<Body props={props} tech={props.meta.default_state.tech} />}>
+    <Suspense fallback={<Body props={props} state={props.meta.default_state} />}>
       <WithUrlState {...props} />
     </Suspense>
   );

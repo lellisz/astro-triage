@@ -214,8 +214,9 @@ describe("A1 Galaxias: Est com point null vira n/a, sem zero, barra ou ponto", (
 });
 
 describe("A2 Galaxias: P3 parcial, marcador distinto e series separadas", () => {
+  // Os graficos por prior so existem no modo tecnico.
+  const html = renderGal(galaxies, "tecnico=1");
   nav.search = "";
-  const html = renderGal(galaxies);
   const css = readFileSync(CHARTS_CSS, "utf-8");
 
   it("precondicao: o estado padrao nao seleciona P3", () => {
@@ -300,11 +301,11 @@ describe("A3 Galaxias: tabelas tecnicas so com tecnico=1; power_note", () => {
     return html.slice(at, next < 0 ? undefined : next);
   };
 
-  it("sem tecnico: so a tabela das redes; sem painel tecnico nem graficos G/z", () => {
+  it("sem tecnico: nenhuma tabela (nem a das redes); sem painel tecnico nem graficos G/z", () => {
     const html = renderGal(galaxies, "");
     expect(html).not.toContain('id="gal-tech"');
-    expect(count(html, "<table")).toBe(1);
-    expect(panelOf(html, "gal-networks")).toContain("<table");
+    expect(count(html, "<table")).toBe(0);
+    expect(panelOf(html, "gal-networks")).not.toContain("<table");
     expect(html).not.toContain('id="gal-g-chart"');
     expect(html).not.toContain('id="gal-z-chart"');
   });
@@ -312,7 +313,7 @@ describe("A3 Galaxias: tabelas tecnicas so com tecnico=1; power_note", () => {
   it("tecnico=0 explicito tambem esconde o painel tecnico", () => {
     const html = renderGal(galaxies, "tecnico=0");
     expect(html).not.toContain('id="gal-tech"');
-    expect(count(html, "<table")).toBe(1);
+    expect(count(html, "<table")).toBe(0);
   });
 
   it("tecnico=1 mostra o painel e duas tabelas tecnicas com uma linha por faixa do JSON", () => {
@@ -324,7 +325,7 @@ describe("A3 Galaxias: tabelas tecnicas so com tecnico=1; power_note", () => {
   });
 
   it("Tarefa 36: redes como tabela (uma linha por rede, com D, IC, delta e veredito), sem #gal-net, com link", () => {
-    const html = renderGal(galaxies, "");
+    const html = renderGal(galaxies, "tecnico=1");
     const panel = panelOf(html, "gal-networks");
     expect(html).not.toContain('id="gal-net"');
     expect(nets).toHaveLength(2);
@@ -338,7 +339,7 @@ describe("A3 Galaxias: tabelas tecnicas so com tecnico=1; power_note", () => {
 
   // REV-01: a coluna "Margem δ" (4a celula: rede, D, IC, delta, veredito) usa a unidade de D.
   const netCells = (g: Galaxies) => {
-    const panel = panelOf(renderGal(g, ""), "gal-networks");
+    const panel = panelOf(renderGal(g, "tecnico=1"), "gal-networks");
     const body = panel.match(/<tbody>([\s\S]*?)<\/tbody>/)![1];
     return [...body.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map((r) =>
       [...r[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/g)].map((c) => textOf(c[1]).trim()),
@@ -366,7 +367,7 @@ describe("A3 Galaxias: tabelas tecnicas so com tecnico=1; power_note", () => {
   });
 
   it("Tarefa 35: ponto fixo dentro de #gal-networks e fora do bloco de contexto", () => {
-    const html = renderGal(galaxies, "");
+    const html = renderGal(galaxies, "tecnico=1");
     const fixed = galaxies.fixed_point_text;
     expect(fixed).toContain("ponto fixo da comparação com as redes");
     expect(count(html, fixed)).toBe(1);
@@ -500,8 +501,10 @@ describe("A5 Comparacao: faixa min-max rotulada 'nao e IC'", () => {
 });
 
 describe("A6 Comparacao: abas", () => {
-  nav.search = "";
+  // As abas so existem no modo tecnico.
+  nav.search = "tecnico=1";
   const html = renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={ok} />);
+  nav.search = "";
 
   it("markup: 4 abas, cada aria-controls aponta para um tabpanel existente e vice-versa", () => {
     const tabs = [...html.matchAll(/<button[^>]*role="tab"[^>]*>/g)].map((m) => m[0]);
@@ -649,7 +652,9 @@ describe("A7 Comparacao: forest plot de diferencas", () => {
       pair: k % 2 ? "FTT" : "MLP",
       diff: { ...v.descriptive[0].diff, ci_text: `IC-${k}` },
     }));
+    nav.search = "tecnico=1";
     const h14 = renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={many} />);
+    nav.search = "";
     expect(h14).not.toContain('id="cmp-descriptive"');
     const t = [...h14.matchAll(/<table[^>]*>[\s\S]*?<\/table>/g)].map((m) => m[0]).find((x) => x.includes("IC-0"))!;
     expect(count(t.match(/<tbody>([\s\S]*?)<\/tbody>/)![1], "<tr>")).toBe(14);
@@ -797,6 +802,21 @@ describe("Metodo: frase do modo simples so fora do modo tecnico", () => {
   });
 });
 
+describe("REV-01 Comparacao no modo simples: power_note e link para o modo tecnico", () => {
+  const withNote = { ...clone(ok), power_note: "Ressalva de poder do fixture." } as Compare;
+  nav.search = "";
+  const html = renderToStaticMarkup(<CompareView meta={meta} figures={FIGS} compare={withNote} />);
+
+  it("mostra o power_note do JSON", () => {
+    expect(textOf(html)).toContain("Ressalva de poder do fixture.");
+  });
+
+  it("tem um link para a mesma pagina com tecnico=1", () => {
+    const hrefs = [...html.matchAll(/<a[^>]*href="([^"]+)"/g)].map((m) => decode(m[1]));
+    expect(hrefs.some((h) => h.startsWith(compareHref.replace(/\/$/, "")) && h.includes("tecnico=1"))).toBe(true);
+  });
+});
+
 describe("Comparacao: sem barra de ajustes (a pagina nao tem modo tecnico)", () => {
   const bar = (path: string): string => {
     nav.path = path;
@@ -818,11 +838,12 @@ describe("Comparacao: sem barra de ajustes (a pagina nao tem modo tecnico)", () 
 });
 
 describe("Graficos: barra sem regra nem prior, com modo tecnico", () => {
-  const bar = (path: string): string => {
+  const bar = (path: string, search = ""): string => {
     nav.path = path;
-    nav.search = "";
+    nav.search = search;
     const out = renderToStaticMarkup(<StateControls meta={meta} />);
     nav.path = "/";
+    nav.search = "";
     return out;
   };
 
@@ -837,9 +858,10 @@ describe("Graficos: barra sem regra nem prior, com modo tecnico", () => {
     }
   });
 
-  it("nas outras rotas os controles de regra e prior continuam", () => {
+  it("nas outras rotas os controles de regra e prior continuam (no modo tecnico)", () => {
     for (const p of ["/", "/galaxias"]) {
-      const html = bar(p);
+      expect(bar(p)).not.toContain('type="radio"');
+      const html = bar(p, "tecnico=1");
       expect(html).toContain('type="radio"');
       expect(html).toContain(controls.rule);
       expect(html).toContain(controls.prior);
@@ -887,8 +909,9 @@ describe("Tarefa 32: /ceu/ sem regra nem prior", () => {
     }
   });
 
-  it("controle: em /galaxias/ os radios de regra continuam", () => {
+  it("controle: em /galaxias/ os radios de regra continuam (no modo tecnico)", () => {
     nav.path = "/galaxias/";
+    nav.search = "tecnico=1";
     expect(renderToStaticMarkup(<StateControls meta={meta} />)).toMatch(/name="regra"/);
   });
 

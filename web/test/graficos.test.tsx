@@ -54,10 +54,10 @@ describe("/graficos: modo simples", () => {
     expect(ids).toEqual(["taxa-por-g-simples", "confusao-simples"]);
     for (const id of ids) expect(graficosFigureIds(graficos)).toContain(id);
     expect(count(html, "<figure")).toBe(2);
-    expect(count(html, "<details")).toBe(5);
-    expect(count(html, "<table")).toBe(5);
+    expect(count(html, "<details")).toBe(3);
+    expect(count(html, "<table")).toBe(3);
     expect(count(html, "<th scope=\"col\"")).toBeGreaterThan(8);
-    expect(count(html, "Ver os números")).toBe(5);
+    expect(count(html, "Ver os números")).toBe(3);
     expect(count(html, 'role="img"')).toBeGreaterThanOrEqual(2);
   });
 
@@ -89,8 +89,9 @@ describe("/graficos: modo simples", () => {
     expect(count(html, "data-cal-raw")).toBe(0);
   });
 
-  it("textos de escopo, piso e notas vem do JSON", () => {
-    const text = textOf(html);
+  it("textos de escopo, piso e notas vem do JSON (com jargao: so no modo tecnico)", () => {
+    expect(textOf(html)).toContain(graficos.error_by_g.missing_note);
+    const text = textOf(render("tecnico=1"));
     for (const t of [
       graficos.scope_text,
       graficos.floor_text,
@@ -120,7 +121,7 @@ describe("/graficos: modo simples", () => {
     expect(count(html, "<figcaption")).toBe(0);
     expect(count(html, "<figure")).toBe(2);
     expect(count(html, "aria-labelledby")).toBeGreaterThanOrEqual(7);
-    expect(html.match(/<table[^>]*aria-labelledby="/g)).toHaveLength(5);
+    expect(html.match(/<table[^>]*aria-labelledby="/g)).toHaveLength(3);
   });
 });
 

@@ -64,7 +64,6 @@ describe("Visao geral: bloco da resposta", () => {
       tie.title,
       tie.lead,
       tie.caveat!,
-      tie.contrast.text,
       tie.contrast.accuracy.text,
       tie.contrast.qso_purity.text,
       tie.summary_en,
@@ -75,6 +74,8 @@ describe("Visao geral: bloco da resposta", () => {
       expect(html).toContain(`<strong>${escapeHtml(p.net)}</strong>: ${escapeHtml(p.text)}`);
     }
     expect(html).toContain('lang="en"');
+    expect(pos(tie.contrast.text), "contraste com jargao fora do modo simples").toBe(-1);
+    expect(render(tie, "tecnico=1")).toContain(escapeHtml(tie.contrast.text));
   });
 
   it("o bloco vem antes dos KPIs", () => {
