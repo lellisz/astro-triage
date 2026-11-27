@@ -1,9 +1,9 @@
+import Link from "next/link";
+import { ConfidenceTable } from "@/components/charts/ConfidenceTable";
 import { HBar } from "@/components/charts/HBar";
-import { HistogramPair } from "@/components/charts/HistogramPair";
-import { ReliabilityPlot } from "@/components/charts/ReliabilityPlot";
 import { DotCI, type DotCIRow } from "@/components/charts/DotCI";
 import { DataTable, type DataColumn } from "@/components/kit/DataTable";
-import { overviewLabels as L } from "@/content/labels";
+import { chartsHref, overviewLabels as L } from "@/content/labels";
 import type { Cls, Num, Overview } from "@/lib/schema";
 import overviewStyles from "./overview.module.css";
 import styles from "./page.module.css";
@@ -15,6 +15,12 @@ const errorColumns: readonly DataColumn[] = [
   { key: "pred", label: L.colPred },
   { key: "n", label: L.colN, numeric: true },
   { key: "share", label: L.colShare, numeric: true },
+];
+
+const f1Columns: readonly DataColumn[] = [
+  { key: "model", label: L.colModel },
+  { key: "score", label: L.colScore, numeric: true },
+  { key: "ci", label: L.colCi },
 ];
 
 function Facts({ items }: { items: [string, Num][] }) {
@@ -31,7 +37,7 @@ function Facts({ items }: { items: [string, Num][] }) {
 }
 
 export function OverviewTechnical({ technical }: { technical: Overview["technical"] }) {
-  const { data_box: box, validation, error_directions: directions, triage, dsc, models, calibration, confidence_hist: hist } = technical;
+  const { data_box: box, validation, error_directions: directions, triage, dsc, models, confidence_hist: hist } = technical;
   const boxItems: [string, Num][] = [
     [L.nPairs, box.n_pairs],
     [L.nTest, box.n_test],
@@ -48,7 +54,7 @@ export function OverviewTechnical({ technical }: { technical: Overview["technica
     n: d.n.text,
     share: d.share.text,
   }));
-  const f1Rows: DotCIRow[] = dsc.macro_f1.map((m) => ({ key: m.model, label: m.label, est: m.est }));
+  const f1Rows = dsc.macro_f1.map((m) => ({ model: m.label, score: m.est.text, ci: m.est.ci_text }));
   const names = new Map<string, string>([...models, ...dsc.macro_f1].map((m) => [m.model, m.label]));
   const diffRows: DotCIRow[] = dsc.paired_diffs.map((d) => ({
     key: `${d.a}-${d.b}`,
@@ -77,6 +83,9 @@ export function OverviewTechnical({ technical }: { technical: Overview["technica
                 [L.validationCompleteness, validation.completeness],
               ]}
             />
+            <p className={overviewStyles.note}>
+              {L.validationPrior}: {validation.prior}
+            </p>
           </div>
         ) : null}
 
@@ -104,15 +113,16 @@ export function OverviewTechnical({ technical }: { technical: Overview["technica
         <div className={overviewStyles.techBlock}>
           <h3>{L.dscTitle}</h3>
           <p className={overviewStyles.note}>
-            {L.dscPopulation}: {dsc.population}. {L.dscRows}: {dsc.n_rows.text}.
+            {L.dscPopulation}: {dsc.population_text} {L.dscRows}: {dsc.n_rows.text}.
           </p>
+          <p className={overviewStyles.note}>{dsc.prior_text}</p>
+          <DataTable caption={L.dscScoreTable} columns={f1Columns} rows={f1Rows} />
           <div
             className={`${overviewStyles.charts} ${overviewStyles.scroll}`}
             role="region"
             aria-label={L.dscRegion}
             tabIndex={0}
           >
-            <DotCI id="ov-dsc-f1" title={L.dscScoreChart} rows={f1Rows} />
             <DotCI id="ov-dsc-diff" title={L.dscDiffChart} rows={diffRows} zeroLine />
           </div>
         </div>
@@ -144,21 +154,14 @@ export function OverviewTechnical({ technical }: { technical: Overview["technica
 
         <div className={overviewStyles.techBlock}>
           <h3>{L.calibrationTitle}</h3>
-          <div
-            className={`${overviewStyles.charts} ${overviewStyles.scroll}`}
-            role="region"
-            aria-label={L.calibrationRegion}
-            tabIndex={0}
-          >
-            <ReliabilityPlot
-              id="ov-calibration"
-              title={L.calibrationChart}
-              xLabel={L.calibrationX}
-              yLabel={L.calibrationY}
-              diagonalLabel={L.calibrationDiagonal}
-              series={CLASS_ORDER.map((c) => ({ cls: c, label: L.classNames[c], points: calibration[c] }))}
-            />
-          </div>
+          <p>
+            <Link href={chartsHref}>{L.calibrationLink}</Link>
+          </p>
+          {models.map((m) => (
+            <p key={m.model} className={overviewStyles.note}>
+              {L.temperature} ({m.label}): {m.temperature.text}
+            </p>
+          ))}
         </div>
 
         <div className={overviewStyles.techBlock}>
@@ -169,14 +172,13 @@ export function OverviewTechnical({ technical }: { technical: Overview["technica
             aria-label={L.confidenceRegion}
             tabIndex={0}
           >
-            <HistogramPair
+            <ConfidenceTable
               id="ov-confidence"
-              title={L.confidenceChart}
+              caption={L.confidenceChart}
               bins={hist}
+              bandLabel={L.confidenceBand}
               rightLabel={L.confidenceRight}
               wrongLabel={L.confidenceWrong}
-              xLabel={L.confidenceX}
-              yLabel={L.confidenceY}
             />
           </div>
         </div>

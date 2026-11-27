@@ -148,23 +148,12 @@ function Purity({ c }: { c: Ok }) {
 
 function Diffs({ c }: { c: Ok }) {
   const netIndex = indexer();
-  const pairIndex = indexer();
   const decision: DotCIRow[] = c.grid.map((g) => {
     const i = netIndex(g.net);
     return {
       key: `g-${g.net}-${g.cls}`,
       label: `${g.net} · ${g.cls_label}`,
       est: g.diff,
-      marker: markerAt(i),
-      dashed: i % 2 === 1,
-    };
-  });
-  const descriptive: DotCIRow[] = c.descriptive.map((d, k) => {
-    const i = pairIndex(d.pair);
-    return {
-      key: `d-${k}`,
-      label: `${d.pair} · ${d.role} · ${d.cls}`,
-      est: d.diff,
       marker: markerAt(i),
       dashed: i % 2 === 1,
     };
@@ -176,23 +165,18 @@ function Diffs({ c }: { c: Ok }) {
       <Scroller label={L.diffsRegion}>
         <DotCI id="cmp-decision" title={L.decisionChart} rows={decision} zeroLine />
       </Scroller>
-      {descriptive.length > 0 ? (
-        <>
-          <Scroller label={L.diffsRegion}>
-            <DotCI id="cmp-descriptive" title={L.descriptiveChart} rows={descriptive} zeroLine />
-          </Scroller>
-          <DataTable
-            caption={L.descriptiveChart}
-            columns={descriptiveColumns}
-            rows={c.descriptive.map((d) => ({
-              pair: d.pair,
-              role: d.role,
-              cls: d.cls,
-              diff: d.diff.text,
-              ci: d.diff.ci_text,
-            }))}
-          />
-        </>
+      {c.descriptive.length > 0 ? (
+        <DataTable
+          caption={L.descriptiveChart}
+          columns={descriptiveColumns}
+          rows={c.descriptive.map((d) => ({
+            pair: d.pair,
+            role: d.role,
+            cls: d.cls,
+            diff: d.diff.text,
+            ci: d.diff.ci_text,
+          }))}
+        />
       ) : (
         <p className={styles.muted}>{L.noDescriptive}</p>
       )}
@@ -248,6 +232,7 @@ function Available({ c }: { c: Ok }) {
     <div className={styles.stack}>
       <Panel id="cmp-result" title={L.result}>
         <p className={styles.answer}>{c.answer_text}</p>
+        <p>{protocolText(c)}</p>
         <p className={styles.muted}>{c.fixed_point.text}</p>
       </Panel>
       <Models c={c} />

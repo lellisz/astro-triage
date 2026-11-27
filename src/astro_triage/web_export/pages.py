@@ -7,6 +7,7 @@ a ``views_*`` module, and it computes no metric.
 
 from __future__ import annotations
 
+import re
 from dataclasses import replace
 from typing import Final
 
@@ -35,7 +36,12 @@ from astro_triage.dashboard import html_dl as HD
 from astro_triage.dashboard import html_method as HM
 from astro_triage.dashboard import verdict_rule as VR
 from astro_triage.dashboard.charts_base import MODEL_PT
-from astro_triage.dashboard.data_overview_page import PRIOR, PageData, load_page
+from astro_triage.dashboard.data_overview_page import (
+    PRIOR,
+    PageData,
+    load_page,
+    total_pairs,
+)
 from astro_triage.dashboard.data_release import CLASSES, wilson
 from astro_triage.dashboard.html_galaxies import SMALL_RATE
 from astro_triage.dashboard.html_galaxy_prior import VERDICT_SCOPE, verdict_text
@@ -99,6 +105,21 @@ FMT_SAMPLES: Final = (
     ("pt_g", ((0,), (0.001,), (0.1,), (1,), (10,), (100,), (1000,), (-2.5,))),
     ("pt_ci_label", ((),)),
 )
+FRONT_ROLE_PT: Final = {
+    f"{data_dl.FRONT_PREFIX}2": "variante sem indicadores",
+    f"{data_dl.FRONT_PREFIX}3": "efeito dos indicadores na rede",
+    f"{data_dl.FRONT_PREFIX}4": "efeito dos indicadores no LightGBM",
+}
+# The full_v0 evaluation artifact still carries the sentence of the 100k pilot; the export
+# replaces it with the release sentence and says so (owner decision D-3, 2026-11-26).
+STALE_SAMPLE_RELEASE: Final = "full_v0"
+STALE_SAMPLE_PREFIX: Final = "Sample of "
+RELEASE_LABELLED: Final = (
+    "Only Gaia sources with an SDSS spectroscopic match are labelled "
+    "({release} release, {rows:,} rows); r_match {r_match} arcsec on SDSS plug positions."
+)
+R_MATCH: Final = re.compile(r"r_match (\S+) arcsec")
+UPDATED_MARK: Final = " (texto atualizado na exportação)"
 UNREADABLE_DL: Final = (
     "O arquivo da avaliação do aprendizado profundo está ilegível; "
     "os vereditos ficam n/a."
@@ -172,6 +193,10 @@ def _rows(rel: D.Release) -> list[dict]:
                 "purity": from_value(chosen.purity),
                 "completeness": from_value(chosen.completeness),
                 "accuracy": num(model.accuracy.point, kind="pct"),
+                # n/a by construction only off the test mix; other nulls are missing data.
+                "accuracy_na_reason": (
+                    "not_test_mix" if rule is ui_state.Rule.MATCHED else None
+                ),
                 "answer_text": overview_text.answer(model, state),
                 "partial_notice": model.partial_notice,
             }
@@ -189,7 +214,7 @@ def _data_box(d: PageData) -> dict:
         "n_test": num(d.n_test),
         "n_errors": num(d.n_errors),
         "n_pixels": num(d.n_pixels),
-        "accuracy": num(d.accuracy, kind="pct", digits=2),
+        "accuracy": num(d.accuracy, kind="pct"),
         "qso_hits": num(d.qso_hits),
         "qso_total": num(d.qso_total),
         "class_mix": _class_mix(d),
@@ -202,6 +227,7 @@ def _validation(d: PageData) -> dict | None:
     return {
         "purity": num(d.validation["purity"], kind="pct"),
         "completeness": num(d.validation["completeness"], kind="pct"),
+        "prior": d.prior,
     }
 
 
@@ -255,10 +281,13 @@ def _dsc(rel: D.Release) -> dict:
                 "est": est(r.point, r.lo, r.hi, kind="num", signed=True),
             }
         )
+    n_rows = num(D.population_rows(rel, DSC_POPULATION))
     return {
         "population": DSC_POPULATION,
         "prior": DSC_PRIOR,
-        "n_rows": num(D.population_rows(rel, DSC_POPULATION)),
+        "population_text": web_text.dsc_population_text(n_rows["text"]),
+        "prior_text": web_text.dsc_prior_text(DSC_PRIOR),
+        "n_rows": n_rows,
         "macro_f1": [
             {"model": m, "label": MODEL_PT[m], "est": _macro_f1(f1, m)}
             for m in DSC_MODELS
@@ -344,7 +373,13 @@ def _headline(rel: D.Release) -> dict:
         lead = str(exc)
     except (ValueError, OSError):
         lead = UNREADABLE_DL
-    base = {"question": web_text.QUESTION, "caveat": None, "pairs": []}
+    status = data_dl.adr_status()
+    base = {
+        "question": web_text.QUESTION,
+        "caveat": None,
+        "pairs": [],
+        "protocol_text": None if status == ACCEPTED_STATUS else web_text.PROTOCOL_PROPOSED,
+    }
     if model is None or not model.pairs:
         return {
             **base,
@@ -354,12 +389,13 @@ def _headline(rel: D.Release) -> dict:
         }
     wins = [n for n, v in model.pairs if v is data_dl.PairVerdict.WIN]
     key = web_text.KEY_WIN if wins else web_text.KEY_TIE
+    weak = list(dict.fromkeys(HD.class_label(g.cls) for g in model.grid if g.underpowered))
     return {
         **base,
         "key": key,
         "title": web_text.TITLES[key],
         "lead": web_text.headline_lead(key, [n for n, _ in model.pairs], wins),
-        "caveat": None if wins else web_text.headline_caveat(CT.POWER_PHRASE),
+        "caveat": None if wins else web_text.headline_caveat(CT.POWER_PHRASE, weak),
         "pairs": [
             {
                 "net": net,
@@ -388,6 +424,8 @@ def _contrast(rows: list[dict]) -> dict:
             shipped["accuracy"]["text"],
             shipped["purity"]["text"],
             purity_lower=_below(shipped["purity"]["point"], shipped["accuracy"]["value"]),
+            prior_text=(shipped.get("qso_prior") or {}).get("text"),
+            prior=shipped["prior"],
         ),
     }
 
@@ -482,19 +520,31 @@ def _regions(stats: pd.DataFrame, floor: int) -> list[dict]:
     ]
 
 
-def _bands(stats: pd.DataFrame) -> list[dict]:
+def _band_rate(r: object, reportable: bool) -> dict:
+    """Band rate under the pixel floor of ADR 0003 (n/a below it), SMALL_RATE decimals."""
+    if not reportable:
+        return est(None, None, None)
+    digits = 2 if r.rate < SMALL_RATE else 1
+    return est(r.rate, r.ci_lo, r.ci_hi, digits=digits)
+
+
+def _bands(stats: pd.DataFrame, min_pixels: int) -> list[dict]:
     names = sky_text.band_names()
-    return [
-        {
-            "band": r.band,
-            "label": names[r.band],
-            "n_pixels": int(r.n_pixels),
-            "n": int(r.n),
-            "errors": int(r.errors),
-            "rate": est(r.rate, r.ci_lo, r.ci_hi, digits=2),
-        }
-        for r in data_sky.lat_band_table(stats).itertuples(index=False)
-    ]
+    out = []
+    for r in data_sky.lat_band_table(stats).itertuples(index=False):
+        reportable = int(r.n_pixels) >= min_pixels
+        out.append(
+            {
+                "band": r.band,
+                "label": names[r.band],
+                "n_pixels": int(r.n_pixels),
+                "n": int(r.n),
+                "errors": int(r.errors),
+                "rate": _band_rate(r, reportable),
+                "reportable": reportable,
+            }
+        )
+    return out
 
 
 def _top_regions(stats: pd.DataFrame, floor: int) -> list[dict]:
@@ -554,7 +604,7 @@ def sky(rel: D.Release, pixels: pd.DataFrame) -> dict:
         },
         "graticule": _graticule(),
         "regions": _regions(stats, floor),
-        "bands": _bands(stats),
+        "bands": _bands(stats, int(rel.meta["floor"]["min_pixels"])),
         "top_regions": _top_regions(stats, floor),
     }
 
@@ -630,7 +680,7 @@ def _networks(cells: dict[str, data_dl.ClassCell | None]) -> dict:
             "label": HD.system_label(net),
             "state": grid.state.value,
             "word": grid.verdict.word,
-            "diff": est(cell.d, cell.lo, cell.hi, kind="num", digits=4, signed=True),
+            "diff": est(cell.d, cell.lo, cell.hi, kind="pp", signed=True),
             "d": cell.d,
             "lo": cell.lo,
             "hi": cell.hi,
@@ -648,7 +698,8 @@ def _power_note(underpowered: bool) -> str | None:
 def _error_rate(r: data_galaxy_prior.ErrorRate | None) -> dict:
     if r is None:
         return est(None, None, None)
-    return est(r.rate, min(r.ci_lo, r.rate), max(r.ci_hi, r.rate))
+    digits = 2 if r.rate < SMALL_RATE else 1
+    return est(r.rate, min(r.ci_lo, r.rate), max(r.ci_hi, r.rate), digits=digits)
 
 
 def _error_rows(rel: D.Release, by_g: pd.DataFrame, by_z: pd.DataFrame) -> list[dict]:
@@ -750,6 +801,31 @@ def _limit_text(original: str) -> str:
     return shown if translated else omit_record_refs(shown) + HM.UNTRANSLATED
 
 
+def _role_label(role: str) -> str:
+    """Front roles in words; the other roles keep the dashboard label."""
+    return FRONT_ROLE_PT.get(role, HD.role_label(role))
+
+
+def _method_limit_text(rel: D.Release, original: str) -> str:
+    """Limitation text of the Método page, with the stale pilot sentence of full_v0 replaced.
+
+    The replacement uses the release's own row count (pairs of the training report); without
+    it, or without the r_match value, the artifact sentence is shown as it is.
+    """
+    match = R_MATCH.search(original)
+    rows = total_pairs(rel.train_report)
+    if (
+        rel.name != STALE_SAMPLE_RELEASE
+        or not original.startswith(STALE_SAMPLE_PREFIX)
+        or match is None
+        or rows is None
+    ):
+        return _limit_text(original)
+    english = RELEASE_LABELLED.format(release=rel.name, rows=rows, r_match=match.group(1))
+    shown, translated = translate(english)
+    return shown + UPDATED_MARK if translated else _limit_text(original)
+
+
 def _compare_blocks(rel: D.Release, results: dict) -> dict:
     model = CM.build(results)
     hl = data_dl.headline(results)
@@ -785,8 +861,7 @@ def _compare_blocks(rel: D.Release, results: dict) -> dict:
                     g.verdict.d,
                     None if g.verdict.ci is None else g.verdict.ci.lo,
                     None if g.verdict.ci is None else g.verdict.ci.hi,
-                    kind="num",
-                    digits=4,
+                    kind="pp",
                     signed=True,
                 ),
                 "delta": g.verdict.delta,
@@ -816,12 +891,12 @@ def _compare_blocks(rel: D.Release, results: dict) -> dict:
         "descriptive": [
             {
                 "pair": HD.pair_label(cell.pair),
-                "role": HD.role_label(cell.role),
+                "role": _role_label(cell.role),
                 "cls": HD.class_label(cls),
                 "d": c.d,
                 "lo": c.lo,
                 "hi": c.hi,
-                "diff": est(c.d, c.lo, c.hi, kind="num", digits=4, signed=True),
+                "diff": est(c.d, c.lo, c.hi, kind="pp", signed=True),
                 "text": (
                     f"D {HD.signed(c.d)}; {fmt.pt_ci_label()} {HD.interval(c.lo, c.hi)}; "
                     f"δ {HD.plain(c.delta)}"
@@ -876,7 +951,7 @@ def method(rel: D.Release) -> dict:
         "lead": HM.LEAD,
         "simple": HM.HINT,
         "reading": method_model.reading_paragraphs(facts),
-        "usage": method_model.usage_paragraphs(),
+        "usage": [],
         "rule_lines": list(VR.rule_lines()),
         "three_limits": [
             HM.crossmatch_limit(limitations),
@@ -884,7 +959,7 @@ def method(rel: D.Release) -> dict:
             method_notes.PRIOR_NOTE,
         ],
         "limitations": [
-            {"text": _limit_text(t), "original": omit_record_refs(t)}
+            {"text": _method_limit_text(rel, t), "original": omit_record_refs(t)}
             for t in limitations
         ],
         "glossary": [

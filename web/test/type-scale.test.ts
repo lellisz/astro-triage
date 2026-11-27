@@ -39,12 +39,28 @@ describe("escala do texto dos graficos SVG", () => {
       return m ? [{ file: f, w: Number(m[1]) }] : [];
     });
 
-  it("os 9 graficos declaram a largura do viewBox", () => {
-    expect(viewWidths.length).toBe(9);
+  it("os 7 graficos declaram a largura do viewBox (PriorSeries e HistogramPair foram apagados)", () => {
+    expect(viewWidths.map((v) => v.file).sort()).toEqual([
+      "CmdMap.tsx",
+      "DotCI.tsx",
+      "HBar.tsx",
+      "HBarCI.tsx",
+      "PurityRange.tsx",
+      "RateByBin.tsx",
+      "ReliabilityPlot.tsx",
+    ]);
   });
 
-  it("a descoberta acha os graficos exclusivos de /graficos", () => {
-    expect(graficosOnly.sort()).toEqual(["CmdMap.tsx", "RateByBin.tsx"]);
+  it("a descoberta acha os graficos exclusivos de /graficos (ReliabilityPlot saiu da Visao geral)", () => {
+    expect([...graficosOnly].sort()).toEqual(["CmdMap.tsx", "RateByBin.tsx", "ReliabilityPlot.tsx"]);
+  });
+
+  it(".scrollCal svg vem depois de .scroll svg (mesma especificidade: o teto do ReliabilityPlot e o dele)", () => {
+    const css = stripCss(read("components", "pages", "graficos.module.css"));
+    const scroll = css.search(/\.scroll\s+svg\s*\{/);
+    const cal = css.search(/\.scrollCal\s+svg\s*\{/);
+    expect(scroll).toBeGreaterThan(-1);
+    expect(cal).toBeGreaterThan(scroll);
   });
 
   // Descoberta: grafico so de /graficos = importado por GraficosView.tsx e por nenhuma outra pagina.
@@ -62,7 +78,8 @@ describe("escala do texto dos graficos SVG", () => {
     ["overview", ".scroll svg", others],
     ["galaxies", ".scroll svg", others],
     ["compare", ".scroll svg", others],
-    ["graficos", ".scroll svg", graficosOnly],
+    // O ReliabilityPlot fica num .scroll.scrollCal: o teto dele e o de .scrollCal svg, abaixo.
+    ["graficos", ".scroll svg", graficosOnly.filter((f) => f !== "ReliabilityPlot.tsx")],
     ["graficos", ".scrollCal svg", ["ReliabilityPlot.tsx"]],
   ];
 

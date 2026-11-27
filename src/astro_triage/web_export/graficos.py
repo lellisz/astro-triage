@@ -41,6 +41,18 @@ def _rate(rate: float, lo: float, hi: float) -> dict:
     return est(rate, lo, hi, digits=digits)
 
 
+def _cal_digits(*values: float) -> int:
+    """Decimals that keep two significant digits of the smallest positive share.
+
+    Calibration bins near zero would otherwise all print "0,0%"; from ``SMALL_RATE`` up the
+    page rule of one decimal applies.
+    """
+    positive = [v for v in values if v is not None and math.isfinite(v) and v > 0]
+    if not positive or min(positive) >= SMALL_RATE:
+        return 1
+    return max(2, 1 - math.floor(math.log10(min(positive) * 100)))
+
+
 def _cal_bin(r: pd.Series, floor: int) -> dict:
     below = int(r["n"]) < floor
     if below:
@@ -53,8 +65,13 @@ def _cal_bin(r: pd.Series, floor: int) -> dict:
             "raw_freq": None,
         }
     return {
-        "p_mean": num(r["mean_pred"], kind="pct"),
-        "freq": est(r["observed"], r["ci_lo"], r["ci_hi"]),
+        "p_mean": num(r["mean_pred"], kind="pct", digits=_cal_digits(r["mean_pred"])),
+        "freq": est(
+            r["observed"],
+            r["ci_lo"],
+            r["ci_hi"],
+            digits=_cal_digits(r["observed"], r["ci_hi"]),
+        ),
         "n": num(int(r["n"])),
         "below_floor": False,
         "raw_p_mean": _finite(r.get("raw_mean_pred")),
@@ -177,7 +194,7 @@ def _cmd(rel: D.Release, floor: int) -> dict:
         },
         "n_missing": num(grid.n_missing),
         "n_outside": num(grid.n_outside),
-        "note": web_text.cmd_note(grid.n_missing, grid.n_outside, floor),
+        "note": web_text.cmd_note(grid.n_missing, grid.n_outside, floor, len(rel.test)),
     }
 
 

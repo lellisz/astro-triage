@@ -21,13 +21,13 @@ STATE_WORD: Final[Mapping[ClassVerdict, str]] = {
 }
 PAIR_WORD: Final[Mapping[PairVerdict, str]] = {
     PairVerdict.WIN: "vence o par, com vitória nas duas classes",
-    PairVerdict.TIE: "sem diferença detectável, fica o LightGBM",
+    PairVerdict.TIE: "sem vitória do par, fica o LightGBM",
 }
 POWER_PHRASE: Final = "falta de poder, não igualdade"
 NOT_CI_LABEL: Final = "não é IC"
 REFERENCE_NAME: Final = "LightGBM"
 FIXED_NOTE: Final = (
-    "ponto fixo desta aba; a regra e o prior da barra de ajustes não o mudam"
+    "ponto fixo da comparação com as redes; a barra de ajustes não o muda"
 )
 
 

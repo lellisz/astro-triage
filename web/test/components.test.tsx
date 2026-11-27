@@ -148,10 +148,44 @@ describe("A3 Visao geral", () => {
     expect(row.accuracy.text).not.toBe("n/a");
   });
 
-  it("prior_matched: KPI de acuracia mostra n/a e pureza muda", () => {
+  it("prior_matched: KPI de acuracia mostra o motivo (accuracyNA) e pureza muda", () => {
     const html = render("regra=prior_matched&prior=P2");
-    expect(kpi(html, overviewLabels.accuracy)).toBe("n/a");
+    expect(overview.rows[2].accuracy.value).toBeNull();
+    expect(overviewLabels.accuracyNA).toMatch(/mistura do teste/);
+    expect(kpi(html, overviewLabels.accuracy)).toBe(overviewLabels.accuracyNA);
     expect(kpi(html, overviewLabels.purity)).toBe(overview.rows[2].purity.text);
+  });
+
+  it("REV-03: as_shipped com accuracy null e sem motivo mostra o texto exportado, nao accuracyNA", () => {
+    const base = overview.rows[0];
+    expect(base.rule).toBe("as_shipped");
+    const row = {
+      ...base,
+      accuracy: { value: null, text: "n/a" },
+      accuracy_na_reason: null,
+    };
+    const rows = [row, ...overview.rows.slice(1)];
+    nav.search = "";
+    const html = renderToStaticMarkup(<OverviewView {...props} rows={rows} />);
+    expect(kpi(html, overviewLabels.accuracy)).toBe(row.accuracy.text);
+    expect(kpi(html, overviewLabels.accuracy)).toBe("n/a");
+    expect(kpi(html, overviewLabels.accuracy)).not.toBe(overviewLabels.accuracyNA);
+    // contraprova: prior_matched com "not_test_mix" continua mostrando accuracyNA
+    const pm = overview.rows[2];
+    expect(pm.rule).toBe("prior_matched");
+    expect(pm.accuracy_na_reason).toBe("not_test_mix");
+    expect(kpi(render("regra=prior_matched&prior=P2"), overviewLabels.accuracy)).toBe(
+      overviewLabels.accuracyNA,
+    );
+  });
+
+  it("prior_matched P1 (Tarefa 29): KPI de acuracia mostra accuracyNA, nunca 'n/a' cru", () => {
+    const row = overview.rows.find((r) => r.rule === "prior_matched" && r.prior === "P1")!;
+    expect(row.accuracy.value).toBeNull();
+    const html = render("regra=prior_matched&prior=P1");
+    expect(kpi(html, overviewLabels.accuracy)).toBe(overviewLabels.accuracyNA);
+    // e na regra como entregue o valor real continua
+    expect(kpi(render(""), overviewLabels.accuracy)).not.toBe(overviewLabels.accuracyNA);
   });
 
   it("partial_notice: aparece como aviso so quando o estado e P3", () => {
@@ -190,14 +224,21 @@ describe("A3 Visao geral", () => {
   it("sem tecnico nao ha conteudo tecnico; com tecnico=1 ele aparece", () => {
     const off = render("");
     const on = render("tecnico=1");
-    for (const marker of ["data-feature", "data-point", "data-cal-point", "data-bin"]) {
+    for (const marker of ["data-feature", "data-point", 'id="ov-confidence"']) {
       expect(off, marker).not.toContain(marker);
       expect(on, marker).toContain(marker);
     }
+    // Tarefa 40a: a calibracao saiu da visao geral; no lugar, um link para /graficos/
+    for (const html of [off, on]) {
+      expect(html).not.toContain("data-cal-point");
+      expect(html).not.toContain('id="ov-calibration"');
+    }
+    expect(on).toMatch(/href="\/graficos\/?(\?[^"]*)?"[^>]*>[^<]*Calibra/);
+    expect(on).toContain(overviewLabels.calibrationLink);
     expect(off).not.toContain(overviewLabels.techTitle);
     expect(on).toContain(overviewLabels.techTitle);
     // tecnico=0 explicito tambem e modo simples
-    expect(render("tecnico=0")).not.toContain("data-bin");
+    expect(render("tecnico=0")).not.toContain('id="ov-confidence"');
   });
 
   it("OverviewTechnical direto: tabela de erros tem uma linha por direcao", () => {

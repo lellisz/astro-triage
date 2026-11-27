@@ -48,6 +48,7 @@ export type OverviewRow = {
   purity: Est;
   completeness: Est;
   accuracy: Num;
+  accuracy_na_reason: "not_test_mix" | null;
   answer_text: string;
   partial_notice: string | null;
 };
@@ -58,6 +59,7 @@ export type OverviewHeadline = {
   title: string;
   lead: string;
   caveat: string | null;
+  protocol_text: string | null;
   pairs: { net: string; text: string }[];
   contrast: { accuracy: Num; qso_purity: Est; text: string };
   summary_en: string;
@@ -78,7 +80,7 @@ export type Overview = Head & {
       qso_total: Num;
       class_mix: Record<Cls, Num>;
     };
-    validation: { purity: Num; completeness: Num } | null;
+    validation: { purity: Num; completeness: Num; prior: string } | null;
     error_directions: { true: Cls; pred: Cls; n: Num; share: Num }[];
     triage: {
       threshold: Num;
@@ -92,6 +94,8 @@ export type Overview = Head & {
       population: string;
       // No JSON real e um rotulo de populacao (ex.: "P0"), nao um Prior.
       prior: string;
+      population_text: string;
+      prior_text: string;
       n_rows: Num;
       macro_f1: { model: string; label: string; est: Est }[];
       paired_diffs: { a: string; b: string; est: Est }[];
@@ -153,7 +157,9 @@ export type Sky = Head & {
     n_pixels: number;
     n: number;
     errors: number;
+    // Abaixo do piso de regioes (meta.floor.min_pixels) rate vem n/a e reportable e false.
     rate: Est;
+    reportable: boolean;
   }[];
   top_regions: {
     hp: number;

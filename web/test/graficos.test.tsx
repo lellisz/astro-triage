@@ -70,11 +70,19 @@ describe("/graficos: modo simples", () => {
     }
   });
 
-  it("sem whiskers, sem curva crua e sem colunas tecnicas", () => {
-    expect(count(html, "data-ci")).toBe(0);
-    expect(count(html, "data-cal-ci")).toBe(0);
+  it("IC sempre visivel (Tarefa 34): whiskers na taxa, na matriz e na calibracao com tecnico=false", () => {
+    const tech = render("tecnico=1");
+    // o modo simples mostra os mesmos IC do modo tecnico
+    expect(count(html, "data-ci")).toBeGreaterThan(0);
+    expect(count(html, "data-ci")).toBe(count(tech, "data-ci"));
+    expect(count(html, "data-cal-ci")).toBeGreaterThan(0);
+    expect(count(html, "data-cal-ci")).toBe(count(tech, "data-cal-ci"));
+    // a legenda do intervalo nao depende do modo tecnico
+    expect(textOf(html)).toContain("Barras: intervalo de confiança (Wilson, por objeto)");
+  });
+
+  it("sem curva crua no modo simples (raw continua so tecnico)", () => {
     expect(count(html, "data-cal-raw")).toBe(0);
-    expect(html).not.toContain("Intervalo de confiança");
   });
 
   it("textos de escopo, piso e notas vem do JSON", () => {

@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { acessibilidade, chartsHref, compareHref, controls } from "@/content/labels";
+import { acessibilidade, chartsHref, compareHref, controls, skyHref } from "@/content/labels";
 import type { Meta, Prior, Rule } from "@/lib/schema";
 import { readState, withState, type UiState } from "@/lib/ui-state";
 import styles from "./StateControls.module.css";
@@ -98,7 +98,7 @@ function Controls({
 function hidesRuleAndPrior(pathname: string, forced: boolean | undefined): boolean {
   if (forced !== undefined) return forced;
   const here = trimSlash(pathname);
-  return here === trimSlash(compareHref) || here === trimSlash(chartsHref);
+  return [compareHref, chartsHref, skyHref].some((href) => here === trimSlash(href));
 }
 
 function ControlsWithState({ meta, hideRuleAndPrior }: Props) {

@@ -12,7 +12,7 @@ export default function SkyPage() {
         eyebrow={pages.sky.eyebrow}
         title={sky.texts.title}
         lead={sky.texts.lead}
-        showStateChip
+        showStateChip={false}
         meta={meta}
       />
       <SkyView meta={meta} sky={sky} />

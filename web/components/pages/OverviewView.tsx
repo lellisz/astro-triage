@@ -33,6 +33,7 @@ function Headline({ h, meta, state }: { h: OverviewHeadline; meta: Meta; state: 
       <h2 id="ov-headline-title" className={o.title}>
         {h.title}
       </h2>
+      {h.protocol_text ? <p className={o.caveat}>{h.protocol_text}</p> : null}
       <p className={o.lead}>{h.lead}</p>
       {h.caveat ? <p className={o.caveat}>{h.caveat}</p> : null}
       {unavailable ? null : (
@@ -121,7 +122,14 @@ function Body({ props, state }: { props: Props; state: UiState }) {
                 text={row.completeness.text}
                 ci={row.completeness.ci_text || undefined}
               />
-              <Kpi label={L.accuracy} text={row.accuracy.text} />
+              <Kpi
+                label={L.accuracy}
+                text={
+                  row.accuracy.value === null && row.accuracy_na_reason === "not_test_mix"
+                    ? L.accuracyNA
+                    : row.accuracy.text
+                }
+              />
             </div>
           ) : null}
         <Panel id="ov-bars" title={L.barsTitle} subtitle={L.barsSub}>

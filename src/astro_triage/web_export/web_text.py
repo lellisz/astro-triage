@@ -23,10 +23,13 @@ QUESTION: Final = (
     "nos dados do Gaia DR3?"
 )
 TITLES: Final[Mapping[str, str]] = {
-    KEY_TIE: "Sem diferença detectável",
+    KEY_TIE: "Nenhuma rede venceu o LightGBM",
     KEY_WIN: "Vitória sobre o LightGBM",
     KEY_NA: "Comparação indisponível",
 }
+PROTOCOL_PROPOSED: Final = (
+    "Protocolo da comparação em proposta (aceitação aberta); resultado provisório."
+)
 SUMMARY_EN: Final = (
     "Star, galaxy and quasar classifier on Gaia DR3 with SDSS spectroscopic labels, "
     "comparing LightGBM with neural networks; every result is provisional."
@@ -52,8 +55,22 @@ def charts_scope(n_test: int, model_label: str) -> str:
         f"Todos os gráficos usam o modelo {model_label} no conjunto de teste "
         f"({fmt.pt_int(n_test)} objetos). A classe prevista é a de maior probabilidade "
         "calibrada; a regra de decisão e o prior das outras páginas não valem aqui. "
-        "Por isso estes acertos e erros não são a pureza nem a completude da Visão geral."
+        "A diagonal da matriz é a completude da regra como entregue; a pureza difere da "
+        "Visão geral porque lá ela é reponderada pelo prior do céu."
     )
+
+
+def dsc_population_text(n_rows: str) -> str:
+    """The DSC comparison population in words; ``n_rows`` is already formatted."""
+    return (
+        f"Só os {n_rows} objetos do teste com as três probabilidades do Gaia DSC "
+        "(allosmod); é uma população menor que a do resto da página."
+    )
+
+
+def dsc_prior_text(prior: str) -> str:
+    """The DSC prior regime: the class mix of the test, not the sky prior of the page."""
+    return f"prior {prior}: mistura do teste"
 
 
 def charts_floor_note(floor: int) -> str:
@@ -79,13 +96,14 @@ def missing_g_note(counts: Mapping[str, int]) -> str:
     )
 
 
-def cmd_note(n_missing: int, n_outside: int, floor: int) -> str:
+def cmd_note(n_missing: int, n_outside: int, floor: int, n_test: int) -> str:
     """Floor rule of the colour-magnitude map and the two totals that are not on it."""
+    share = f" ({fmt.pt_pct(n_outside / n_test, 1)} do teste)" if n_test > 0 else ""
     return (
         f"Células com menos de {fmt.pt_int(floor)} objetos, vazias incluídas, não têm taxa "
         "confiável e aparecem hachuradas, sem valor. Ficam fora do mapa "
         f"{fmt.pt_int(n_missing)} objetos sem magnitude G ou sem cor BP-RP e "
-        f"{fmt.pt_int(n_outside)} fora da área desenhada."
+        f"{fmt.pt_int(n_outside)}{share} fora da área desenhada."
     )
 
 
@@ -128,23 +146,49 @@ def headline_lead(key: str, nets: list[str], winners: list[str]) -> str:
     return f"Nenhuma rede ({', '.join(nets)}) superou o LightGBM com esta amostra."
 
 
-def headline_caveat(power_phrase: str) -> str:
-    """Why a missing difference is not a tie; the phrase itself comes from compare_text."""
+def headline_caveat(power_phrase: str, classes: list[str]) -> str:
+    """Why a missing difference is not a tie, scoped to the underpowered classes.
+
+    ``classes`` are the labels of the cells without power; empty keeps the unscoped sentence.
+    """
+    if not classes:
+        scope = ""
+    elif len(classes) == 1:
+        scope = f" na classe {classes[0].lower()}"
+    else:
+        scope = f" nas classes {' e '.join(c.lower() for c in classes)}"
     return (
-        "Com esta amostra não dá para afirmar que as redes igualam o LightGBM: "
+        f"Com esta amostra não dá para afirmar que as redes igualam o LightGBM{scope}: "
         f"o que há é {power_phrase}."
     )
 
 
-def contrast_text(accuracy: str, purity: str, *, purity_lower: bool = True) -> str:
+def contrast_text(
+    accuracy: str,
+    purity: str,
+    *,
+    purity_lower: bool = True,
+    prior_text: str | None = None,
+    prior: str | None = None,
+) -> str:
     """Overall accuracy against QSO purity of the shipped rule; n/a if either is missing.
 
     ``purity_lower`` (decided by the caller from the two values) picks the connective, so the
-    text never says "only" about a purity that is not below the accuracy.
+    text never says "only" about a purity that is not below the accuracy. ``prior_text`` and
+    ``prior`` name the sky the purity is reweighted to, because the accuracy is measured on
+    the test mix: the two numbers describe different populations.
     """
     if NA_WORD in (accuracy, purity):
         return NA_WORD
-    tail = "dos objetos que o modelo chama de quasar são quasares na regra como entregue."
+    sky = (
+        f", num céu com {prior_text} de quasares (prior {prior})"
+        if prior_text and prior_text != NA_WORD and prior
+        else ""
+    )
+    tail = (
+        "dos objetos que o modelo chama de quasar são quasares na regra como entregue"
+        f"{sky}; a acurácia vale para a mistura do teste."
+    )
     if purity_lower:
-        return f"Acerto geral {accuracy}, mas só {purity} {tail}"
-    return f"Acerto geral {accuracy}; {purity} {tail}"
+        return f"Acurácia {accuracy}, mas só {purity} {tail}"
+    return f"Acurácia {accuracy}; {purity} {tail}"

@@ -54,11 +54,11 @@ def test_wilson_interval_contains_rate_and_feeds_the_row():
 def test_extreme_bands_chosen_by_position_not_label():
     by_g, by_z = _tables()
     picks = dict(HG.extreme_bands(by_g, by_z, FLOOR))
-    assert picks["As mais brilhantes"].name == "G < 18"
-    assert picks["As mais próximas"].name == "z ≤ 0,001"
-    assert picks["As mais distantes"].name == "z ≥ 0,1"
+    assert picks[HG.BRIGHTEST].name == "G < 18"
+    assert picks[HG.NEAREST].name == "z ≤ 0,001"
+    assert picks[HG.FARTHEST].name == "z ≥ 0,1"
     shuffled = by_z.iloc[::-1].reset_index(drop=True)
-    assert dict(HG.extreme_bands(by_g, shuffled, FLOOR))["As mais distantes"].name == "z ≥ 0,1"
+    assert dict(HG.extreme_bands(by_g, shuffled, FLOOR))[HG.FARTHEST].name == "z ≥ 0,1"
 
 
 def test_bar_colour_threshold():

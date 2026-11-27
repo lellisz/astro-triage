@@ -1,4 +1,4 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderToStaticMarkup } from "react-dom/server";
@@ -7,9 +7,23 @@ import { Tabs, type TabItem } from "@/components/kit/Tabs";
 import { CompareView } from "@/components/pages/CompareView";
 import { GalaxiesView } from "@/components/pages/GalaxiesView";
 import MethodPage from "@/app/metodo/page";
+import SkyPage from "@/app/ceu/page";
+import { OverviewTechnical } from "@/components/pages/OverviewTechnical";
+import { SkyView } from "@/components/pages/SkyView";
 import { StateControls } from "@/components/shell/StateControls";
-import { chartLabels, chartsHref, compareHref, compareLabels, controls, methodLabels } from "@/content/labels";
-import type { Compare, Est, Galaxies, Meta, Method } from "@/lib/schema";
+import {
+  chartLabels,
+  chartsHref,
+  compareHref,
+  compareLabels,
+  controls,
+  galaxiesLabels as L_gal,
+  methodLabels,
+  overviewLabels as L_ov,
+  skyLabels as L_sky,
+} from "@/content/labels";
+import { ptInt, ptPct } from "@/lib/fmt";
+import type { Compare, Est, Galaxies, Meta, Method, Overview, Sky } from "@/lib/schema";
 
 const nav = vi.hoisted(() => ({ search: "", path: "/" }));
 vi.mock("next/navigation", () => ({
@@ -60,6 +74,8 @@ const meta = load<Meta>("meta");
 const galaxies = load<Galaxies>("galaxies");
 const compare = load<Compare>("compare");
 const method = load<Method>("method");
+const overview = load<Overview>("overview");
+const sky = load<Sky>("sky");
 
 type Ok = Extract<Compare, { status: "ok" }>;
 const ok = compare as Ok;
@@ -98,6 +114,23 @@ const rowChunks = (html: string, key: string): string[] => {
     from = at + marker.length;
   }
 };
+const escHtml = (x: string) =>
+  x.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#x27;");
+const escRe = (x: string) => x.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+// Tabela da DataTable cuja legenda (<p id=X>) tem o texto dado: a <table aria-labelledby=X>.
+const tableAfterCaption = (html: string, caption: string): string | undefined => {
+  const p = html.match(new RegExp(`<p id="([^"]+)"[^>]*>${escRe(escHtml(caption))}</p>`));
+  if (!p) return undefined;
+  const all = [...html.matchAll(/<table[^>]*>[\s\S]*?<\/table>/g)].map((m) => m[0]);
+  return all.find((x) => x.includes(`aria-labelledby="${p[1]}"`));
+};
+// Conteudo do <section aria-labelledby=id> (Panel do kit); os paineis testados nao aninham section.
+const panel = (html: string, id: string): string => {
+  const m = html.match(new RegExp(`<section[^>]*aria-labelledby="${escRe(id)}"[^>]*>[\\s\\S]*?</section>`));
+  if (!m) throw new Error(`painel ${id} ausente`);
+  return m[0];
+};
+
 const figure = (html: string, id: string): string => {
   const m = html.match(new RegExp(`<figure[^>]*id="${id}"[\\s\\S]*?</figure>`));
   if (!m) throw new Error(`figure ${id} ausente`);
@@ -116,58 +149,73 @@ describe("A1 Galaxias: Est com point null vira n/a, sem zero, barra ou ponto", (
   g.blocks.prior_matched[1].completeness = NA_EST;
   const html = renderGal(g, "tecnico=1");
 
-  it("series por prior: a linha nula mostra n/a e nenhum marcador, linha, intervalo ou valor", () => {
+  it("barras por prior: a linha nula mostra n/a, sem barra, marcador, intervalo ou valor", () => {
     const chunks = rowChunks(html, "prior_matched-P2");
     expect(chunks).toHaveLength(2); // pureza e completude
     for (const c of chunks) {
-      expect(c).not.toMatch(/<(circle|rect|polygon|polyline|line)\b/);
+      expect(c).not.toContain("data-bar");
       expect(c).not.toContain("data-ci");
+      expect(c).not.toMatch(/<(circle|rect|polygon|polyline)\b/);
       expect(c).toContain('aria-label="não disponível"');
-      expect(textOf(c).trim()).toBe("n/a");
+      expect(textOf(c)).toContain("n/a");
+      expect(textOf(c)).not.toMatch(/\d\s*%/);
     }
   });
 
-  it("series por prior: o ponto nulo nao entra no caminho e o vizinho nao-nulo continua desenhado", () => {
-    const poly = [...html.matchAll(/<g data-series="prior_matched">([\s\S]*?)<\/g><\/g>/g)];
-    expect(poly.length).toBeGreaterThan(0);
-    expect(rowChunks(html, "prior_matched-P1")[0]).toMatch(/<circle|<rect/);
-    expect(rowChunks(html, "prior_matched-P3")[0]).toMatch(/<polygon/);
-  });
-
-  it("barras de erro (geral, G e z): linhas nulas sem barra, ponto ou intervalo", () => {
-    const groups: [string, number[], typeof galaxies.error_rows][] = [
-      ["err", [], galaxies.error_rows],
-      ["g", [], galaxies.technical.by_g],
-      ["z", [], galaxies.technical.by_z],
-    ];
-    let nulls = 0;
-    for (const [prefix, , rows] of groups) {
-      rows.forEach((r, i) => {
-        if (r.rate.point !== null) return;
-        nulls += 1;
-        const chunks = rowChunks(html, `${prefix}-${i}`);
-        expect(chunks, `${prefix}-${i}`).toHaveLength(1);
-        const c = chunks[0];
-        expect(c).not.toContain("data-bar");
-        expect(c).not.toContain("data-ci");
-        expect(c).not.toMatch(/<circle/);
-        expect(c).toContain("n/a");
-        expect(textOf(c)).not.toMatch(/\d\s*%/);
-      });
+  it("barras por prior: as vizinhas nao-nulas continuam com barra e IC", () => {
+    for (const key of ["prior_matched-P1", "prior_matched-P3", "as_shipped-P2"]) {
+      const chunks = rowChunks(html, key);
+      expect(chunks, key).toHaveLength(2);
+      for (const c of chunks) {
+        expect(c).toContain("data-bar");
+        expect(c).toContain("data-ci");
+      }
     }
-    expect(nulls).toBeGreaterThan(0);
   });
 
-  it("faixas abaixo do piso nao somem: contagem de linhas = contagem do JSON", () => {
+  it("barras de erro gerais: linhas nulas sem barra, ponto ou intervalo; G e z sao so tabela (Tarefa 37)", () => {
+    galaxies.error_rows.forEach((r, i) => {
+      const c = rowChunks(html, `err-${i}`);
+      expect(c, `err-${i}`).toHaveLength(1);
+      if (r.rate.point !== null) {
+        expect(c[0]).toContain("data-bar");
+        return;
+      }
+      expect(c[0]).not.toContain("data-bar");
+      expect(c[0]).not.toContain("data-ci");
+      expect(c[0]).toContain("n/a");
+    });
+    expect(html).not.toContain('id="gal-g-chart"');
+    expect(html).not.toContain('id="gal-z-chart"');
+    expect(count(html, /data-row="(g|z)-\d+"/g)).toBe(0);
+    // as faixas nulas de G e z viram n/a na tabela, sem numero de taxa
+    const tables = [...html.matchAll(/<table[^>]*>[\s\S]*?<\/table>/g)].map((m) => m[0]);
+    const nullRows = [...galaxies.technical.by_g, ...galaxies.technical.by_z].filter((r) => r.rate.point === null);
+    expect(nullRows.length).toBeGreaterThan(0);
+    const trs = tables.join("").split("<tr>").map((x) => textOf(x.split("</tr>")[0]));
+    for (const r of nullRows) {
+      const row = trs.find((t) => t.includes(r.label));
+      expect(row, r.label).toBeDefined();
+      expect(row).toContain("n/a");
+    }
+  });
+
+  it("faixas abaixo do piso nao somem: linhas das tabelas = contagem do JSON, com IC (Tarefa 37)", () => {
     expect(count(html, /data-row="err-\d+"/g)).toBe(galaxies.error_rows.length);
-    expect(count(html, /data-row="g-\d+"/g)).toBe(galaxies.technical.by_g.length);
-    expect(count(html, /data-row="z-\d+"/g)).toBe(galaxies.technical.by_z.length);
+    expect(galaxies.technical.by_g.length).toBe(5);
+    expect(galaxies.technical.by_z.length).toBe(7);
     expect(galaxies.technical.by_g.some((r) => !r.reportable)).toBe(true);
     expect(galaxies.technical.by_z.some((r) => !r.reportable)).toBe(true);
-    // e cada rotulo do JSON aparece
+    const tech = html.slice(html.indexOf('id="gal-tech"'));
+    const bodies = [...tech.matchAll(/<tbody>([\s\S]*?)<\/tbody>/g)].map((m) => m[1]);
+    expect(bodies.map((b) => count(b, "<tr>"))).toEqual([5, 7]);
+    // coluna de IC rotulada como Wilson por objeto, com o ci_text de cada faixa reportavel
+    expect(tech).toContain("Intervalo de confiança (Wilson, por objeto)");
     for (const r of [...galaxies.technical.by_g, ...galaxies.technical.by_z]) {
-      expect(textOf(html)).toContain(r.label);
+      expect(textOf(tech)).toContain(r.label);
+      if (r.rate.point !== null) expect(textOf(tech)).toContain(r.rate.ci_text);
     }
+    expect(textOf(tech)).toContain(L_gal.galBandsJoinNote);
   });
 
   it("uma estimativa 0 real (point 0) NAO e confundida com n/a: continua desenhada", () => {
@@ -190,45 +238,57 @@ describe("A2 Galaxias: P3 parcial, marcador distinto e series separadas", () => 
     expect(galaxies.blocks.prior_matched.find((b) => b.prior === "P3")?.partial).toBe(true);
   });
 
-  it("P3 tem rotulo de parcial nos dois graficos e marcador triangulo nas duas regras", () => {
-    expect(count(textOf(html), `P3 (${chartLabels.partialTag})`)).toBeGreaterThanOrEqual(2);
-    for (const rule of ["as_shipped", "prior_matched"]) {
-      const chunks = rowChunks(html, `${rule}-P3`);
-      expect(chunks, rule).toHaveLength(2);
-      for (const c of chunks) {
-        expect(c).toContain('data-partial="true"');
-        expect(c).toMatch(/<polygon/);
-        expect(c).not.toMatch(/<circle|<rect/);
+  it("Tarefa 38: 6 barras em cada grafico (2 regras x P1, P2, P3), P3 marcado como parcial", () => {
+    const blocks = [...galaxies.blocks.as_shipped, ...galaxies.blocks.prior_matched];
+    expect(blocks).toHaveLength(6);
+    for (const id of ["gal-purity-chart", "gal-completeness-chart"]) {
+      const fig = figure(html, id);
+      const keys = [...fig.matchAll(/data-row="([^"]+)"/g)].map((m) => m[1]);
+      expect(keys, id).toEqual([
+        "as_shipped-P1",
+        "as_shipped-P2",
+        "as_shipped-P3",
+        "prior_matched-P1",
+        "prior_matched-P2",
+        "prior_matched-P3",
+      ]);
+      expect(count(fig, 'data-partial="true"'), id).toBe(2);
+      expect(count(textOf(fig), `P3 (${chartLabels.partialTag})`), id).toBe(2);
+      for (const rule of ["as_shipped", "prior_matched"]) {
+        expect(rowChunks(fig, `${rule}-P3`)[0]).toContain('data-partial="true"');
+        expect(rowChunks(fig, `${rule}-P1`)[0]).not.toContain("data-partial");
       }
     }
-    // nao-parcial nunca usa triangulo
-    for (const rule of ["as_shipped", "prior_matched"]) {
-      for (const c of rowChunks(html, `${rule}-P1`)) expect(c).not.toMatch(/<polygon/);
+  });
+
+  it("Tarefa 38: rotulo de meta.states quando existe, senao rule_labels + prior; valor e IC do bloco", () => {
+    const fig = figure(html, "gal-purity-chart");
+    for (const rule of ["as_shipped", "prior_matched"] as const) {
+      for (const b of galaxies.blocks[rule]) {
+        const c = rowChunks(fig, `${rule}-${b.prior}`)[0];
+        const st = meta.states.find((s) => s.rule === rule && s.prior === b.prior);
+        expect(textOf(c), `${rule}-${b.prior}`).toContain(st ? st.label : `${meta.rule_labels[rule]} · ${b.prior}`);
+        if (b.purity.point !== null) {
+          expect(textOf(c)).toContain(b.purity.text);
+          expect(c).toContain("data-ci");
+        }
+      }
     }
+    // a barra selecionada e a do estado padrao
+    const sel = [...fig.matchAll(/data-row="([^"]+)"[^>]*aria-current="true"/g)].map((m) => m[1]);
+    expect(sel).toEqual([`${meta.default_state.rule}-${meta.default_state.prior}`]);
   });
 
-  it("as_shipped e prior_matched sao series separadas, com forma de marcador e traco diferentes", () => {
-    expect(count(html, 'data-series="as_shipped"')).toBe(2);
-    expect(count(html, 'data-series="prior_matched"')).toBe(2);
-    expect(rowChunks(html, "as_shipped-P1")[0]).toMatch(/<circle/);
-    expect(rowChunks(html, "prior_matched-P1")[0]).toMatch(/<rect/);
-    const cls = (rule: string) =>
-      [...html.matchAll(new RegExp(`data-series="${rule}"><polyline class="([^"]*)"`, "g"))].map((m) => m[1]);
-    expect(cls("as_shipped")).toHaveLength(2);
-    expect(cls("prior_matched")).toHaveLength(2);
-    for (const c of cls("as_shipped")) expect(c).toMatch(/seriesSolid/);
-    for (const c of cls("prior_matched")) expect(c).toMatch(/seriesDashed/);
-    // legenda tambem distingue
-    expect(html).toMatch(/data-legend="as_shipped"><line class="[^"]*seriesSolid/);
-    expect(html).toMatch(/data-legend="prior_matched"><line class="[^"]*seriesDashed/);
+  it("Tarefas 38/39: PriorSeries saiu do codigo (componente apagado e sem import)", () => {
+    const web = fileURLToPath(new URL("..", import.meta.url));
+    expect(existsSync(path.join(web, "components", "charts", "PriorSeries.tsx"))).toBe(false);
+    expect(existsSync(path.join(web, "components", "charts", "HistogramPair.tsx"))).toBe(false);
+    const view = readFileSync(path.join(web, "components", "pages", "GalaxiesView.tsx"), "utf-8");
+    expect(view).not.toMatch(/PriorSeries/);
+    expect(html).not.toContain("data-series=");
   });
 
-  it("stroke-dasharray existe so na regra tracejada (via classe do css module, nao atributo)", () => {
-    const rule = (name: string) => css.match(new RegExp(`\\.${name}\\s*\\{([^}]*)\\}`))?.[1] ?? "";
-    expect(rule("seriesDashed")).toMatch(/stroke-dasharray\s*:\s*\S/);
-    expect(rule("seriesSolid")).not.toMatch(/stroke-dasharray/);
-    expect(rule("seriesSolid")).not.toBe("");
-    // nenhum atributo inline de traco no markup
+  it("nenhum atributo inline de traco no markup", () => {
     expect(html).not.toMatch(/stroke-dasharray=/i);
   });
 
@@ -244,27 +304,89 @@ describe("A2 Galaxias: P3 parcial, marcador distinto e series separadas", () => 
 });
 
 describe("A3 Galaxias: tabelas tecnicas so com tecnico=1; power_note", () => {
-  it("sem tecnico nao ha painel tecnico, tabelas nem graficos G/z", () => {
+  const nets = Object.values(galaxies.networks).filter((n) => n !== null);
+  const panelOf = (html: string, id: string) => {
+    const at = html.indexOf(`id="${id}"`);
+    expect(at, id).toBeGreaterThan(-1);
+    const next = html.indexOf("<section", at + 1);
+    return html.slice(at, next < 0 ? undefined : next);
+  };
+
+  it("sem tecnico: so a tabela das redes; sem painel tecnico nem graficos G/z", () => {
     const html = renderGal(galaxies, "");
     expect(html).not.toContain('id="gal-tech"');
-    expect(html).not.toContain("<table");
+    expect(count(html, "<table")).toBe(1);
+    expect(panelOf(html, "gal-networks")).toContain("<table");
     expect(html).not.toContain('id="gal-g-chart"');
     expect(html).not.toContain('id="gal-z-chart"');
   });
 
-  it("tecnico=0 explicito tambem esconde", () => {
+  it("tecnico=0 explicito tambem esconde o painel tecnico", () => {
     const html = renderGal(galaxies, "tecnico=0");
     expect(html).not.toContain('id="gal-tech"');
-    expect(html).not.toContain("<table");
+    expect(count(html, "<table")).toBe(1);
   });
 
-  it("tecnico=1 mostra o painel e duas tabelas com uma linha por faixa do JSON", () => {
+  it("tecnico=1 mostra o painel e duas tabelas tecnicas com uma linha por faixa do JSON", () => {
     const html = renderGal(galaxies, "tecnico=1");
     expect(html).toContain('id="gal-tech"');
-    expect(count(html, "<table")).toBe(2);
-    expect(count(html, /<tbody>[\s\S]*?<\/tbody>/g)).toBe(2);
+    expect(count(html, "<table")).toBe(3);
     const bodyRows = [...html.matchAll(/<tbody>([\s\S]*?)<\/tbody>/g)].map((m) => count(m[1], "<tr>"));
-    expect(bodyRows).toEqual([galaxies.technical.by_g.length, galaxies.technical.by_z.length]);
+    expect(bodyRows).toEqual([nets.length, galaxies.technical.by_g.length, galaxies.technical.by_z.length]);
+  });
+
+  it("Tarefa 36: redes como tabela (uma linha por rede, com D, IC, delta e veredito), sem #gal-net, com link", () => {
+    const html = renderGal(galaxies, "");
+    const panel = panelOf(html, "gal-networks");
+    expect(html).not.toContain('id="gal-net"');
+    expect(nets).toHaveLength(2);
+    const body = panel.match(/<tbody>([\s\S]*?)<\/tbody>/)![1];
+    expect(count(body, "<tr>")).toBe(2);
+    for (const n of nets) {
+      for (const s of [n.label, n.diff.text, n.diff.ci_text, n.word]) expect(textOf(body), s).toContain(s);
+    }
+    expect(panel).toMatch(/href="\/comparacao-dl\/?(\?[^"]*)?"/);
+  });
+
+  // REV-01: a coluna "Margem δ" (4a celula: rede, D, IC, delta, veredito) usa a unidade de D.
+  const netCells = (g: Galaxies) => {
+    const panel = panelOf(renderGal(g, ""), "gal-networks");
+    const body = panel.match(/<tbody>([\s\S]*?)<\/tbody>/)![1];
+    return [...body.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map((r) =>
+      [...r[1].matchAll(/<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/g)].map((c) => textOf(c[1]).trim()),
+    );
+  };
+
+  it("REV-01: Margem δ da fixture (0.02) e exatamente '2,00 p.p.', na unidade de D, sem '0.02'", () => {
+    expect(nets.map((n) => n.delta)).toEqual([0.02, 0.02]);
+    const rows = netCells(galaxies);
+    expect(rows).toHaveLength(2);
+    for (const cells of rows) {
+      expect(cells).toHaveLength(5);
+      expect(cells[3]).toBe("2,00 p.p.");
+      expect(cells[3]).not.toContain("0.02");
+      expect(cells[1].endsWith(" p.p."), `D="${cells[1]}"`).toBe(true);
+    }
+  });
+
+  it("REV-01 controle: δ = 0.005 vira '0,50 p.p.' (x100, 2 casas, nao fixo)", () => {
+    const g = clone(galaxies);
+    for (const n of Object.values(g.networks)) if (n) n.delta = 0.005;
+    const rows = netCells(g);
+    expect(rows).toHaveLength(2);
+    for (const cells of rows) expect(cells[3]).toBe("0,50 p.p.");
+  });
+
+  it("Tarefa 35: ponto fixo dentro de #gal-networks e fora do bloco de contexto", () => {
+    const html = renderGal(galaxies, "");
+    const fixed = galaxies.fixed_point_text;
+    expect(fixed).toContain("ponto fixo da comparação com as redes");
+    expect(count(html, fixed)).toBe(1);
+    expect(panelOf(html, "gal-networks")).toContain(fixed);
+    const ctx = html.match(/<div class="[^"]*context[^"]*">[\s\S]*?<\/div>/)![0];
+    expect(ctx).not.toContain(fixed);
+    expect(textOf(html)).toContain(L_gal.errorsSub);
+    expect(L_gal.errorsSub).toContain("classe de maior probabilidade (regra como entregue)");
   });
 
   it("power_note nao nulo aparece uma vez; nulo nao deixa rastro", () => {
@@ -518,17 +640,34 @@ describe("A7 Comparacao: forest plot de diferencas", () => {
     expect(count(fig, "data-point")).toBe(ok.grid.length - 1);
   });
 
-  it("descritivo: linha de zero, uma linha por item, n/a sem ponto", () => {
-    const fig = figure(html, "cmp-descriptive");
-    expect(count(fig, "data-zero")).toBe(1);
-    expect(count(fig, "data-row=")).toBe(v.descriptive.length);
-    const na = rowChunks(fig, "d-1")[0];
-    expect(na).not.toContain("data-point");
-    expect(na).toContain("n/a");
-    expect(count(fig, "data-point")).toBe(2);
-    // a tabela descritiva traz uma linha por item
-    const rows = [...html.matchAll(/<table[^>]*>[\s\S]*?<\/table>/g)].map((m) => m[0]);
-    expect(rows.some((t) => count(t, "<tr>") === v.descriptive.length + 1)).toBe(true);
+  it("descritivo (Tarefa 31): sem grafico #cmp-descriptive; tabela com uma linha por item e a coluna de IC", () => {
+    expect(html).not.toContain('id="cmp-descriptive"');
+    expect(count(html, "<figure")).toBe(count(html, 'id="cmp-decision"') + count(html, 'id="cmp-purity-chart"'));
+    // A DataTable poe a legenda num <p> antes da tabela (aria-labelledby), nao num <caption>.
+    const t = tableAfterCaption(html, compareLabels.descriptiveChart);
+    expect(t).toBeDefined();
+    const body = t!.match(/<tbody>([\s\S]*?)<\/tbody>/)![1];
+    expect(count(body, "<tr>")).toBe(v.descriptive.length);
+    const bodyRows = body.split("<tr>").slice(1).map((r) => textOf(r));
+    v.descriptive.forEach((d, i) => {
+      expect(bodyRows[i]).toContain(d.diff.text);
+      expect(bodyRows[i]).toContain(d.diff.ci_text);
+    });
+    expect(bodyRows[1]).toContain("n/a");
+  });
+
+  it("descritivo com 14 itens (como o full_v0): 14 linhas, cada uma com IC", () => {
+    const many = clone(ok);
+    many.descriptive = Array.from({ length: 14 }, (_, k) => ({
+      ...v.descriptive[0],
+      pair: k % 2 ? "FTT" : "MLP",
+      diff: { ...v.descriptive[0].diff, ci_text: `IC-${k}` },
+    }));
+    const h14 = renderToStaticMarkup(<CompareView compare={many} />);
+    expect(h14).not.toContain('id="cmp-descriptive"');
+    const t = [...h14.matchAll(/<table[^>]*>[\s\S]*?<\/table>/g)].map((m) => m[0]).find((x) => x.includes("IC-0"))!;
+    expect(count(t.match(/<tbody>([\s\S]*?)<\/tbody>/)![1], "<tr>")).toBe(14);
+    for (let k = 0; k < 14; k++) expect(t).toContain(`IC-${k}<`);
   });
 
   it("sem itens descritivos: mensagem, sem segundo grafico", () => {
@@ -594,15 +733,25 @@ describe("A8 Metodo: todos os campos do method.json aparecem", () => {
     expect(count(out, 'rel="noopener noreferrer"')).toBe(method.links.length);
   });
 
-  it("details/summary para leitura, uso, regras e limitacoes; original aninhado so se difere", () => {
-    for (const id of ["leitura", "uso", "regras", "limitacoes"]) {
+  it("Tarefa 19: o export web grava usage vazio e a secao 'uso' nao aparece", () => {
+    expect(method.usage).toEqual([]);
+    expect(html).not.toContain('id="uso"');
+    expect(text).not.toMatch(/dispersão por objeto/i);
+  });
+
+  it("details/summary para leitura, regras e limitacoes; original aninhado so se difere", () => {
+    for (const id of ["leitura", "regras", "limitacoes"]) {
       expect(html, id).toMatch(new RegExp(`<details[^>]*id="${id}"`));
     }
     const differing = method.limitations.filter((l) => l.original !== l.text).length;
     expect(differing).toBeGreaterThan(0);
-    expect(count(html, "<details")).toBe(4 + differing);
-    expect(count(html, "<summary")).toBe(4 + differing);
-    expect(count(html, /<summary[^>]*>[^<]+<\/summary>/g)).toBe(4 + differing);
+    expect(count(html, "<details")).toBe(3 + differing);
+    expect(count(html, "<summary")).toBe(3 + differing);
+    expect(count(html, /<summary[^>]*>[^<]+<\/summary>/g)).toBe(3 + differing);
+    // com usage preenchido a secao volta (o componente nao a esconde por engano)
+    const withUsage = withMethod({ ...clone(method), usage: ["USO-XYZ"] });
+    expect(withUsage).toMatch(/<details[^>]*id="uso"/);
+    expect(textOf(withUsage)).toContain("USO-XYZ");
   });
 
   it("fechados por padrao e abertos com tecnico=1", () => {
@@ -610,7 +759,14 @@ describe("A8 Metodo: todos os campos do method.json aparecem", () => {
     store.pages = { meta, method };
     nav.search = "tecnico=1";
     const open = renderToStaticMarkup(<MethodPage />);
-    expect(count(open, /<details[^>]*\sopen=""/g)).toBe(4);
+    expect(count(open, /<details[^>]*\sopen=""/g)).toBe(3);
+  });
+
+  it("Tarefa 20: a leitura rotula o IC por faixa como Wilson por objeto", () => {
+    const r = method.reading.find((s) => s.includes("Wilson"));
+    expect(r).toContain("método de Wilson, por objeto");
+    expect(r).toContain("regiões vizinhas");
+    expect(text).toContain(r!);
   });
 
   it("listas vazias nao geram details vazio", () => {
@@ -701,5 +857,182 @@ describe("Graficos: barra sem regra nem prior, com modo tecnico", () => {
       expect(html).toContain(controls.prior);
     }
     expect(bar(compareHref)).toBe("");
+  });
+});
+
+describe("Tarefa 30: status do protocolo dentro do Resultado da Comparacao", () => {
+  it("'em proposta' aparece dentro de #cmp-result quando protocol_accepted e false", () => {
+    expect(ok.protocol_accepted).toBe(false);
+    const res = textOf(panel(renderToStaticMarkup(<CompareView compare={ok} />), "cmp-result"));
+    expect(res).toContain("em proposta");
+    expect(res).toContain(compareLabels.protocolProposed);
+  });
+
+  it("aceito e desconhecido mudam o texto do painel; 'em proposta' some", () => {
+    const acc = clone(ok);
+    acc.protocol_accepted = true;
+    const a = textOf(panel(renderToStaticMarkup(<CompareView compare={acc} />), "cmp-result"));
+    expect(a).toContain(compareLabels.protocolAccepted);
+    expect(a).not.toContain("em proposta");
+    const unk = clone(ok);
+    unk.protocol_accepted = null;
+    const u = textOf(panel(renderToStaticMarkup(<CompareView compare={unk} />), "cmp-result"));
+    expect(u).toContain(compareLabels.protocolUnknown);
+    expect(u).not.toContain("em proposta");
+  });
+});
+
+describe("Tarefa 32: /ceu/ sem regra nem prior", () => {
+  afterEach(() => {
+    nav.path = "/";
+    nav.search = "";
+  });
+
+  it("barra de ajustes em /ceu/: sem radios de regra e prior, com o checkbox tecnico", () => {
+    for (const where of ["/ceu/", "/ceu"]) {
+      nav.path = where;
+      const html = renderToStaticMarkup(<StateControls meta={meta} />);
+      expect(html, where).not.toMatch(/name="regra"/);
+      expect(html, where).not.toMatch(/name="prior"/);
+      expect(html, where).toMatch(/type="checkbox"/);
+      expect(html, where).toContain(escHtml(controls.tech));
+    }
+  });
+
+  it("controle: em /galaxias/ os radios de regra continuam", () => {
+    nav.path = "/galaxias/";
+    expect(renderToStaticMarkup(<StateControls meta={meta} />)).toMatch(/name="regra"/);
+  });
+
+  it("pagina /ceu/ sem o chip de estado", () => {
+    store.pages = { meta, sky };
+    nav.path = "/ceu/";
+    const html = renderToStaticMarkup(<SkyPage />);
+    expect(html).toContain(escHtml(sky.texts.title));
+    expect(html).not.toContain(`aria-label="${escHtml(controls.currentState)}"`);
+    expect(html).not.toMatch(/name="regra"/);
+  });
+});
+
+describe("Tarefa 33: faixas do ceu com coluna de IC e banda abaixo do piso em n/a", () => {
+  const bandsTable = (s: Sky) => {
+    nav.search = "tecnico=1";
+    const html = panel(renderToStaticMarkup(<SkyView meta={meta} sky={s} />), "sky-bands");
+    nav.search = "";
+    return html;
+  };
+  const bodyRows = (html: string) => html.match(/<tbody>([\s\S]*?)<\/tbody>/)![1].split("<tr>").slice(1);
+
+  it("coluna de IC; reportavel mostra taxa e IC, abaixo do piso mostra n/a com o rotulo do piso", () => {
+    const html = bandsTable(sky);
+    expect(textOf(html.match(/<thead>[\s\S]*?<\/thead>/)![0])).toContain(L_sky.colRateCi);
+    const rows = bodyRows(html).map(textOf);
+    expect(rows).toHaveLength(sky.bands.length);
+    expect(sky.bands[0].band).toBe("A");
+    expect(sky.bands[0].reportable).toBe(false);
+    expect(sky.bands.some((b) => b.reportable)).toBe(true);
+    sky.bands.forEach((b, i) => {
+      if (b.reportable) {
+        expect(b.rate.ci_text).toMatch(/^IC 95%/);
+        expect(rows[i]).toContain(b.rate.text);
+        expect(rows[i]).toContain(b.rate.ci_text);
+        expect(rows[i]).not.toContain(L_sky.bandBelowFloor);
+      } else {
+        expect(rows[i]).toContain(`n/a (${L_sky.bandBelowFloor})`);
+        expect(rows[i]).not.toMatch(/\d,\d%/);
+      }
+    });
+  });
+
+  it("banda A com objetos mas abaixo do piso: contagens ficam, taxa n/a, sem IC", () => {
+    const s = clone(sky);
+    s.bands[0] = { ...s.bands[0], n_pixels: 13, n: 1284, errors: 29, reportable: false, rate: NA_EST };
+    const rowA = textOf(bodyRows(bandsTable(s))[0]);
+    expect(rowA).toContain(ptInt(1284));
+    expect(rowA).toContain(`n/a (${L_sky.bandBelowFloor})`);
+    expect(rowA).not.toMatch(/IC 95%/);
+  });
+});
+
+describe("Tarefas 40b, 40c e validacao: Visao geral tecnica", () => {
+  const tech = overview.technical;
+  const body = (t: string) => t.match(/<tbody>([\s\S]*?)<\/tbody>/)![1].split("<tr>").slice(1);
+
+  it("40b: DSC sem c_sdsc no DOM e sem #ov-dsc-f1; populacao e prior em portugues; tabela de F1 com IC", () => {
+    const t = clone(tech);
+    t.dsc.population = "c_sdsc"; // o campo cru nunca deve ser exibido
+    t.dsc.prior = "c_sdsc";
+    const html = renderToStaticMarkup(<OverviewTechnical technical={t} />);
+    expect(html).not.toContain("c_sdsc");
+    expect(html).not.toContain('id="ov-dsc-f1"');
+    expect(html).not.toContain('id="ov-calibration"');
+    const text = textOf(html);
+    expect(text).toContain(t.dsc.population_text);
+    expect(text).toContain(t.dsc.prior_text);
+    const f1 = tableAfterCaption(html, L_ov.dscScoreTable);
+    expect(f1).toBeDefined();
+    const rows = body(f1!).map(textOf);
+    expect(rows).toHaveLength(t.dsc.macro_f1.length);
+    t.dsc.macro_f1.forEach((m, i) => {
+      expect(rows[i]).toContain(m.label);
+      expect(rows[i]).toContain(m.est.text);
+      expect(rows[i]).toContain(m.est.ci_text);
+    });
+  });
+
+  it("40c: ConfidenceTable com uma linha por faixa; contagens e soma dos erros lidas da fixture", () => {
+    const hist = tech.confidence_hist;
+    expect(hist).toHaveLength(8);
+    const html = renderToStaticMarkup(<OverviewTechnical technical={tech} />);
+    const rows = body(html.match(/<table id="ov-confidence"[\s\S]*?<\/table>/)![0]);
+    expect(rows).toHaveLength(hist.length);
+    let wrongSum = 0;
+    rows.forEach((r, i) => {
+      const cells = r.split("<td>").slice(1).map((x) => textOf(x).trim());
+      expect(cells).toHaveLength(2);
+      expect(cells[0]).toBe(ptInt(hist[i].n_right));
+      expect(cells[1]).toBe(ptInt(hist[i].n_wrong));
+      expect(textOf(r)).toContain(`${ptPct(hist[i].lo, 0)} – ${ptPct(hist[i].hi, 0)}`);
+      wrongSum += Number(cells[1].replace(/\./g, ""));
+    });
+    const expected = hist.reduce((acc, b) => acc + b.n_wrong, 0);
+    expect(expected).toBeGreaterThan(0);
+    expect(wrongSum).toBe(expected);
+  });
+
+  it("40c: cada coluna tem a propria escala (o maximo de cada coluna ocupa a largura toda)", () => {
+    const t = clone(tech);
+    t.confidence_hist = [
+      { lo: 0, hi: 0.5, n_right: 1000, n_wrong: 10 },
+      { lo: 0.5, hi: 1, n_right: 500, n_wrong: 5 },
+    ];
+    const html = renderToStaticMarkup(<OverviewTechnical technical={t} />);
+    const widths = body(html.match(/<table id="ov-confidence"[\s\S]*?<\/table>/)![0]).map((r) =>
+      [...r.matchAll(/<rect[^>]*width="([\d.]+)"/g)].map((m) => Number(m[1])),
+    );
+    const full = widths[0][0];
+    expect(full).toBeGreaterThan(0);
+    // com escala unica, 10 erros contra 1000 acertos dariam 1% da largura
+    expect(widths[0][1]).toBeCloseTo(full);
+    expect(widths[1][0]).toBeCloseTo(full / 2);
+    expect(widths[1][1]).toBeCloseTo(full / 2);
+  });
+
+  it("validacao: com o objeto montado no teste o prior P2 aparece; com null o bloco some", () => {
+    expect(tech.validation).toBeNull();
+    const t = clone(tech);
+    t.validation = {
+      purity: { text: "71,3%", value: 0.713 },
+      completeness: { text: "80,0%", value: 0.8 },
+      prior: "P2",
+    } as unknown as NonNullable<Overview["technical"]["validation"]>;
+    const text = textOf(renderToStaticMarkup(<OverviewTechnical technical={t} />));
+    expect(text).toContain(L_ov.validationTitle);
+    expect(text).toContain(`${L_ov.validationPrior}: P2`);
+    expect(text).toContain("71,3%");
+    expect(text).toContain("80,0%");
+    const none = textOf(renderToStaticMarkup(<OverviewTechnical technical={tech} />));
+    expect(none).not.toContain(L_ov.validationTitle);
+    expect(none).not.toContain(`${L_ov.validationPrior}: P2`);
   });
 });
