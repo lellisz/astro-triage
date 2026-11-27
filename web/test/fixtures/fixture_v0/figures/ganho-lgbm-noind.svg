@@ -1,0 +1,112 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="386" viewBox="0 0 440 386" role="img" aria-labelledby="ganho-lgbm-noind-title" aria-describedby="ganho-lgbm-noind-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="ganho-lgbm-noind-title">Ganho por atributo: LightGBM sem indicadores de astrometria</title><desc id="ganho-lgbm-noind-desc">f_b: 60,0%; f_a: 40,0%</desc>
+ <g id="ganho-lgbm-noind-figure_1">
+  <g id="ganho-lgbm-noind-patch_1">
+   <path d="M 0 386 
+L 440 386 
+L 440 0 
+L 0 0 
+z
+" style="fill: #141414"/>
+  </g>
+  <g id="ganho-lgbm-noind-axes_1">
+   <g id="ganho-lgbm-noind-patch_2">
+    <path d="M 16 125 
+L 336 125 
+L 336 137 
+L 16 137 
+z
+" style="fill: #d6d6d6"/>
+   </g>
+   <g id="ganho-lgbm-noind-patch_3">
+    <path d="M 16 167 
+L 229.333333 167 
+L 229.333333 179 
+L 16 179 
+z
+" style="fill: #d6d6d6"/>
+   </g>
+   <g id="ganho-lgbm-noind-line2d_1">
+    <path d="M 16 102 
+L 16 186 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="ganho-lgbm-noind-line2d_2">
+    <path d="M 122.666667 102 
+L 122.666667 186 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="ganho-lgbm-noind-line2d_3">
+    <path d="M 229.333333 102 
+L 229.333333 186 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="ganho-lgbm-noind-line2d_4">
+    <path d="M 336 102 
+L 336 186 
+" style="fill: none; stroke: #2a2a2a"/>
+   </g>
+   <g id="ganho-lgbm-noind-line2d_5">
+    <path d="M 16 186 
+L 336 186 
+" style="fill: none; stroke: #8a8a8a"/>
+   </g>
+   <g id="ganho-lgbm-noind-text_1">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="22" transform="rotate(-0 16 22)">Ganho por atributo: LightGBM sem</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_2">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="42" transform="rotate(-0 16 42)">indicadores de astrometria</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_3">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="62" transform="rotate(-0 16 62)">Participação de cada atributo no ganho total do</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_4">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="82" transform="rotate(-0 16 82)">modelo</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_5">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="16" y="208" transform="rotate(-0 16 208)">0%</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_6">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="122.666667" y="208" transform="rotate(-0 122.666667 208)">20%</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_7">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="229.333333" y="208" transform="rotate(-0 229.333333 208)">40%</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_8">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="336" y="208" transform="rotate(-0 336 208)">60%</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_9">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="118" transform="rotate(-0 16 118)">f_b</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_10">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="344" y="136" transform="rotate(-0 344 136)">60,0%</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_11">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="160" transform="rotate(-0 16 160)">f_a</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_12">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="237.333333" y="178" transform="rotate(-0 237.333333 178)">40,0%</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_13">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="176" y="232" transform="rotate(-0 176 232)">Ganho (% do ganho total)</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_14">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="260" transform="rotate(-0 16 260)">2 maiores de 12 atributos · melhor iteração 77</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_15">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="280" transform="rotate(-0 16 280)">Sem IC: ganho do modelo treinado, não é estimativa</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_16">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="300" transform="rotate(-0 16 300)">amostral</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_17">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="320" transform="rotate(-0 16 320)">Temperatura de calibração: 1,250</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_18">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="350" transform="rotate(-0 16 350)">PROVISÓRIO</text>
+   </g>
+   <g id="ganho-lgbm-noind-text_19">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="370" transform="rotate(-0 16 370)">LightGBM sem indicadores de astrometria · fixture_v0</text>
+   </g>
+  </g>
+ </g>
+</svg>

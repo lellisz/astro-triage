@@ -1,0 +1,210 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="674" viewBox="0 0 440 674" role="img" aria-labelledby="confusao-title" aria-describedby="confusao-desc" stroke-linejoin="round" stroke-linecap="butt" style="max-width:100%;height:auto"><title id="confusao-title">Matriz de confusão</title><desc id="confusao-desc">Estrela prevista como Estrela: 40,0%, n = 6, IC 95%: 19,8% a 64,3%; Estrela prevista como Galáxia: 40,0%, n = 6, IC 95%: 19,8% a 64,3%; Estrela prevista como Quasar: n/a, n = n/a, n/a; Galáxia prevista como Estrela: 46,7%, n = 7, IC 95%: 24,8% a 69,9%; Galáxia prevista como Galáxia: n/a, n = n/a, n/a; Galáxia prevista como Quasar: 33,3%, n = 5, IC 95%: 15,2% a 58,3%; Quasar prevista como Estrela: 46,7%, n = 7, IC 95%: 24,8% a 69,9%; Quasar prevista como Galáxia: n/a, n = n/a, n/a; Quasar prevista como Quasar: n/a, n = n/a, n/a</desc>
+ <g id="confusao-figure_1">
+  <g id="confusao-patch_1">
+   <path d="M 0 674 
+L 440 674 
+L 440 0 
+L 0 0 
+z
+" style="fill: #141414"/>
+  </g>
+  <g id="confusao-axes_1">
+   <g id="confusao-patch_2">
+    <path d="M 17 157 
+L 151 157 
+L 151 239 
+L 17 239 
+z
+" style="fill: #d6d6d6; fill-opacity: 0.128; stroke: #8c8c8c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="confusao-patch_3">
+    <path d="M 153 157 
+L 287 157 
+L 287 239 
+L 153 239 
+z
+" style="fill: #d6d6d6; fill-opacity: 0.128"/>
+   </g>
+   <g id="confusao-patch_4">
+    <path d="M 289 157 
+L 423 157 
+L 423 239 
+L 289 239 
+L 289 157 
+z
+" style="fill: none"/>
+   </g>
+   <g id="confusao-patch_5">
+    <path d="M 17 277 
+L 151 277 
+L 151 359 
+L 17 359 
+z
+" style="fill: #d6d6d6; fill-opacity: 0.149333"/>
+   </g>
+   <g id="confusao-patch_6">
+    <path d="M 153 277 
+L 287 277 
+L 287 359 
+L 153 359 
+L 153 277 
+z
+" style="fill: none; stroke: #8c8c8c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="confusao-patch_7">
+    <path d="M 289 277 
+L 423 277 
+L 423 359 
+L 289 359 
+z
+" style="fill: #d6d6d6; fill-opacity: 0.106667"/>
+   </g>
+   <g id="confusao-patch_8">
+    <path d="M 17 397 
+L 151 397 
+L 151 479 
+L 17 479 
+z
+" style="fill: #d6d6d6; fill-opacity: 0.149333"/>
+   </g>
+   <g id="confusao-patch_9">
+    <path d="M 153 397 
+L 287 397 
+L 287 479 
+L 153 479 
+L 153 397 
+z
+" style="fill: none"/>
+   </g>
+   <g id="confusao-patch_10">
+    <path d="M 289 397 
+L 423 397 
+L 423 479 
+L 289 479 
+L 289 397 
+z
+" style="fill: none; stroke: #8c8c8c; stroke-width: 1.5; stroke-linejoin: miter"/>
+   </g>
+   <g id="confusao-text_1">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="22" transform="rotate(-0 16 22)">Matriz de confusão</text>
+   </g>
+   <g id="confusao-text_2">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="42" transform="rotate(-0 16 42)">LightGBM completo · conjunto de teste · fração de</text>
+   </g>
+   <g id="confusao-text_3">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #b4b4b4" x="16" y="62" transform="rotate(-0 16 62)">cada linha</text>
+   </g>
+   <g id="confusao-text_4">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="220" y="92" transform="rotate(-0 220 92)">Classe prevista</text>
+   </g>
+   <g id="confusao-text_5">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #eeeeee" x="84" y="114" transform="rotate(-0 84 114)">Estrela</text>
+   </g>
+   <g id="confusao-text_6">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #eeeeee" x="220" y="114" transform="rotate(-0 220 114)">Galáxia</text>
+   </g>
+   <g id="confusao-text_7">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #eeeeee" x="356" y="114" transform="rotate(-0 356 114)">Quasar</text>
+   </g>
+   <g id="confusao-text_8">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="148" transform="rotate(-0 16 148)">Estrela</text>
+   </g>
+   <g id="confusao-text_9">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="83.179688" y="148" transform="rotate(-0 83.179688 148)">verdadeira · n = 15</text>
+   </g>
+   <g id="confusao-text_10">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #6db3ff" x="84" y="184" transform="rotate(-0 84 184)">40,0%</text>
+   </g>
+   <g id="confusao-text_11">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="84" y="205" transform="rotate(-0 84 205)">n = 6</text>
+   </g>
+   <g id="confusao-text_12">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="84" y="226" transform="rotate(-0 84 226)">19,8% a 64,3%</text>
+   </g>
+   <g id="confusao-text_13">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #6db3ff" x="220" y="184" transform="rotate(-0 220 184)">40,0%</text>
+   </g>
+   <g id="confusao-text_14">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="220" y="205" transform="rotate(-0 220 205)">n = 6</text>
+   </g>
+   <g id="confusao-text_15">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="220" y="226" transform="rotate(-0 220 226)">19,8% a 64,3%</text>
+   </g>
+   <g id="confusao-text_16">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="356" y="184" transform="rotate(-0 356 184)">n/a</text>
+   </g>
+   <g id="confusao-text_17">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="268" transform="rotate(-0 16 268)">Galáxia</text>
+   </g>
+   <g id="confusao-text_18">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="86.639062" y="268" transform="rotate(-0 86.639062 268)">verdadeira · n = 15</text>
+   </g>
+   <g id="confusao-text_19">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #6db3ff" x="84" y="304" transform="rotate(-0 84 304)">46,7%</text>
+   </g>
+   <g id="confusao-text_20">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="84" y="325" transform="rotate(-0 84 325)">n = 7</text>
+   </g>
+   <g id="confusao-text_21">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="84" y="346" transform="rotate(-0 84 346)">24,8% a 69,9%</text>
+   </g>
+   <g id="confusao-text_22">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="220" y="304" transform="rotate(-0 220 304)">n/a</text>
+   </g>
+   <g id="confusao-text_23">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #6db3ff" x="356" y="304" transform="rotate(-0 356 304)">33,3%</text>
+   </g>
+   <g id="confusao-text_24">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="356" y="325" transform="rotate(-0 356 325)">n = 5</text>
+   </g>
+   <g id="confusao-text_25">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="356" y="346" transform="rotate(-0 356 346)">15,2% a 58,3%</text>
+   </g>
+   <g id="confusao-text_26">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #eeeeee" x="16" y="388" transform="rotate(-0 16 388)">Quasar</text>
+   </g>
+   <g id="confusao-text_27">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="84" y="388" transform="rotate(-0 84 388)">verdadeira · n = 15</text>
+   </g>
+   <g id="confusao-text_28">
+    <text style="font-weight: 600; font-size: 17px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #6db3ff" x="84" y="424" transform="rotate(-0 84 424)">46,7%</text>
+   </g>
+   <g id="confusao-text_29">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #b4b4b4" x="84" y="445" transform="rotate(-0 84 445)">n = 7</text>
+   </g>
+   <g id="confusao-text_30">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="84" y="466" transform="rotate(-0 84 466)">24,8% a 69,9%</text>
+   </g>
+   <g id="confusao-text_31">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="220" y="424" transform="rotate(-0 220 424)">n/a</text>
+   </g>
+   <g id="confusao-text_32">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: middle; fill: #8c8c8c" x="356" y="424" transform="rotate(-0 356 424)">n/a</text>
+   </g>
+   <g id="confusao-text_33">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="508" transform="rotate(-0 16 508)">Linha: classe verdadeira, soma 100% · célula: fração,</text>
+   </g>
+   <g id="confusao-text_34">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="528" transform="rotate(-0 16 528)">n e IC 95%</text>
+   </g>
+   <g id="confusao-text_35">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="548" transform="rotate(-0 16 548)">Contorno: diagonal (acertos) · tom de cinza</text>
+   </g>
+   <g id="confusao-text_36">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="568" transform="rotate(-0 16 568)">proporcional à fração</text>
+   </g>
+   <g id="confusao-text_37">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="588" transform="rotate(-0 16 588)">Total: 45 objetos no teste</text>
+   </g>
+   <g id="confusao-text_38">
+    <text style="font-weight: 600; font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #6db3ff" x="16" y="618" transform="rotate(-0 16 618)">PROVISÓRIO</text>
+   </g>
+   <g id="confusao-text_39">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="638" transform="rotate(-0 16 638)">LightGBM completo · fixture_v0</text>
+   </g>
+   <g id="confusao-text_40">
+    <text style="font-size: 15px; font-family: var(--font-sans, 'Inter', 'DejaVu Sans', sans-serif); text-anchor: start; fill: #8c8c8c" x="16" y="658" transform="rotate(-0 16 658)">Célula com menos de 5 objetos: n/a</text>
+   </g>
+  </g>
+ </g>
+</svg>
