@@ -30,6 +30,7 @@ const bandColumns: readonly DataColumn[] = [
   { key: "n", label: L.colObjects, numeric: true },
   { key: "errors", label: L.colErrors, numeric: true },
   { key: "rate", label: L.colRate, numeric: true },
+  { key: "ci", label: L.colRateCi },
 ];
 
 function Body({ props, tech }: { props: Props; tech: boolean }) {
@@ -60,7 +61,8 @@ function Body({ props, tech }: { props: Props; tech: boolean }) {
     pixels: ptInt(b.n_pixels),
     n: ptInt(b.n),
     errors: ptInt(b.errors),
-    rate: b.rate.text,
+    rate: b.reportable ? b.rate.text : `${b.rate.text} (${L.bandBelowFloor})`,
+    ci: b.rate.ci_text,
   }));
 
   return (

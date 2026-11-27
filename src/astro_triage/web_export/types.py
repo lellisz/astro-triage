@@ -15,7 +15,9 @@ from astro_triage.dashboard.kit_types import NA_WORD, Value
 from astro_triage.web_export import SCHEMA_VERSION
 
 _NUM_KINDS: Final = ("int", "pct", "num", "g")
-_EST_KINDS: Final = ("pct", "num")
+_EST_KINDS: Final = ("pct", "num", "pp")
+PP_SUFFIX: Final = " p.p."
+PP_DIGITS: Final = 2
 
 
 def _real(name: str, x: object) -> float | None:
@@ -31,13 +33,22 @@ def _real(name: str, x: object) -> float | None:
     return x.item() if isinstance(x, np.generic) else x
 
 
+def _signed_num(x: float, digits: int, signed: bool) -> str:
+    """``fmt.pt_num``, except that a signed value rounding to zero prints "0,000", no sign."""
+    if signed and round(x, digits) == 0:
+        return fmt.pt_num(0.0, digits)
+    return fmt.pt_num(x, digits, signed)
+
+
 def _format(kind: str, x: float, digits: int | None, signed: bool) -> str:
     if kind == "int":
         return fmt.pt_int(x)
     if kind == "pct":
         return fmt.pt_pct(x, 1 if digits is None else digits)
     if kind == "num":
-        return fmt.pt_num(x, 3 if digits is None else digits, signed)
+        return _signed_num(x, 3 if digits is None else digits, signed)
+    if kind == "pp":
+        return _signed_num(x * 100, PP_DIGITS if digits is None else digits, signed) + PP_SUFFIX
     return fmt.pt_g(x)
 
 

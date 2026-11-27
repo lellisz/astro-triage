@@ -34,10 +34,12 @@ VERDICT_TEXT: Final[Mapping[VerdictKey, str]] = {
     ),
     VerdictKey.DEPENDS: "A pureza de galáxia depende do prior assumido.",
     VerdictKey.WIDE: (
-        "Sem diferença detectável entre P1 e P2; "
+        "Os intervalos de P1 e P2 se sobrepõem (sem teste pareado entre priors); "
         "a comparação com as redes tem intervalos largos."
     ),
-    VerdictKey.NO_DIFFERENCE: "Sem diferença detectável entre P1 e P2.",
+    VerdictKey.NO_DIFFERENCE: (
+        "Os intervalos de P1 e P2 se sobrepõem (sem teste pareado entre priors)."
+    ),
     VerdictKey.UNAVAILABLE: hs.NA,
 }
 NETWORK_NAME: Final[Mapping[str, str]] = {

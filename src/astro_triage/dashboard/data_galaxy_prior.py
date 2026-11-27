@@ -24,7 +24,13 @@ from astro_triage.dashboard.data_headline import (
     SKY_PRIORS,
 )
 from astro_triage.dashboard.data_release import Release
-from astro_triage.dashboard.html_galaxies import extreme_bands
+from astro_triage.dashboard.html_galaxies import (
+    BRIGHTEST,
+    FARTHEST,
+    NEAREST,
+    Band,
+    extreme_bands,
+)
 from astro_triage.dashboard.kit_types import BarRow, Value
 from astro_triage.dashboard.kit_types import Interval as KitInterval
 from astro_triage.dashboard.overview_model import ROW_ORDER
@@ -36,9 +42,11 @@ VERDICT_PRIORS = ("P1", "P2")  # P3 is partial and stays out of the verdict
 NETWORKS = ("mlp_full", "ftt_full")
 REFERENCE = "lgbm_full"
 ALL_LABEL = "Todas as galáxias"
-BRIGHTEST_LABEL = "As mais brilhantes"
-NEAREST_LABEL = "As mais próximas"
-FARTHEST_LABEL = "As mais distantes"
+BRIGHTEST_LABEL = BRIGHTEST
+NEAREST_LABEL = NEAREST
+FARTHEST_LABEL = FARTHEST
+# Bands whose limits alone do not say why they are an extreme keep the word in parentheses.
+_QUALIFIED = (BRIGHTEST_LABEL, NEAREST_LABEL)
 _CROSSMATCH_PREFIX = "Selection by crossmatch"
 
 
@@ -233,8 +241,16 @@ def galaxy_error_rows(
     ]
     for label in (BRIGHTEST_LABEL, NEAREST_LABEL, FARTHEST_LABEL):
         band = bands.get(label)
-        rows.append((label, _rate(band.n, band.errors, floor) if band else None))
+        if band is None:
+            rows.append((label, None))
+        else:
+            rows.append((_shown_label(label, band), _rate(band.n, band.errors, floor)))
     return tuple(rows)
+
+
+def _shown_label(what: str, band: Band) -> str:
+    """Row label from the band limits, e.g. "G < 18 (mais brilhantes)"; no digit typed here."""
+    return f"{band.name} ({what})" if what in _QUALIFIED else band.name
 
 
 def crossmatch_note(rel: Release) -> str | None:

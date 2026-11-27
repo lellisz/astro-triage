@@ -1,19 +1,15 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, type ReactNode } from "react";
 import { useSearchParams } from "next/navigation";
-import { DotCI, type DotCIRow } from "@/components/charts/DotCI";
 import { HBarCI, type HBarCIRow } from "@/components/charts/HBarCI";
-import {
-  PriorSeries,
-  type PriorSeriesCategory,
-  type PriorSeriesLine,
-} from "@/components/charts/PriorSeries";
 import { DataTable, type DataColumn } from "@/components/kit/DataTable";
 import { Panel } from "@/components/kit/Panel";
-import { chartLabels, galaxiesLabels as L } from "@/content/labels";
-import type { Est, Galaxies, GalaxyErrorRow, Meta, Rule } from "@/lib/schema";
-import { readState, type UiState } from "@/lib/ui-state";
+import { chartLabels, compareHref, galaxiesLabels as L } from "@/content/labels";
+import { ptNum } from "@/lib/fmt";
+import type { Galaxies, GalaxyErrorRow, Meta, Rule } from "@/lib/schema";
+import { readState, withState, type UiState } from "@/lib/ui-state";
 import galaxiesStyles from "./galaxies.module.css";
 import styles from "./page.module.css";
 
@@ -22,14 +18,20 @@ type Props = { meta: Meta; galaxies: Galaxies };
 const RULES: readonly Rule[] = ["as_shipped", "prior_matched"];
 const AXIS_STEPS = [0.2, 0.4, 0.8, 1];
 
-const MISSING: Est = { point: null, lo: null, hi: null, text: L.pointMissing, ci_text: L.pointMissing };
-
 const columns: readonly DataColumn[] = [
   { key: "label", label: L.colBand },
   { key: "n", label: L.colObjects, numeric: true },
   { key: "errors", label: L.colErrors, numeric: true },
   { key: "rate", label: L.colRate, numeric: true },
   { key: "ci", label: L.colRateCi },
+];
+
+const netColumns: readonly DataColumn[] = [
+  { key: "net", label: L.colNet },
+  { key: "diff", label: L.colDiff, numeric: true },
+  { key: "ci", label: L.colCi },
+  { key: "delta", label: L.colDelta, numeric: true },
+  { key: "verdict", label: L.colVerdict },
 ];
 
 // Só escala de eixo (layout): o menor degrau que contém o maior limite superior exportado.
@@ -66,42 +68,42 @@ function Scroller({ label, children }: { label: string; children: ReactNode }) {
   );
 }
 
-function priorSeries(meta: Meta, g: Galaxies, state: UiState, pick: "purity" | "completeness") {
-  const base = g.blocks.as_shipped;
-  const categories: PriorSeriesCategory[] = base.map((b) => ({
-    key: b.prior,
-    label: b.prior,
-    partial: b.partial,
-    selected: b.prior === state.prior,
-  }));
-  const series: PriorSeriesLine[] = RULES.map((rule, i) => ({
-    key: rule,
-    label: meta.rule_labels[rule],
-    style: i === 0 ? "solid" : "dashed",
-    points: base.map((b) => {
-      const block = g.blocks[rule].find((x) => x.prior === b.prior);
-      return {
-        est: block ? block[pick] : MISSING,
-        partial: block ? block.partial : b.partial,
-        selected: rule === state.rule && b.prior === state.prior,
-      };
-    }),
-  }));
-  return { categories, series };
+// As duas regras com cada prior do bloco, na mesma forma de barras da Visão geral.
+function priorRows(meta: Meta, g: Galaxies, state: UiState, pick: "purity" | "completeness"): HBarCIRow[] {
+  return RULES.flatMap((rule) =>
+    g.blocks[rule].map((b) => ({
+      key: `${rule}-${b.prior}`,
+      label:
+        meta.states.find((s) => s.rule === rule && s.prior === b.prior)?.label ??
+        `${meta.rule_labels[rule]} · ${b.prior}`,
+      est: b[pick],
+      selected: rule === state.rule && b.prior === state.prior,
+      partial: b.partial,
+    })),
+  );
 }
 
-function Networks({ g }: { g: Galaxies }) {
+function Networks({ g, meta, state }: { g: Galaxies; meta: Meta; state: UiState }) {
   const nets = Object.entries(g.networks).flatMap(([key, n]) => (n ? [{ key, n }] : []));
-  const rows: DotCIRow[] = nets.map(({ key, n }) => ({ key, label: n.label, est: n.diff }));
+  const rows = nets.map(({ n }) => ({
+    net: n.label,
+    diff: n.diff.text,
+    ci: n.diff.ci_text,
+    // Mesma regra do kind "pp" de types.py (x100, 2 casas, sufixo " p.p."), unidade de D.
+    delta: `${ptNum(n.delta * 100, 2)} p.p.`,
+    verdict: n.word,
+  }));
   return (
     <>
+      <p className={styles.muted}>{g.fixed_point_text}</p>
       {g.dl_error ? <p className={styles.callout}>{g.dl_error}</p> : null}
       {g.networks_note ? <p className={styles.callout}>{g.networks_note}</p> : null}
       {nets.length > 0 ? (
         <>
-          <Scroller label={L.networksRegion}>
-            <DotCI id="gal-net" title={L.networkDiffChart} rows={rows} zeroLine />
-          </Scroller>
+          <DataTable caption={L.netTableCaption} columns={netColumns} rows={rows} />
+          <p>
+            <Link href={withState(compareHref, state, meta.release)}>{L.compareLink}</Link>
+          </p>
           <ul className={galaxiesStyles.nets}>
             {nets.map(({ key, n }) => (
               <li key={key} className={galaxiesStyles.net} data-net={key} data-state={n.state}>
@@ -126,42 +128,39 @@ function Networks({ g }: { g: Galaxies }) {
 
 function Body({ props, state }: { props: Props; state: UiState }) {
   const { meta, galaxies: g } = props;
-  const purity = priorSeries(meta, g, state, "purity");
-  const completeness = priorSeries(meta, g, state, "completeness");
+  const purity = priorRows(meta, g, state, "purity");
+  const completeness = priorRows(meta, g, state, "completeness");
   const overall = g.error_rows;
   return (
     <div className={styles.stack}>
       <div className={galaxiesStyles.context}>
         <p className={styles.answer}>{g.verdict.text}</p>
         {g.verdict.scope_text ? <p className={styles.muted}>{g.verdict.scope_text}</p> : null}
-        <p className={styles.muted}>{g.fixed_point_text}</p>
       </div>
 
       <Panel id="gal-purity" title={L.purityTitle} subtitle={L.puritySub}>
         <Scroller label={L.chartsRegion}>
-          <PriorSeries
+          <HBarCI
             id="gal-purity-chart"
             title={L.purityChart}
-            categories={purity.categories}
-            series={purity.series}
+            rows={purity}
             partialTag={chartLabels.partialTag}
           />
         </Scroller>
       </Panel>
       <Panel id="gal-completeness" title={L.completenessTitle} subtitle={L.completenessSub}>
         <Scroller label={L.chartsRegion}>
-          <PriorSeries
+          <HBarCI
             id="gal-completeness-chart"
             title={L.completenessChart}
-            categories={completeness.categories}
-            series={completeness.series}
+            rows={completeness}
             partialTag={chartLabels.partialTag}
           />
         </Scroller>
       </Panel>
 
       <Panel id="gal-networks" title={L.networksTitle} subtitle={L.networksSub}>
-        <Networks g={g} />
+        <Networks g={g} meta={meta} state={state} />
       </Panel>
 
       <Panel id="gal-errors" title={L.errorsTitle} subtitle={L.errorsSub}>
@@ -201,25 +200,8 @@ function Technical({ g }: { g: Galaxies }) {
   return (
     <Panel id="gal-tech" title={L.techTitle} subtitle={missing}>
       <div className={galaxiesStyles.tech}>
-        <Scroller label={L.errorsRegion}>
-          <HBarCI
-            id="gal-g-chart"
-            title={L.techByG}
-            rows={errorBars("g", byG)}
-            axisMax={axisMaxOf(byG)}
-            partialTag={chartLabels.partialTag}
-          />
-        </Scroller>
         <DataTable caption={L.techByG} columns={columns} rows={tableRows(byG)} />
-        <Scroller label={L.errorsRegion}>
-          <HBarCI
-            id="gal-z-chart"
-            title={L.techByZ}
-            rows={errorBars("z", byZ)}
-            axisMax={axisMaxOf(byZ)}
-            partialTag={chartLabels.partialTag}
-          />
-        </Scroller>
+        <p className={styles.muted}>{L.galBandsJoinNote}</p>
         <DataTable caption={L.techByZ} columns={columns} rows={tableRows(byZ)} />
       </div>
     </Panel>

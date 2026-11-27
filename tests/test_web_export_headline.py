@@ -57,7 +57,7 @@ def test_all_ties_give_no_detectable_difference(synthetic, monkeypatch) -> None:
     _force_pairs(monkeypatch, (PairVerdict.TIE, PairVerdict.TIE))
     h = _headline(synthetic)
     assert h["key"] == "no_detectable_difference"
-    assert h["title"] == "Sem diferença detectável"
+    assert h["title"] == "Nenhuma rede venceu o LightGBM"
     assert CT.POWER_PHRASE in h["caveat"]
     assert "MLP" in h["lead"] and "FTT" in h["lead"]
     assert [p["text"] for p in h["pairs"]] == [CT.PAIR_WORD[PairVerdict.TIE]] * 2

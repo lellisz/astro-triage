@@ -17,6 +17,7 @@ export const routes: readonly Route[] = [
 
 export const compareHref = "/comparacao-dl/";
 export const chartsHref = "/graficos/";
+export const skyHref = "/ceu/";
 
 export type PageLabels = { eyebrow: string; title: string; lead: string };
 
@@ -83,7 +84,8 @@ export const footer = {
 export const overviewLabels = {
   purity: "Pureza de quasar",
   completeness: "Completude de quasar",
-  accuracy: "Acurácia geral",
+  accuracy: "Acurácia",
+  accuracyNA: "não se aplica: a acurácia só é definida na mistura do teste",
   unavailable: "Esta combinação de regra e prior não está disponível nesta versão dos dados.",
   barsTitle: "Pureza e completude nas condições avaliadas",
   barsSub: "Comparação da regra e dos priors de referência",
@@ -97,8 +99,8 @@ export const overviewLabels = {
   skyAria: "Mapa do céu inteiro: cada ponto é uma região com taxa de erro",
   skyCaption:
     "Cada ponto é uma região do céu com objetos suficientes para a conta. Quanto mais forte a cor, maior a taxa de erro. Regiões com poucos objetos não aparecem.",
-  contrastRegion: "Acerto geral contra pureza de quasar",
-  contrastAccuracy: "Acerto geral",
+  contrastRegion: "Acurácia contra pureza de quasar",
+  contrastAccuracy: "Acurácia",
   contrastPurity: "Pureza de quasar na regra como entregue",
   techLink: "Ver detalhes técnicos",
   techLinkAria: "Ver detalhes técnicos desta página, no modo técnico",
@@ -115,8 +117,9 @@ export const overviewLabels = {
   dataBoxTitle: "Dados do teste",
   classMixTitle: "Composição por classe",
   validationTitle: "Validação",
-  validationPurity: "Pureza na validação",
-  validationCompleteness: "Completude na validação",
+  validationPurity: "Pureza de quasar na validação, com completude fixada",
+  validationCompleteness: "Completude fixada (C*)",
+  validationPrior: "Prior",
   errorsTitle: "Direções do erro",
   errorsCaption: "Erros por classe verdadeira e classe prevista",
   colTrue: "Classe verdadeira",
@@ -133,6 +136,10 @@ export const overviewLabels = {
   dscTitle: "Comparação com o Gaia DSC",
   dscPopulation: "População",
   dscRows: "Linhas",
+  dscScoreTable: "Medida F macro por modelo, com intervalo de confiança",
+  colModel: "Modelo",
+  colScore: "Medida F macro",
+  colCi: "Intervalo de confiança",
   dscScoreChart: "Medida F macro por modelo",
   dscDiffChart: "Diferenças pareadas da medida F macro",
   dscRegion: "Gráficos da comparação com o Gaia DSC, roláveis na horizontal",
@@ -146,20 +153,22 @@ export const overviewLabels = {
   calibrationY: "Frequência observada",
   calibrationDiagonal: "Calibração perfeita",
   calibrationRegion: "Diagrama de confiabilidade, rolável na horizontal",
+  calibrationLink: "Calibração por classe: ver na página Gráficos",
   confidenceTitle: "Confiança nas previsões",
   confidenceChart: "Objetos por faixa de confiança",
   confidenceX: "Confiança da previsão",
   confidenceY: "Objetos",
   confidenceRight: "Acertos",
   confidenceWrong: "Erros",
-  confidenceRegion: "Histograma de confiança, rolável na horizontal",
+  confidenceRegion: "Tabela de confiança, rolável na horizontal",
+  confidenceBand: "Faixa de confiança",
 };
 
 export const skyLabels = {
   regions: "Regiões com dados",
   objects: "Objetos no teste",
   below: "Regiões abaixo do piso",
-  maxRate: "Maior taxa de erro",
+  maxRate: "Maior taxa entre as regiões acima do piso (o máximo tende a exagerar)",
   mapTitle: "Mapa Mollweide do céu",
   toolbarAria: "Controles do mapa",
   modeGroupAria: "Grandeza exibida no mapa",
@@ -172,9 +181,10 @@ export const skyLabels = {
   colObjects: "Objetos",
   colErrors: "Erros",
   colRate: "Taxa de erro",
-  colRateCi: "Intervalo de confiança",
+  colRateCi: "Intervalo de confiança (Wilson, por objeto)",
   colBand: "Faixa",
   colPixels: "Regiões",
+  bandBelowFloor: "abaixo do piso de regiões",
 };
 
 export const skyMapLabels = {
@@ -208,7 +218,7 @@ export const galaxiesLabels = {
   networksTitle: "Redes neurais",
   networksSub: "Diferença de pureza em relação ao modelo de árvores",
   errorsTitle: "Onde os erros se concentram",
-  errorsSub: "Taxa de erro por magnitude G e por redshift",
+  errorsSub: "Taxa de erro da classe de maior probabilidade (regra como entregue), por magnitude G e por redshift",
   pointMissing: "indisponível",
   purityChart: "Pureza de galáxia",
   completenessChart: "Completude de galáxia",
@@ -232,7 +242,16 @@ export const galaxiesLabels = {
   colObjects: "Objetos",
   colErrors: "Erros",
   colRate: "Taxa de erro",
-  colRateCi: "Intervalo de confiança",
+  colRateCi: "Intervalo de confiança (Wilson, por objeto)",
+  galBandsJoinNote:
+    "As faixas de magnitude desta tabela juntam as mais brilhantes numa só, para passar do piso; por isso diferem das faixas da página Gráficos.",
+  netTableCaption: "Diferença de pureza de galáxia de cada rede em relação ao modelo de árvores",
+  colNet: "Rede",
+  colDiff: "Diferença",
+  colCi: "Intervalo de confiança",
+  colDelta: "Margem δ",
+  colVerdict: "Veredito",
+  compareLink: "Ver a comparação completa com aprendizado profundo",
 };
 
 export const compareLabels = {
@@ -342,10 +361,10 @@ export const graficosLabels = {
   colObjects: "Objetos",
   colErrors: "Erros",
   colRate: "Taxa de erro",
-  colRateCi: "Intervalo de confiança",
+  colRateCi: "Intervalo de confiança (Wilson, por objeto)",
   colMeanProb: "Probabilidade média",
   colFreq: "Frequência observada",
-  colFreqCi: "Intervalo de confiança",
+  colFreqCi: "Intervalo de confiança (Wilson, por objeto)",
   colShare: "Fração da linha",
   colClass: "Classe",
   viewNumbers: "Ver os números",
@@ -354,7 +373,7 @@ export const graficosLabels = {
   legendTitle: "Legenda",
   legendBelowFloor: "Marcador oco abaixo do eixo: abaixo do piso, sem valor",
   legendCmdBelowFloor: "Célula hachurada: abaixo do piso, sem valor",
-  legendInterval: "Barras: intervalo de confiança, só no modo técnico",
+  legendInterval: "Barras: intervalo de confiança (Wilson, por objeto)",
   legendRaw: "Marcador oco: antes do ajuste de temperatura",
   legendDiagonal: "Diagonal: acertos",
   notAvailable: "n/a",

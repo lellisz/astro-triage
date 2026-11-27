@@ -47,7 +47,9 @@ def reading_paragraphs(f: MethodFacts) -> list[str]:
         ),
         N.floor_note(f.min_objects, f.min_pixels),
         (
-            "Os intervalos de acerto por faixa usam o método de Wilson. "
+            "Os intervalos por faixa, por célula e por região usam o método de Wilson, por "
+            "objeto: não incluem a correlação entre regiões vizinhas e ficam mais estreitos "
+            "que um bootstrap por região. "
             + N.bootstrap_note(f.n_boot)
             + " "
             + N.INTERVAL_NOTE

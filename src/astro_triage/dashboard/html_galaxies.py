@@ -16,6 +16,10 @@ from astro_triage.dashboard.constants import ERROR_HIGH
 
 # Rates below this share are written with two decimals.
 SMALL_RATE: Final = 0.01
+# What each extreme band is, in words that do not read z as a distance.
+BRIGHTEST: Final = "mais brilhantes"
+NEAREST: Final = "redshift quase nulo"
+FARTHEST: Final = "maior redshift"
 
 
 @dataclass(frozen=True)
@@ -69,8 +73,8 @@ def extreme_bands(
     picks: list[tuple[str, Band]] = []
     g, z = _usable(by_g), _usable(by_z)
     if len(g):
-        picks.append(("As mais brilhantes", _band(g.loc[g["lo"].idxmin()], "G")))
+        picks.append((BRIGHTEST, _band(g.loc[g["lo"].idxmin()], "G")))
     if len(z):
-        picks.append(("As mais próximas", _band(z.loc[z["lo"].idxmin()], "z")))
-        picks.append(("As mais distantes", _band(z.loc[z["lo"].idxmax()], "z")))
+        picks.append((NEAREST, _band(z.loc[z["lo"].idxmin()], "z")))
+        picks.append((FARTHEST, _band(z.loc[z["lo"].idxmax()], "z")))
     return [(what, band) for what, band in picks if band.n >= floor]

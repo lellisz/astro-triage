@@ -260,7 +260,12 @@ def test_error_rows_do_not_scan_the_release():
 
 def test_error_rows_four_rows_in_order_with_counts():
     rows = rows_of(error_release())
-    assert tuple(r[0] for r in rows) == LABELS
+    assert tuple(r[0] for r in rows) == (
+        gp.ALL_LABEL,
+        f"G < 18 ({gp.BRIGHTEST_LABEL})",
+        f"z ≤ 0,001 ({gp.NEAREST_LABEL})",
+        "z ≥ 0,45",
+    )
     assert [(r[1].n, r[1].errors) for r in rows] == [
         (60, 10),
         (20, 5),
@@ -383,12 +388,14 @@ def test_verdict_texts_use_the_agreed_wording():
     assert (
         hg.verdict_text(V.DEPENDS) == "A pureza de galáxia depende do prior assumido."
     )
-    assert hg.verdict_text(V.NO_DIFFERENCE) == "Sem diferença detectável entre P1 e P2."
+    assert hg.verdict_text(V.NO_DIFFERENCE) == (
+        "Os intervalos de P1 e P2 se sobrepõem (sem teste pareado entre priors)."
+    )
     assert hg.verdict_text(V.DEPENDS_WIDE).endswith(
         "a comparação com as redes tem intervalos largos."
     )
     assert hg.verdict_text(V.WIDE).startswith(
-        "Sem diferença detectável entre P1 e P2; "
+        "Os intervalos de P1 e P2 se sobrepõem (sem teste pareado entre priors); "
     )
 
 

@@ -93,7 +93,7 @@ function Calibration({ g, tech }: { g: Graficos; tech: boolean }) {
           xLabel={L.calibrationX}
           yLabel={L.calibrationY}
           diagonalLabel={L.legendDiagonal}
-          intervals={tech}
+          intervals
           raw={tech}
           intervalLabel={L.legendInterval}
           rawLabel={L.legendRaw}
@@ -160,13 +160,13 @@ function RatePanel({
             id={perClass ? `${id}-chart-${group[0].key}` : `${id}-chart`}
             title={perClass ? group[0].label : chart}
             series={group}
-            showCi={tech}
+            showCi
             yLabel={L.errorY}
             naText={L.notAvailable}
           />
         </Scroller>
       ))}
-      <Legend items={[L.legendBelowFloor, ...(tech ? [L.legendInterval] : [])]} />
+      <Legend items={[L.legendBelowFloor, L.legendInterval]} />
       {note ? <p className={styles.callout}>{note}</p> : null}
       <Numbers>
         <DataTable caption={chart} columns={columns} rows={rows} />
@@ -206,7 +206,7 @@ function Confusion({ g, tech }: { g: Graficos; tech: boolean }) {
           caption={L.confusionCaption}
           classes={conf.classes}
           rows={conf.rows}
-          showCi={tech}
+          showCi
           trueLabel={L.confusionTrue}
           predLabel={L.confusionPred}
         />

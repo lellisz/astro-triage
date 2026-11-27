@@ -92,6 +92,34 @@ describe("Visao geral: bloco da resposta", () => {
     expect(render(tie, "tecnico=1")).not.toContain(`>${L.techLink}<`);
   });
 
+  it("linha de protocolo em proposta logo abaixo do titulo (Tarefa 28, AUD-01)", () => {
+    const proto = overview.headline.protocol_text;
+    expect(proto).toContain("em proposta");
+    const fixture = render(overview.headline);
+    const at = fixture.indexOf(escapeHtml(proto!));
+    expect(at).toBeGreaterThan(fixture.indexOf(escapeHtml(overview.headline.title)));
+    expect(at).toBeLessThan(fixture.indexOf(escapeHtml(overview.headline.lead)));
+    // nulo (protocolo aceito) nao deixa rastro
+    expect(render({ ...overview.headline, protocol_text: null })).not.toContain("em proposta");
+  });
+
+  it("frase do par sem vitoria da fixture segue a D-1 (o titulo TIE e provado no pytest)", () => {
+    const html = render(overview.headline);
+    for (const p of overview.headline.pairs) {
+      expect(p.text).not.toMatch(/sem diferença detectável/i);
+      expect(html).toContain(escapeHtml(p.text));
+    }
+    expect(overview.headline.pairs.map((p) => p.text)).toContain("sem vitória do par, fica o LightGBM");
+    expect(html).not.toMatch(/Sem diferença detectável/);
+  });
+
+  it("contraste cita o prior P2 e a mistura do teste (AUD-12)", () => {
+    const t = overview.headline.contrast.text;
+    expect(t).toContain("(prior P2)");
+    expect(t).toContain(overview.rows[0].qso_prior!.text);
+    expect(t).toContain("mistura do teste");
+  });
+
   it("sem aviso quando caveat e nulo", () => {
     const wins = render({ ...tie, key: "network_wins", caveat: null });
     expect(wins).not.toContain(escapeHtml(tie.caveat!));
@@ -106,7 +134,9 @@ describe("Visao geral: comparacao indisponivel", () => {
     expect(html).toContain(unavailable.lead);
     for (const p of unavailable.pairs) expect(html).not.toContain(escapeHtml(p.text));
     expect(html).not.toContain(escapeHtml(unavailable.contrast.text));
-    expect(html).not.toContain(L.contrastAccuracy);
+    // o bloco de contraste inteiro some (a palavra "Acuracia" continua no KPI)
+    expect(html).not.toContain(`aria-label="${escapeHtml(L.contrastRegion)}"`);
+    expect(render(tie)).toContain(`role="group" aria-label="${escapeHtml(L.contrastRegion)}"`);
   });
 
   it("os KPIs e os atalhos continuam", () => {
